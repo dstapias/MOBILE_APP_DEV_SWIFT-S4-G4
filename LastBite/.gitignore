@@ -1,0 +1,34 @@
+# Archivos generados automáticamente que NO deben subirse
+DerivedData/
+*.xcworkspace
+*.xcuserdata
+*.xcodeproj/project.xcworkspace/
+*.xcodeproj/xcuserdata/
+*.xcodeproj/project.xcsettings
+
+# Archivos de caché y binarios
+build/
+Pods/
+*.app
+*.ipa
+*.dSYM
+*.xcuserstate
+
+#  Archivos de Swift Package Manager
+Packages/
+Package.pins
+
+#  Archivos de configuración del simulador de Xcode
+*.moved-aside
+*.swp
+*.lock
+*.DS_Store
+
+#  Configuración de CocoaPods (si usas Pods)
+Pods/
+Podfile.lock
+
+#  Configuración de Carthage (si usas Carthage)
+Carthage/
+Carthage/Checkouts
+Carthage/Build

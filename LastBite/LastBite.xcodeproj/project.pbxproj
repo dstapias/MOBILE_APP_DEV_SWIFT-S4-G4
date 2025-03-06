@@ -1,0 +1,744 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		DE11E70C2D793C1000EB9862 /* LastBiteApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE11E70B2D793C1000EB9862 /* LastBiteApp.swift */; };
+		DE11E70E2D793C1000EB9862 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE11E70D2D793C1000EB9862 /* ContentView.swift */; };
+		DE11E7102D793C1200EB9862 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DE11E70F2D793C1200EB9862 /* Assets.xcassets */; };
+		DE11E7132D793C1200EB9862 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DE11E7122D793C1200EB9862 /* Preview Assets.xcassets */; };
+		DE11E71D2D793C1200EB9862 /* LastBiteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE11E71C2D793C1200EB9862 /* LastBiteTests.swift */; };
+		DE11E7272D793C1200EB9862 /* LastBiteUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE11E7262D793C1200EB9862 /* LastBiteUITests.swift */; };
+		DE11E7292D793C1200EB9862 /* LastBiteUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE11E7282D793C1200EB9862 /* LastBiteUITestsLaunchTests.swift */; };
+		DE11E7372D793D7500EB9862 /* SplashScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE11E7362D793D7500EB9862 /* SplashScreenView.swift */; };
+		DE11E7392D793DB600EB9862 /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE11E7382D793DB600EB9862 /* WelcomeView.swift */; };
+		DE11E74A2D79407F00EB9862 /* RedHatDisplay-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DE11E73C2D79407F00EB9862 /* RedHatDisplay-Black.ttf */; };
+		DE11E74B2D79407F00EB9862 /* RedHatDisplay-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DE11E73C2D79407F00EB9862 /* RedHatDisplay-Black.ttf */; };
+		DE11E74C2D79407F00EB9862 /* RedHatDisplay-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DE11E73C2D79407F00EB9862 /* RedHatDisplay-Black.ttf */; };
+		DE11E74D2D79407F00EB9862 /* RedHatDisplay-BlackItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DE11E73D2D79407F00EB9862 /* RedHatDisplay-BlackItalic.ttf */; };
+		DE11E74E2D79407F00EB9862 /* RedHatDisplay-BlackItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DE11E73D2D79407F00EB9862 /* RedHatDisplay-BlackItalic.ttf */; };
+		DE11E74F2D79407F00EB9862 /* RedHatDisplay-BlackItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DE11E73D2D79407F00EB9862 /* RedHatDisplay-BlackItalic.ttf */; };
+		DE11E7502D79407F00EB9862 /* RedHatDisplay-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DE11E73E2D79407F00EB9862 /* RedHatDisplay-Light.ttf */; };
+		DE11E7512D79407F00EB9862 /* RedHatDisplay-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DE11E73E2D79407F00EB9862 /* RedHatDisplay-Light.ttf */; };
+		DE11E7522D79407F00EB9862 /* RedHatDisplay-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DE11E73E2D79407F00EB9862 /* RedHatDisplay-Light.ttf */; };
+		DE11E7532D79407F00EB9862 /* RedHatDisplay-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DE11E73F2D79407F00EB9862 /* RedHatDisplay-Italic.ttf */; };
+		DE11E7542D79407F00EB9862 /* RedHatDisplay-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DE11E73F2D79407F00EB9862 /* RedHatDisplay-Italic.ttf */; };
+		DE11E7552D79407F00EB9862 /* RedHatDisplay-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DE11E73F2D79407F00EB9862 /* RedHatDisplay-Italic.ttf */; };
+		DE11E7562D79407F00EB9862 /* RedHatDisplay-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DE11E7402D79407F00EB9862 /* RedHatDisplay-Medium.ttf */; };
+		DE11E7572D79407F00EB9862 /* RedHatDisplay-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DE11E7402D79407F00EB9862 /* RedHatDisplay-Medium.ttf */; };
+		DE11E7582D79407F00EB9862 /* RedHatDisplay-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DE11E7402D79407F00EB9862 /* RedHatDisplay-Medium.ttf */; };
+		DE11E7592D79407F00EB9862 /* RedHatDisplay-MediumItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DE11E7412D79407F00EB9862 /* RedHatDisplay-MediumItalic.ttf */; };
+		DE11E75A2D79407F00EB9862 /* RedHatDisplay-MediumItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DE11E7412D79407F00EB9862 /* RedHatDisplay-MediumItalic.ttf */; };
+		DE11E75B2D79407F00EB9862 /* RedHatDisplay-MediumItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DE11E7412D79407F00EB9862 /* RedHatDisplay-MediumItalic.ttf */; };
+		DE11E75C2D79407F00EB9862 /* RedHatDisplay-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DE11E7422D79407F00EB9862 /* RedHatDisplay-ExtraBold.ttf */; };
+		DE11E75D2D79407F00EB9862 /* RedHatDisplay-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DE11E7422D79407F00EB9862 /* RedHatDisplay-ExtraBold.ttf */; };
+		DE11E75E2D79407F00EB9862 /* RedHatDisplay-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DE11E7422D79407F00EB9862 /* RedHatDisplay-ExtraBold.ttf */; };
+		DE11E75F2D79407F00EB9862 /* RedHatDisplay-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DE11E7432D79407F00EB9862 /* RedHatDisplay-SemiBold.ttf */; };
+		DE11E7602D79407F00EB9862 /* RedHatDisplay-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DE11E7432D79407F00EB9862 /* RedHatDisplay-SemiBold.ttf */; };
+		DE11E7612D79407F00EB9862 /* RedHatDisplay-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DE11E7432D79407F00EB9862 /* RedHatDisplay-SemiBold.ttf */; };
+		DE11E7622D79407F00EB9862 /* RedHatDisplay-ExtraBoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DE11E7442D79407F00EB9862 /* RedHatDisplay-ExtraBoldItalic.ttf */; };
+		DE11E7632D79407F00EB9862 /* RedHatDisplay-ExtraBoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DE11E7442D79407F00EB9862 /* RedHatDisplay-ExtraBoldItalic.ttf */; };
+		DE11E7642D79407F00EB9862 /* RedHatDisplay-ExtraBoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DE11E7442D79407F00EB9862 /* RedHatDisplay-ExtraBoldItalic.ttf */; };
+		DE11E7652D79407F00EB9862 /* RedHatDisplay-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DE11E7452D79407F00EB9862 /* RedHatDisplay-Bold.ttf */; };
+		DE11E7662D79407F00EB9862 /* RedHatDisplay-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DE11E7452D79407F00EB9862 /* RedHatDisplay-Bold.ttf */; };
+		DE11E7672D79407F00EB9862 /* RedHatDisplay-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DE11E7452D79407F00EB9862 /* RedHatDisplay-Bold.ttf */; };
+		DE11E7682D79407F00EB9862 /* RedHatDisplay-SemiBoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DE11E7462D79407F00EB9862 /* RedHatDisplay-SemiBoldItalic.ttf */; };
+		DE11E7692D79407F00EB9862 /* RedHatDisplay-SemiBoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DE11E7462D79407F00EB9862 /* RedHatDisplay-SemiBoldItalic.ttf */; };
+		DE11E76A2D79407F00EB9862 /* RedHatDisplay-SemiBoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DE11E7462D79407F00EB9862 /* RedHatDisplay-SemiBoldItalic.ttf */; };
+		DE11E76B2D79407F00EB9862 /* RedHatDisplay-LightItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DE11E7472D79407F00EB9862 /* RedHatDisplay-LightItalic.ttf */; };
+		DE11E76C2D79407F00EB9862 /* RedHatDisplay-LightItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DE11E7472D79407F00EB9862 /* RedHatDisplay-LightItalic.ttf */; };
+		DE11E76D2D79407F00EB9862 /* RedHatDisplay-LightItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DE11E7472D79407F00EB9862 /* RedHatDisplay-LightItalic.ttf */; };
+		DE11E76E2D79407F00EB9862 /* RedHatDisplay-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DE11E7482D79407F00EB9862 /* RedHatDisplay-Regular.ttf */; };
+		DE11E76F2D79407F00EB9862 /* RedHatDisplay-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DE11E7482D79407F00EB9862 /* RedHatDisplay-Regular.ttf */; };
+		DE11E7702D79407F00EB9862 /* RedHatDisplay-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DE11E7482D79407F00EB9862 /* RedHatDisplay-Regular.ttf */; };
+		DE11E7712D79407F00EB9862 /* RedHatDisplay-BoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DE11E7492D79407F00EB9862 /* RedHatDisplay-BoldItalic.ttf */; };
+		DE11E7722D79407F00EB9862 /* RedHatDisplay-BoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DE11E7492D79407F00EB9862 /* RedHatDisplay-BoldItalic.ttf */; };
+		DE11E7732D79407F00EB9862 /* RedHatDisplay-BoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DE11E7492D79407F00EB9862 /* RedHatDisplay-BoldItalic.ttf */; };
+		DE11E7752D7944D500EB9862 /* ColorManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE11E7742D7944D500EB9862 /* ColorManager.swift */; };
+		DE11E7762D7944D500EB9862 /* ColorManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE11E7742D7944D500EB9862 /* ColorManager.swift */; };
+		DE11E7772D7944D500EB9862 /* ColorManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE11E7742D7944D500EB9862 /* ColorManager.swift */; };
+		DE11E7782D7947EE00EB9862 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DE11E70F2D793C1200EB9862 /* Assets.xcassets */; };
+		DE11E7792D7947EF00EB9862 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DE11E70F2D793C1200EB9862 /* Assets.xcassets */; };
+		DE4F751E2D794F4800F20D45 /* SignupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE4F751D2D794F4800F20D45 /* SignupView.swift */; };
+		DE4F751F2D794F4800F20D45 /* SignupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE4F751D2D794F4800F20D45 /* SignupView.swift */; };
+		DE4F75202D794F4800F20D45 /* SignupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE4F751D2D794F4800F20D45 /* SignupView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		DE11E7192D793C1200EB9862 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = DE11E7002D793C1000EB9862 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = DE11E7072D793C1000EB9862;
+			remoteInfo = LastBite;
+		};
+		DE11E7232D793C1200EB9862 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = DE11E7002D793C1000EB9862 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = DE11E7072D793C1000EB9862;
+			remoteInfo = LastBite;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		DE11E7082D793C1000EB9862 /* LastBite.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LastBite.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DE11E70B2D793C1000EB9862 /* LastBiteApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LastBiteApp.swift; sourceTree = "<group>"; };
+		DE11E70D2D793C1000EB9862 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		DE11E70F2D793C1200EB9862 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		DE11E7122D793C1200EB9862 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		DE11E7182D793C1200EB9862 /* LastBiteTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LastBiteTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		DE11E71C2D793C1200EB9862 /* LastBiteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LastBiteTests.swift; sourceTree = "<group>"; };
+		DE11E7222D793C1200EB9862 /* LastBiteUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LastBiteUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		DE11E7262D793C1200EB9862 /* LastBiteUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LastBiteUITests.swift; sourceTree = "<group>"; };
+		DE11E7282D793C1200EB9862 /* LastBiteUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LastBiteUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		DE11E7362D793D7500EB9862 /* SplashScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashScreenView.swift; sourceTree = "<group>"; };
+		DE11E7382D793DB600EB9862 /* WelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
+		DE11E73C2D79407F00EB9862 /* RedHatDisplay-Black.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "RedHatDisplay-Black.ttf"; path = "../../../../../../Downloads/Red_Hat_Display/static/RedHatDisplay-Black.ttf"; sourceTree = "<group>"; };
+		DE11E73D2D79407F00EB9862 /* RedHatDisplay-BlackItalic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "RedHatDisplay-BlackItalic.ttf"; path = "../../../../../../Downloads/Red_Hat_Display/static/RedHatDisplay-BlackItalic.ttf"; sourceTree = "<group>"; };
+		DE11E73E2D79407F00EB9862 /* RedHatDisplay-Light.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "RedHatDisplay-Light.ttf"; path = "../../../../../../Downloads/Red_Hat_Display/static/RedHatDisplay-Light.ttf"; sourceTree = "<group>"; };
+		DE11E73F2D79407F00EB9862 /* RedHatDisplay-Italic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "RedHatDisplay-Italic.ttf"; path = "../../../../../../Downloads/Red_Hat_Display/static/RedHatDisplay-Italic.ttf"; sourceTree = "<group>"; };
+		DE11E7402D79407F00EB9862 /* RedHatDisplay-Medium.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "RedHatDisplay-Medium.ttf"; path = "../../../../../../Downloads/Red_Hat_Display/static/RedHatDisplay-Medium.ttf"; sourceTree = "<group>"; };
+		DE11E7412D79407F00EB9862 /* RedHatDisplay-MediumItalic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "RedHatDisplay-MediumItalic.ttf"; path = "../../../../../../Downloads/Red_Hat_Display/static/RedHatDisplay-MediumItalic.ttf"; sourceTree = "<group>"; };
+		DE11E7422D79407F00EB9862 /* RedHatDisplay-ExtraBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "RedHatDisplay-ExtraBold.ttf"; path = "../../../../../../Downloads/Red_Hat_Display/static/RedHatDisplay-ExtraBold.ttf"; sourceTree = "<group>"; };
+		DE11E7432D79407F00EB9862 /* RedHatDisplay-SemiBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "RedHatDisplay-SemiBold.ttf"; path = "../../../../../../Downloads/Red_Hat_Display/static/RedHatDisplay-SemiBold.ttf"; sourceTree = "<group>"; };
+		DE11E7442D79407F00EB9862 /* RedHatDisplay-ExtraBoldItalic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "RedHatDisplay-ExtraBoldItalic.ttf"; path = "../../../../../../Downloads/Red_Hat_Display/static/RedHatDisplay-ExtraBoldItalic.ttf"; sourceTree = "<group>"; };
+		DE11E7452D79407F00EB9862 /* RedHatDisplay-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "RedHatDisplay-Bold.ttf"; path = "../../../../../../Downloads/Red_Hat_Display/static/RedHatDisplay-Bold.ttf"; sourceTree = "<group>"; };
+		DE11E7462D79407F00EB9862 /* RedHatDisplay-SemiBoldItalic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "RedHatDisplay-SemiBoldItalic.ttf"; path = "../../../../../../Downloads/Red_Hat_Display/static/RedHatDisplay-SemiBoldItalic.ttf"; sourceTree = "<group>"; };
+		DE11E7472D79407F00EB9862 /* RedHatDisplay-LightItalic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "RedHatDisplay-LightItalic.ttf"; path = "../../../../../../Downloads/Red_Hat_Display/static/RedHatDisplay-LightItalic.ttf"; sourceTree = "<group>"; };
+		DE11E7482D79407F00EB9862 /* RedHatDisplay-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "RedHatDisplay-Regular.ttf"; path = "../../../../../../Downloads/Red_Hat_Display/static/RedHatDisplay-Regular.ttf"; sourceTree = "<group>"; };
+		DE11E7492D79407F00EB9862 /* RedHatDisplay-BoldItalic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "RedHatDisplay-BoldItalic.ttf"; path = "../../../../../../Downloads/Red_Hat_Display/static/RedHatDisplay-BoldItalic.ttf"; sourceTree = "<group>"; };
+		DE11E7742D7944D500EB9862 /* ColorManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorManager.swift; sourceTree = "<group>"; };
+		DE4F751D2D794F4800F20D45 /* SignupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignupView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		DE11E7052D793C1000EB9862 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DE11E7152D793C1200EB9862 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DE11E71F2D793C1200EB9862 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		DE11E6FF2D793C1000EB9862 = {
+			isa = PBXGroup;
+			children = (
+				DE11E70A2D793C1000EB9862 /* LastBite */,
+				DE11E71B2D793C1200EB9862 /* LastBiteTests */,
+				DE11E7252D793C1200EB9862 /* LastBiteUITests */,
+				DE11E7092D793C1000EB9862 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		DE11E7092D793C1000EB9862 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				DE11E7082D793C1000EB9862 /* LastBite.app */,
+				DE11E7182D793C1200EB9862 /* LastBiteTests.xctest */,
+				DE11E7222D793C1200EB9862 /* LastBiteUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		DE11E70A2D793C1000EB9862 /* LastBite */ = {
+			isa = PBXGroup;
+			children = (
+				DE11E73B2D79405500EB9862 /* Fonts */,
+				DE11E7352D793D3800EB9862 /* Views */,
+				DE11E70B2D793C1000EB9862 /* LastBiteApp.swift */,
+				DE11E70F2D793C1200EB9862 /* Assets.xcassets */,
+				DE11E7112D793C1200EB9862 /* Preview Content */,
+			);
+			path = LastBite;
+			sourceTree = "<group>";
+		};
+		DE11E7112D793C1200EB9862 /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				DE11E7122D793C1200EB9862 /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		DE11E71B2D793C1200EB9862 /* LastBiteTests */ = {
+			isa = PBXGroup;
+			children = (
+				DE11E71C2D793C1200EB9862 /* LastBiteTests.swift */,
+			);
+			path = LastBiteTests;
+			sourceTree = "<group>";
+		};
+		DE11E7252D793C1200EB9862 /* LastBiteUITests */ = {
+			isa = PBXGroup;
+			children = (
+				DE11E7262D793C1200EB9862 /* LastBiteUITests.swift */,
+				DE11E7282D793C1200EB9862 /* LastBiteUITestsLaunchTests.swift */,
+			);
+			path = LastBiteUITests;
+			sourceTree = "<group>";
+		};
+		DE11E7352D793D3800EB9862 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				DE11E70D2D793C1000EB9862 /* ContentView.swift */,
+				DE11E7362D793D7500EB9862 /* SplashScreenView.swift */,
+				DE11E7382D793DB600EB9862 /* WelcomeView.swift */,
+				DE11E7742D7944D500EB9862 /* ColorManager.swift */,
+				DE4F751D2D794F4800F20D45 /* SignupView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		DE11E73B2D79405500EB9862 /* Fonts */ = {
+			isa = PBXGroup;
+			children = (
+				DE11E73C2D79407F00EB9862 /* RedHatDisplay-Black.ttf */,
+				DE11E73D2D79407F00EB9862 /* RedHatDisplay-BlackItalic.ttf */,
+				DE11E7452D79407F00EB9862 /* RedHatDisplay-Bold.ttf */,
+				DE11E7492D79407F00EB9862 /* RedHatDisplay-BoldItalic.ttf */,
+				DE11E7422D79407F00EB9862 /* RedHatDisplay-ExtraBold.ttf */,
+				DE11E7442D79407F00EB9862 /* RedHatDisplay-ExtraBoldItalic.ttf */,
+				DE11E73F2D79407F00EB9862 /* RedHatDisplay-Italic.ttf */,
+				DE11E73E2D79407F00EB9862 /* RedHatDisplay-Light.ttf */,
+				DE11E7472D79407F00EB9862 /* RedHatDisplay-LightItalic.ttf */,
+				DE11E7402D79407F00EB9862 /* RedHatDisplay-Medium.ttf */,
+				DE11E7412D79407F00EB9862 /* RedHatDisplay-MediumItalic.ttf */,
+				DE11E7482D79407F00EB9862 /* RedHatDisplay-Regular.ttf */,
+				DE11E7432D79407F00EB9862 /* RedHatDisplay-SemiBold.ttf */,
+				DE11E7462D79407F00EB9862 /* RedHatDisplay-SemiBoldItalic.ttf */,
+			);
+			path = Fonts;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		DE11E7072D793C1000EB9862 /* LastBite */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DE11E72C2D793C1200EB9862 /* Build configuration list for PBXNativeTarget "LastBite" */;
+			buildPhases = (
+				DE11E7042D793C1000EB9862 /* Sources */,
+				DE11E7052D793C1000EB9862 /* Frameworks */,
+				DE11E7062D793C1000EB9862 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = LastBite;
+			productName = LastBite;
+			productReference = DE11E7082D793C1000EB9862 /* LastBite.app */;
+			productType = "com.apple.product-type.application";
+		};
+		DE11E7172D793C1200EB9862 /* LastBiteTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DE11E72F2D793C1200EB9862 /* Build configuration list for PBXNativeTarget "LastBiteTests" */;
+			buildPhases = (
+				DE11E7142D793C1200EB9862 /* Sources */,
+				DE11E7152D793C1200EB9862 /* Frameworks */,
+				DE11E7162D793C1200EB9862 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				DE11E71A2D793C1200EB9862 /* PBXTargetDependency */,
+			);
+			name = LastBiteTests;
+			productName = LastBiteTests;
+			productReference = DE11E7182D793C1200EB9862 /* LastBiteTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		DE11E7212D793C1200EB9862 /* LastBiteUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DE11E7322D793C1200EB9862 /* Build configuration list for PBXNativeTarget "LastBiteUITests" */;
+			buildPhases = (
+				DE11E71E2D793C1200EB9862 /* Sources */,
+				DE11E71F2D793C1200EB9862 /* Frameworks */,
+				DE11E7202D793C1200EB9862 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				DE11E7242D793C1200EB9862 /* PBXTargetDependency */,
+			);
+			name = LastBiteUITests;
+			productName = LastBiteUITests;
+			productReference = DE11E7222D793C1200EB9862 /* LastBiteUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		DE11E7002D793C1000EB9862 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1420;
+				LastUpgradeCheck = 1420;
+				TargetAttributes = {
+					DE11E7072D793C1000EB9862 = {
+						CreatedOnToolsVersion = 14.2;
+					};
+					DE11E7172D793C1200EB9862 = {
+						CreatedOnToolsVersion = 14.2;
+						TestTargetID = DE11E7072D793C1000EB9862;
+					};
+					DE11E7212D793C1200EB9862 = {
+						CreatedOnToolsVersion = 14.2;
+						TestTargetID = DE11E7072D793C1000EB9862;
+					};
+				};
+			};
+			buildConfigurationList = DE11E7032D793C1000EB9862 /* Build configuration list for PBXProject "LastBite" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = DE11E6FF2D793C1000EB9862;
+			productRefGroup = DE11E7092D793C1000EB9862 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				DE11E7072D793C1000EB9862 /* LastBite */,
+				DE11E7172D793C1200EB9862 /* LastBiteTests */,
+				DE11E7212D793C1200EB9862 /* LastBiteUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		DE11E7062D793C1000EB9862 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DE11E74A2D79407F00EB9862 /* RedHatDisplay-Black.ttf in Resources */,
+				DE11E7502D79407F00EB9862 /* RedHatDisplay-Light.ttf in Resources */,
+				DE11E76B2D79407F00EB9862 /* RedHatDisplay-LightItalic.ttf in Resources */,
+				DE11E75F2D79407F00EB9862 /* RedHatDisplay-SemiBold.ttf in Resources */,
+				DE11E7562D79407F00EB9862 /* RedHatDisplay-Medium.ttf in Resources */,
+				DE11E75C2D79407F00EB9862 /* RedHatDisplay-ExtraBold.ttf in Resources */,
+				DE11E7682D79407F00EB9862 /* RedHatDisplay-SemiBoldItalic.ttf in Resources */,
+				DE11E76E2D79407F00EB9862 /* RedHatDisplay-Regular.ttf in Resources */,
+				DE11E7132D793C1200EB9862 /* Preview Assets.xcassets in Resources */,
+				DE11E7592D79407F00EB9862 /* RedHatDisplay-MediumItalic.ttf in Resources */,
+				DE11E7712D79407F00EB9862 /* RedHatDisplay-BoldItalic.ttf in Resources */,
+				DE11E7622D79407F00EB9862 /* RedHatDisplay-ExtraBoldItalic.ttf in Resources */,
+				DE11E7102D793C1200EB9862 /* Assets.xcassets in Resources */,
+				DE11E74D2D79407F00EB9862 /* RedHatDisplay-BlackItalic.ttf in Resources */,
+				DE11E7652D79407F00EB9862 /* RedHatDisplay-Bold.ttf in Resources */,
+				DE11E7532D79407F00EB9862 /* RedHatDisplay-Italic.ttf in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DE11E7162D793C1200EB9862 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DE11E7602D79407F00EB9862 /* RedHatDisplay-SemiBold.ttf in Resources */,
+				DE11E74B2D79407F00EB9862 /* RedHatDisplay-Black.ttf in Resources */,
+				DE11E76F2D79407F00EB9862 /* RedHatDisplay-Regular.ttf in Resources */,
+				DE11E7542D79407F00EB9862 /* RedHatDisplay-Italic.ttf in Resources */,
+				DE11E7782D7947EE00EB9862 /* Assets.xcassets in Resources */,
+				DE11E75A2D79407F00EB9862 /* RedHatDisplay-MediumItalic.ttf in Resources */,
+				DE11E7662D79407F00EB9862 /* RedHatDisplay-Bold.ttf in Resources */,
+				DE11E7632D79407F00EB9862 /* RedHatDisplay-ExtraBoldItalic.ttf in Resources */,
+				DE11E76C2D79407F00EB9862 /* RedHatDisplay-LightItalic.ttf in Resources */,
+				DE11E74E2D79407F00EB9862 /* RedHatDisplay-BlackItalic.ttf in Resources */,
+				DE11E7692D79407F00EB9862 /* RedHatDisplay-SemiBoldItalic.ttf in Resources */,
+				DE11E7512D79407F00EB9862 /* RedHatDisplay-Light.ttf in Resources */,
+				DE11E75D2D79407F00EB9862 /* RedHatDisplay-ExtraBold.ttf in Resources */,
+				DE11E7722D79407F00EB9862 /* RedHatDisplay-BoldItalic.ttf in Resources */,
+				DE11E7572D79407F00EB9862 /* RedHatDisplay-Medium.ttf in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DE11E7202D793C1200EB9862 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DE11E7612D79407F00EB9862 /* RedHatDisplay-SemiBold.ttf in Resources */,
+				DE11E74C2D79407F00EB9862 /* RedHatDisplay-Black.ttf in Resources */,
+				DE11E7702D79407F00EB9862 /* RedHatDisplay-Regular.ttf in Resources */,
+				DE11E7552D79407F00EB9862 /* RedHatDisplay-Italic.ttf in Resources */,
+				DE11E7792D7947EF00EB9862 /* Assets.xcassets in Resources */,
+				DE11E75B2D79407F00EB9862 /* RedHatDisplay-MediumItalic.ttf in Resources */,
+				DE11E7672D79407F00EB9862 /* RedHatDisplay-Bold.ttf in Resources */,
+				DE11E7642D79407F00EB9862 /* RedHatDisplay-ExtraBoldItalic.ttf in Resources */,
+				DE11E76D2D79407F00EB9862 /* RedHatDisplay-LightItalic.ttf in Resources */,
+				DE11E74F2D79407F00EB9862 /* RedHatDisplay-BlackItalic.ttf in Resources */,
+				DE11E76A2D79407F00EB9862 /* RedHatDisplay-SemiBoldItalic.ttf in Resources */,
+				DE11E7522D79407F00EB9862 /* RedHatDisplay-Light.ttf in Resources */,
+				DE11E75E2D79407F00EB9862 /* RedHatDisplay-ExtraBold.ttf in Resources */,
+				DE11E7732D79407F00EB9862 /* RedHatDisplay-BoldItalic.ttf in Resources */,
+				DE11E7582D79407F00EB9862 /* RedHatDisplay-Medium.ttf in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		DE11E7042D793C1000EB9862 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DE4F751E2D794F4800F20D45 /* SignupView.swift in Sources */,
+				DE11E70E2D793C1000EB9862 /* ContentView.swift in Sources */,
+				DE11E7752D7944D500EB9862 /* ColorManager.swift in Sources */,
+				DE11E70C2D793C1000EB9862 /* LastBiteApp.swift in Sources */,
+				DE11E7372D793D7500EB9862 /* SplashScreenView.swift in Sources */,
+				DE11E7392D793DB600EB9862 /* WelcomeView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DE11E7142D793C1200EB9862 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DE4F751F2D794F4800F20D45 /* SignupView.swift in Sources */,
+				DE11E71D2D793C1200EB9862 /* LastBiteTests.swift in Sources */,
+				DE11E7762D7944D500EB9862 /* ColorManager.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DE11E71E2D793C1200EB9862 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DE4F75202D794F4800F20D45 /* SignupView.swift in Sources */,
+				DE11E7772D7944D500EB9862 /* ColorManager.swift in Sources */,
+				DE11E7292D793C1200EB9862 /* LastBiteUITestsLaunchTests.swift in Sources */,
+				DE11E7272D793C1200EB9862 /* LastBiteUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		DE11E71A2D793C1200EB9862 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = DE11E7072D793C1000EB9862 /* LastBite */;
+			targetProxy = DE11E7192D793C1200EB9862 /* PBXContainerItemProxy */;
+		};
+		DE11E7242D793C1200EB9862 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = DE11E7072D793C1000EB9862 /* LastBite */;
+			targetProxy = DE11E7232D793C1200EB9862 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		DE11E72A2D793C1200EB9862 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		DE11E72B2D793C1200EB9862 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		DE11E72D2D793C1200EB9862 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"LastBite/Preview Content\"";
+				DEVELOPMENT_TEAM = 585XBRU6ZG;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = co.uniandes.LastBite;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		DE11E72E2D793C1200EB9862 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"LastBite/Preview Content\"";
+				DEVELOPMENT_TEAM = 585XBRU6ZG;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = co.uniandes.LastBite;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		DE11E7302D793C1200EB9862 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 585XBRU6ZG;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = co.uniandes.LastBiteTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LastBite.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/LastBite";
+			};
+			name = Debug;
+		};
+		DE11E7312D793C1200EB9862 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 585XBRU6ZG;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = co.uniandes.LastBiteTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LastBite.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/LastBite";
+			};
+			name = Release;
+		};
+		DE11E7332D793C1200EB9862 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 585XBRU6ZG;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = co.uniandes.LastBiteUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = LastBite;
+			};
+			name = Debug;
+		};
+		DE11E7342D793C1200EB9862 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 585XBRU6ZG;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = co.uniandes.LastBiteUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = LastBite;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		DE11E7032D793C1000EB9862 /* Build configuration list for PBXProject "LastBite" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DE11E72A2D793C1200EB9862 /* Debug */,
+				DE11E72B2D793C1200EB9862 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DE11E72C2D793C1200EB9862 /* Build configuration list for PBXNativeTarget "LastBite" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DE11E72D2D793C1200EB9862 /* Debug */,
+				DE11E72E2D793C1200EB9862 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DE11E72F2D793C1200EB9862 /* Build configuration list for PBXNativeTarget "LastBiteTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DE11E7302D793C1200EB9862 /* Debug */,
+				DE11E7312D793C1200EB9862 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DE11E7322D793C1200EB9862 /* Build configuration list for PBXNativeTarget "LastBiteUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DE11E7332D793C1200EB9862 /* Debug */,
+				DE11E7342D793C1200EB9862 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = DE11E7002D793C1000EB9862 /* Project object */;
+}
