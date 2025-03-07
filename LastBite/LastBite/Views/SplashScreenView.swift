@@ -3,24 +3,27 @@ import SwiftUI
 struct SplashScreenView: View {
     var body: some View {
         ZStack {
-            Color.primaryGreen // Using the custom color
+            Color.primaryGreen
                 .edgesIgnoringSafeArea(.all)
             
-            VStack {
-                Image(systemName: "cart.fill") // Placeholder for your logo
+            HStack(spacing: 10) {
+                Image("pizza_loading")
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 100, height: 100)
-                    .foregroundColor(.white)
+                    .frame(width: 80, height: 80)
                 
-                Text("LastBite")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                    .foregroundColor(.white)
+                VStack(spacing: 0.1) {
+                    Text("LastBite")
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                        .foregroundColor(.white)
+                    Text("cheap food")
+                        .font(.subheadline)
+                        .foregroundColor(.white.opacity(0.8))
+                        .multilineTextAlignment(.center)
+                }
                 
-                Text("cheap food")
-                    .font(.subheadline)
-                    .foregroundColor(.white.opacity(0.8))
+                
             }
         }
     }
