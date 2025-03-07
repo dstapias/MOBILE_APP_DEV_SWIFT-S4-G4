@@ -1,107 +1,99 @@
 import SwiftUI
 
 struct SignupView: View {
+    @State private var navigateToPhoneNumber = false
+
     var body: some View {
-        VStack {
-            // Top Image
-            Image("bag_of_fruits") // Ensure this image is in Assets.xcassets
-                .resizable()
-                .scaledToFit()
-                .frame(width: 219, height: 384)
-                .padding(.top, 40)
+            GeometryReader { geometry in
+                VStack {
+                    Spacer(minLength: geometry.size.height * 0.05) // Dynamic spacing
 
-            // Text Stack (Left-Aligned)
-            VStack(alignment: .leading, spacing: 5) { // Added better spacing
-                Text("Get cheap food")
-                    .font(.system(size: 26, weight: .regular)) // Regular, not bold
-                
-                Text("with LastBite")
-                    .font(.system(size: 26, weight: .regular)) // Regular, not bold
+                    Image("bag_of_fruits")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: min(219, geometry.size.width * 0.5), height: min(384, geometry.size.height * 0.35)) // Adjust size dynamically
+                        .padding(.top, 20)
+
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text("Get cheap food")
+                            .font(.system(size: geometry.size.width > 600 ? 32 : 26, weight: .regular)) // Adjust size for iPad
+                        Text("with LastBite")
+                            .font(.system(size: geometry.size.width > 600 ? 32 : 26, weight: .regular))
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 40)
+                    .padding(.top, 10)
+
+                    // ✅ Tap to Enter Phone Number
+                    
+                    NavigationLink(destination: PhoneNumberView()) {
+                        HStack {
+                            Image("colombia_flag")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 20, height: 14)
+                            Text("+57")
+                                .font(.headline)
+                            Spacer()
+                        }
+                        .frame(maxWidth: .infinity, minHeight: 50)
+                        .padding(.horizontal, 40)
+                        .background(Color.gray.opacity(0.1))
+                        .cornerRadius(10)
+                    }
+                    .padding(.top, 10) // Space before the sign-in link
+
+                    Divider()
+                        .padding(.horizontal, 40)
+
+                    // ✅ Social Media Connection Info
+                    Text("Or connect with social media")
+                        .font(.footnote)
+                        .foregroundColor(.gray)
+                        .padding(.top, 20)
+                        .frame(maxWidth: .infinity, alignment: .center)
+
+                    // ✅ Social Media Buttons
+                    VStack(spacing: 15) {
+                        socialButton(image: "google_login", text: "Continue with Google", color: Color.blue)
+                        socialButton(image: "facebook_login", text: "Continue with Facebook", color: Color.blue.opacity(0.8))
+                    }
+                    .frame(maxWidth: min(500, geometry.size.width * 0.8))
+                    .padding(.top, 20)
+
+                    Spacer()
+                }
+                .frame(width: geometry.size.width, height: geometry.size.height)
+                .padding()
             }
-            .frame(maxWidth: .infinity, alignment: .leading) // Ensures full-width alignment
-            .padding(.horizontal, 40) // Adjusts left/right padding
-            .padding(.top, 10)
+    }
 
-            // Country Code Section (Proper Spacing)
-            HStack(spacing: 10) { // Increased spacing from 3 to 10
-                Image("colombia_flag")
+    // ✅ Reusable Social Button Component
+    private func socialButton(image: String, text: String, color: Color) -> some View {
+        Button(action: {}) {
+            HStack {
+                Image(image)
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 20, height: 14)
-                Text("+57") // Default country code
-                    .font(.headline)
+                    .frame(width: 22, height: 22)
+
+                Spacer().frame(width: 12)
+
+                Text(text)
+                    .bold()
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .frame(maxWidth: .infinity, alignment: .leading) // Forces left alignment
-            .padding(.horizontal, 40)
-            .padding(.top, 10) // Added padding to separate from text above
-
-            Divider()
-                .padding(.horizontal, 40)
-
-            // Social Media Connection Info
-            Text("Or connect with social media") // Shortened text for better UI
-                .font(.footnote)
-                .foregroundColor(.gray)
-                .padding(.top, 20)
-                .frame(maxWidth: .infinity, alignment: .center)
-
-            // Social Media Buttons
-            VStack(spacing: 15) {
-                Button(action: {
-                    // Google Signup Action
-                }) {
-                    HStack {
-                        Image("google_login")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 22, height: 22)
-                        
-                        Spacer().frame(width: 12) // ✅ Ensures even spacing
-
-                        Text("Continue with Google")
-                            .bold()
-                            .frame(maxWidth: .infinity, alignment: .leading) // ✅ Align text
-                    }
-                    .frame(maxWidth: .infinity, minHeight: 50, alignment: .leading)
-                    .padding(.horizontal, 20)
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-                }
-
-                Button(action: {
-                    // Facebook Signup Action
-                }) {
-                    HStack {
-                        Image("facebook_login")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 22, height: 22)
-                        
-                        Spacer().frame(width: 12)
-
-                        Text("Continue with Facebook")
-                            .bold()
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                    }
-                    .frame(maxWidth: .infinity, minHeight: 50, alignment: .leading)
-                    .padding(.horizontal, 20)
-                    .background(Color.blue.opacity(0.8))
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-                }
-            }
-            .padding(.horizontal, 40)
-            .padding(.top, 20)
-
-            Spacer()
+            .frame(maxWidth: .infinity, minHeight: 50, alignment: .leading)
+            .padding(.horizontal, 20)
+            .background(color)
+            .foregroundColor(.white)
+            .cornerRadius(10)
         }
-        .padding()
     }
 }
 
 struct SignupView_Previews: PreviewProvider {
     static var previews: some View {
-        SignupView()
+            SignupView()
     }
 }
