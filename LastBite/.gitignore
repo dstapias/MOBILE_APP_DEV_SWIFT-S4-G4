@@ -26,9 +26,10 @@ Package.pins
 
 #  Configuración de CocoaPods (si usas Pods)
 Pods/
-Podfile.lock
 
 #  Configuración de Carthage (si usas Carthage)
 Carthage/
 Carthage/Checkouts
 Carthage/Build
+
+

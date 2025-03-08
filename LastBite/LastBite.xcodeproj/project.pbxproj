@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2D0566345A0980C82C1F4659 /* Pods_LastBite.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EA49284CA19DAC2A478FBBF0 /* Pods_LastBite.framework */; };
+		860DE9F73C917DEE422C954B /* Pods_LastBite_LastBiteUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43701770524729CEF4EF2407 /* Pods_LastBite_LastBiteUITests.framework */; };
+		ADEDA1C84A26254439006DCC /* Pods_LastBiteTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EB2EC236CA2AB824464BED0B /* Pods_LastBiteTests.framework */; };
 		DE11E70C2D793C1000EB9862 /* LastBiteApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE11E70B2D793C1000EB9862 /* LastBiteApp.swift */; };
 		DE11E70E2D793C1000EB9862 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE11E70D2D793C1000EB9862 /* ContentView.swift */; };
 		DE11E7102D793C1200EB9862 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DE11E70F2D793C1200EB9862 /* Assets.xcassets */; };
@@ -67,6 +70,11 @@
 		DE4F751E2D794F4800F20D45 /* SignupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE4F751D2D794F4800F20D45 /* SignupView.swift */; };
 		DE4F751F2D794F4800F20D45 /* SignupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE4F751D2D794F4800F20D45 /* SignupView.swift */; };
 		DE4F75202D794F4800F20D45 /* SignupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE4F751D2D794F4800F20D45 /* SignupView.swift */; };
+		DEC0D35F2D7BE5E30006D9B4 /* SigninView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEC0D35E2D7BE5DD0006D9B4 /* SigninView.swift */; };
+		DEC0D3632D7BFCAA0006D9B4 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = DEC0D3622D7BFCAA0006D9B4 /* GoogleService-Info.plist */; };
+		DEC0D3642D7BFCAA0006D9B4 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = DEC0D3622D7BFCAA0006D9B4 /* GoogleService-Info.plist */; };
+		DEC0D3652D7BFCAA0006D9B4 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = DEC0D3622D7BFCAA0006D9B4 /* GoogleService-Info.plist */; };
+		DEC0D3692D7C03960006D9B4 /* FinalSignUp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEC0D3682D7C038B0006D9B4 /* FinalSignUp.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -87,6 +95,12 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		03F148106758A64FEFEF9607 /* Pods-LastBite-LastBiteUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LastBite-LastBiteUITests.release.xcconfig"; path = "Target Support Files/Pods-LastBite-LastBiteUITests/Pods-LastBite-LastBiteUITests.release.xcconfig"; sourceTree = "<group>"; };
+		43701770524729CEF4EF2407 /* Pods_LastBite_LastBiteUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_LastBite_LastBiteUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		483BAD0D8AAD3B21B2716729 /* Pods-LastBiteTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LastBiteTests.debug.xcconfig"; path = "Target Support Files/Pods-LastBiteTests/Pods-LastBiteTests.debug.xcconfig"; sourceTree = "<group>"; };
+		92980C0455F4A31759E3C7E1 /* Pods-LastBiteTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LastBiteTests.release.xcconfig"; path = "Target Support Files/Pods-LastBiteTests/Pods-LastBiteTests.release.xcconfig"; sourceTree = "<group>"; };
+		A9A5D0E6CCD2D6A91A26926D /* Pods-LastBite.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LastBite.debug.xcconfig"; path = "Target Support Files/Pods-LastBite/Pods-LastBite.debug.xcconfig"; sourceTree = "<group>"; };
+		D9CCE84FDE38B30F5FD8C7FC /* Pods-LastBite.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LastBite.release.xcconfig"; path = "Target Support Files/Pods-LastBite/Pods-LastBite.release.xcconfig"; sourceTree = "<group>"; };
 		DE11E7082D793C1000EB9862 /* LastBite.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LastBite.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DE11E70B2D793C1000EB9862 /* LastBiteApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LastBiteApp.swift; sourceTree = "<group>"; };
 		DE11E70D2D793C1000EB9862 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -118,6 +132,12 @@
 		DE2ACE0D2D7BD28C00A7D749 /* FourDigitCode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FourDigitCode.swift; sourceTree = "<group>"; };
 		DE2ACE0F2D7BD74800A7D749 /* LocationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationView.swift; sourceTree = "<group>"; };
 		DE4F751D2D794F4800F20D45 /* SignupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignupView.swift; sourceTree = "<group>"; };
+		DEC0D35E2D7BE5DD0006D9B4 /* SigninView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SigninView.swift; sourceTree = "<group>"; };
+		DEC0D3622D7BFCAA0006D9B4 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		DEC0D3682D7C038B0006D9B4 /* FinalSignUp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinalSignUp.swift; sourceTree = "<group>"; };
+		EA49284CA19DAC2A478FBBF0 /* Pods_LastBite.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_LastBite.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		EB2EC236CA2AB824464BED0B /* Pods_LastBiteTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_LastBiteTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		EF7CBFA9BDDA536AAB128359 /* Pods-LastBite-LastBiteUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LastBite-LastBiteUITests.debug.xcconfig"; path = "Target Support Files/Pods-LastBite-LastBiteUITests/Pods-LastBite-LastBiteUITests.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -125,6 +145,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2D0566345A0980C82C1F4659 /* Pods_LastBite.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -132,6 +153,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ADEDA1C84A26254439006DCC /* Pods_LastBiteTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -139,19 +161,33 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				860DE9F73C917DEE422C954B /* Pods_LastBite_LastBiteUITests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		B312962D6BFC9EE4D5DEC579 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				EA49284CA19DAC2A478FBBF0 /* Pods_LastBite.framework */,
+				43701770524729CEF4EF2407 /* Pods_LastBite_LastBiteUITests.framework */,
+				EB2EC236CA2AB824464BED0B /* Pods_LastBiteTests.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		DE11E6FF2D793C1000EB9862 = {
 			isa = PBXGroup;
 			children = (
+				DEC0D3622D7BFCAA0006D9B4 /* GoogleService-Info.plist */,
 				DE11E70A2D793C1000EB9862 /* LastBite */,
 				DE11E71B2D793C1200EB9862 /* LastBiteTests */,
 				DE11E7252D793C1200EB9862 /* LastBiteUITests */,
 				DE11E7092D793C1000EB9862 /* Products */,
+				E555CBDC9A1169B6F57F6AFC /* Pods */,
+				B312962D6BFC9EE4D5DEC579 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -205,6 +241,7 @@
 		DE11E7352D793D3800EB9862 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				DEC0D35D2D7BE5D50006D9B4 /* Signin */,
 				DE2ACE112D7BDD0200A7D749 /* Signup */,
 				DE2ACE0B2D7BC8AE00A7D749 /* ColorManager.swift */,
 				DE11E70D2D793C1000EB9862 /* ContentView.swift */,
@@ -238,12 +275,34 @@
 		DE2ACE112D7BDD0200A7D749 /* Signup */ = {
 			isa = PBXGroup;
 			children = (
+				DEC0D3682D7C038B0006D9B4 /* FinalSignUp.swift */,
 				DE4F751D2D794F4800F20D45 /* SignupView.swift */,
 				DE2ACE052D7B4F7800A7D749 /* PhoneNumberView.swift */,
 				DE2ACE0D2D7BD28C00A7D749 /* FourDigitCode.swift */,
 				DE2ACE0F2D7BD74800A7D749 /* LocationView.swift */,
 			);
 			path = Signup;
+			sourceTree = "<group>";
+		};
+		DEC0D35D2D7BE5D50006D9B4 /* Signin */ = {
+			isa = PBXGroup;
+			children = (
+				DEC0D35E2D7BE5DD0006D9B4 /* SigninView.swift */,
+			);
+			path = Signin;
+			sourceTree = "<group>";
+		};
+		E555CBDC9A1169B6F57F6AFC /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				A9A5D0E6CCD2D6A91A26926D /* Pods-LastBite.debug.xcconfig */,
+				D9CCE84FDE38B30F5FD8C7FC /* Pods-LastBite.release.xcconfig */,
+				EF7CBFA9BDDA536AAB128359 /* Pods-LastBite-LastBiteUITests.debug.xcconfig */,
+				03F148106758A64FEFEF9607 /* Pods-LastBite-LastBiteUITests.release.xcconfig */,
+				483BAD0D8AAD3B21B2716729 /* Pods-LastBiteTests.debug.xcconfig */,
+				92980C0455F4A31759E3C7E1 /* Pods-LastBiteTests.release.xcconfig */,
+			);
+			path = Pods;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -253,9 +312,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = DE11E72C2D793C1200EB9862 /* Build configuration list for PBXNativeTarget "LastBite" */;
 			buildPhases = (
+				652E1DF4FA044291CA364643 /* [CP] Check Pods Manifest.lock */,
 				DE11E7042D793C1000EB9862 /* Sources */,
 				DE11E7052D793C1000EB9862 /* Frameworks */,
 				DE11E7062D793C1000EB9862 /* Resources */,
+				75EB7A09F76452E9736BBF54 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -270,6 +331,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = DE11E72F2D793C1200EB9862 /* Build configuration list for PBXNativeTarget "LastBiteTests" */;
 			buildPhases = (
+				7B093ED98C3B32AAA8F9903F /* [CP] Check Pods Manifest.lock */,
 				DE11E7142D793C1200EB9862 /* Sources */,
 				DE11E7152D793C1200EB9862 /* Frameworks */,
 				DE11E7162D793C1200EB9862 /* Resources */,
@@ -288,9 +350,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = DE11E7322D793C1200EB9862 /* Build configuration list for PBXNativeTarget "LastBiteUITests" */;
 			buildPhases = (
+				8ECD06AECF92DCF77A0443F1 /* [CP] Check Pods Manifest.lock */,
 				DE11E71E2D793C1200EB9862 /* Sources */,
 				DE11E71F2D793C1200EB9862 /* Frameworks */,
 				DE11E7202D793C1200EB9862 /* Resources */,
+				653AFFE82B98A521ED12F2CD /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -362,6 +426,7 @@
 				DE11E7592D79407F00EB9862 /* RedHatDisplay-MediumItalic.ttf in Resources */,
 				DE11E7712D79407F00EB9862 /* RedHatDisplay-BoldItalic.ttf in Resources */,
 				DE11E7622D79407F00EB9862 /* RedHatDisplay-ExtraBoldItalic.ttf in Resources */,
+				DEC0D3652D7BFCAA0006D9B4 /* GoogleService-Info.plist in Resources */,
 				DE11E7102D793C1200EB9862 /* Assets.xcassets in Resources */,
 				DE11E74D2D79407F00EB9862 /* RedHatDisplay-BlackItalic.ttf in Resources */,
 				DE11E7652D79407F00EB9862 /* RedHatDisplay-Bold.ttf in Resources */,
@@ -382,6 +447,7 @@
 				DE11E7662D79407F00EB9862 /* RedHatDisplay-Bold.ttf in Resources */,
 				DE11E7632D79407F00EB9862 /* RedHatDisplay-ExtraBoldItalic.ttf in Resources */,
 				DE11E76C2D79407F00EB9862 /* RedHatDisplay-LightItalic.ttf in Resources */,
+				DEC0D3632D7BFCAA0006D9B4 /* GoogleService-Info.plist in Resources */,
 				DE11E74E2D79407F00EB9862 /* RedHatDisplay-BlackItalic.ttf in Resources */,
 				DE11E7692D79407F00EB9862 /* RedHatDisplay-SemiBoldItalic.ttf in Resources */,
 				DE11E7512D79407F00EB9862 /* RedHatDisplay-Light.ttf in Resources */,
@@ -404,6 +470,7 @@
 				DE11E7672D79407F00EB9862 /* RedHatDisplay-Bold.ttf in Resources */,
 				DE11E7642D79407F00EB9862 /* RedHatDisplay-ExtraBoldItalic.ttf in Resources */,
 				DE11E76D2D79407F00EB9862 /* RedHatDisplay-LightItalic.ttf in Resources */,
+				DEC0D3642D7BFCAA0006D9B4 /* GoogleService-Info.plist in Resources */,
 				DE11E74F2D79407F00EB9862 /* RedHatDisplay-BlackItalic.ttf in Resources */,
 				DE11E76A2D79407F00EB9862 /* RedHatDisplay-SemiBoldItalic.ttf in Resources */,
 				DE11E7522D79407F00EB9862 /* RedHatDisplay-Light.ttf in Resources */,
@@ -415,13 +482,118 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		652E1DF4FA044291CA364643 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-LastBite-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		653AFFE82B98A521ED12F2CD /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-LastBite-LastBiteUITests/Pods-LastBite-LastBiteUITests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-LastBite-LastBiteUITests/Pods-LastBite-LastBiteUITests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-LastBite-LastBiteUITests/Pods-LastBite-LastBiteUITests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		75EB7A09F76452E9736BBF54 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-LastBite/Pods-LastBite-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-LastBite/Pods-LastBite-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-LastBite/Pods-LastBite-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		7B093ED98C3B32AAA8F9903F /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-LastBiteTests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		8ECD06AECF92DCF77A0443F1 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-LastBite-LastBiteUITests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		DE11E7042D793C1000EB9862 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				DE2ACE0C2D7BC8B600A7D749 /* ColorManager.swift in Sources */,
+				DEC0D3692D7C03960006D9B4 /* FinalSignUp.swift in Sources */,
 				DE4F751E2D794F4800F20D45 /* SignupView.swift in Sources */,
+				DEC0D35F2D7BE5E30006D9B4 /* SigninView.swift in Sources */,
 				DE11E70E2D793C1000EB9862 /* ContentView.swift in Sources */,
 				DE2ACE062D7B4FAC00A7D749 /* PhoneNumberView.swift in Sources */,
 				DE11E70C2D793C1000EB9862 /* LastBiteApp.swift in Sources */,
@@ -583,6 +755,7 @@
 		};
 		DE11E72D2D793C1200EB9862 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = A9A5D0E6CCD2D6A91A26926D /* Pods-LastBite.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -612,6 +785,7 @@
 		};
 		DE11E72E2D793C1200EB9862 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = D9CCE84FDE38B30F5FD8C7FC /* Pods-LastBite.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -641,6 +815,7 @@
 		};
 		DE11E7302D793C1200EB9862 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 483BAD0D8AAD3B21B2716729 /* Pods-LastBiteTests.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -661,6 +836,7 @@
 		};
 		DE11E7312D793C1200EB9862 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 92980C0455F4A31759E3C7E1 /* Pods-LastBiteTests.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -681,6 +857,7 @@
 		};
 		DE11E7332D793C1200EB9862 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = EF7CBFA9BDDA536AAB128359 /* Pods-LastBite-LastBiteUITests.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
@@ -699,6 +876,7 @@
 		};
 		DE11E7342D793C1200EB9862 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 03F148106758A64FEFEF9607 /* Pods-LastBite-LastBiteUITests.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;

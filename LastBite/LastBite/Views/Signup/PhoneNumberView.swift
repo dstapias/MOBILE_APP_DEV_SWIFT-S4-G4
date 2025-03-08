@@ -2,6 +2,7 @@ import SwiftUI
 
 struct PhoneNumberView: View {
     @Binding var showPhoneNumberView: Bool // ✅ Controls manual navigation
+    @Binding var showSignInView: Bool // ✅ Binding to transition to SignInView
     @State private var phoneNumber: String = ""
     @FocusState private var isPhoneNumberFocused: Bool // ✅ Controls keyboard focus
     @State private var showFourDigitCodeView = false // ✅ Controls PhoneNumberView navigation
@@ -99,7 +100,7 @@ struct PhoneNumberView: View {
             }
         }
         .fullScreenCover(isPresented: $showFourDigitCodeView) {
-            FourDigitCodeView(showFourDigitCodeView: $showFourDigitCodeView)
+            FourDigitCodeView(showFourDigitCodeView: $showFourDigitCodeView, showSignInView: $showSignInView)
         }
     }
 }

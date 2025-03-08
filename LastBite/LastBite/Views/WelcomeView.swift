@@ -2,6 +2,7 @@ import SwiftUI
 
 struct WelcomeView: View {
     @State private var showSignupView = false
+    @State private var showSignInView = false
     var body: some View {
             GeometryReader { geometry in
                 ZStack {
@@ -44,10 +45,14 @@ struct WelcomeView: View {
                                 .font(.subheadline)
                                 .foregroundColor(.white)
 
-                            Text("Sign-in")
-                                .font(.subheadline)
-                                .foregroundColor(.green)
-                                .bold()
+                            Button(action: {
+                                showSignInView = true
+                            }) {
+                                Text("Sign-in")
+                                    .font(.subheadline)
+                                    .foregroundColor(.green)
+                                    .bold()
+                            }
                         }
                         .padding(.bottom, max(geometry.safeAreaInsets.bottom, 20))
                     }
@@ -58,7 +63,10 @@ struct WelcomeView: View {
             }
             .ignoresSafeArea()
             .fullScreenCover(isPresented: $showSignupView) {
-                       SignupView(showSignupView: $showSignupView)
+                SignupView(showSignupView: $showSignupView, showSignInView: $showSignInView)
+                   }
+            .fullScreenCover(isPresented: $showSignInView) {
+                       SignInView(showSignInView: $showSignInView)
                    }
     }
 }

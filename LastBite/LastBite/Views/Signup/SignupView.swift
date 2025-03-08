@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SignupView: View {
     @Binding var showSignupView: Bool // ✅ Binding to go back to WelcomeView
+    @Binding var showSignInView: Bool // ✅ Binding to transition to SignInView
     @State private var showPhoneNumberView = false // ✅ Controls PhoneNumberView navigation
     
     var body: some View {
@@ -83,7 +84,7 @@ struct SignupView: View {
             .frame(width: geometry.size.width, height: geometry.size.height)
             .padding()
             .fullScreenCover(isPresented: $showPhoneNumberView) {
-                PhoneNumberView(showPhoneNumberView: $showPhoneNumberView)
+                PhoneNumberView(showPhoneNumberView: $showPhoneNumberView, showSignInView: $showSignInView)
             }
         }
     }
