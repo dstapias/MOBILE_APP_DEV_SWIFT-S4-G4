@@ -63,7 +63,7 @@ struct WelcomeView: View {
             }
             .ignoresSafeArea()
             .fullScreenCover(isPresented: $showSignupView) {
-                       SignupView(showSignupView: $showSignupView)
+                SignupView(showSignupView: $showSignupView, showSignInView: $showSignInView)
                    }
             .fullScreenCover(isPresented: $showSignInView) {
                        SignInView(showSignInView: $showSignInView)

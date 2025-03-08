@@ -74,6 +74,7 @@
 		DEC0D3632D7BFCAA0006D9B4 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = DEC0D3622D7BFCAA0006D9B4 /* GoogleService-Info.plist */; };
 		DEC0D3642D7BFCAA0006D9B4 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = DEC0D3622D7BFCAA0006D9B4 /* GoogleService-Info.plist */; };
 		DEC0D3652D7BFCAA0006D9B4 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = DEC0D3622D7BFCAA0006D9B4 /* GoogleService-Info.plist */; };
+		DEC0D3692D7C03960006D9B4 /* FinalSignUp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEC0D3682D7C038B0006D9B4 /* FinalSignUp.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -133,6 +134,7 @@
 		DE4F751D2D794F4800F20D45 /* SignupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignupView.swift; sourceTree = "<group>"; };
 		DEC0D35E2D7BE5DD0006D9B4 /* SigninView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SigninView.swift; sourceTree = "<group>"; };
 		DEC0D3622D7BFCAA0006D9B4 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		DEC0D3682D7C038B0006D9B4 /* FinalSignUp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinalSignUp.swift; sourceTree = "<group>"; };
 		EA49284CA19DAC2A478FBBF0 /* Pods_LastBite.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_LastBite.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		EB2EC236CA2AB824464BED0B /* Pods_LastBiteTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_LastBiteTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		EF7CBFA9BDDA536AAB128359 /* Pods-LastBite-LastBiteUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LastBite-LastBiteUITests.debug.xcconfig"; path = "Target Support Files/Pods-LastBite-LastBiteUITests/Pods-LastBite-LastBiteUITests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -273,6 +275,7 @@
 		DE2ACE112D7BDD0200A7D749 /* Signup */ = {
 			isa = PBXGroup;
 			children = (
+				DEC0D3682D7C038B0006D9B4 /* FinalSignUp.swift */,
 				DE4F751D2D794F4800F20D45 /* SignupView.swift */,
 				DE2ACE052D7B4F7800A7D749 /* PhoneNumberView.swift */,
 				DE2ACE0D2D7BD28C00A7D749 /* FourDigitCode.swift */,
@@ -588,6 +591,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				DE2ACE0C2D7BC8B600A7D749 /* ColorManager.swift in Sources */,
+				DEC0D3692D7C03960006D9B4 /* FinalSignUp.swift in Sources */,
 				DE4F751E2D794F4800F20D45 /* SignupView.swift in Sources */,
 				DEC0D35F2D7BE5E30006D9B4 /* SigninView.swift in Sources */,
 				DE11E70E2D793C1000EB9862 /* ContentView.swift in Sources */,

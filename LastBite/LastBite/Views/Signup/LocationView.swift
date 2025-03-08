@@ -9,9 +9,11 @@ import SwiftUI
 
 struct LocationView: View {
     @Binding var showLocationView: Bool // ✅ Controls manual navigation
+    @Binding var showSignInView: Bool // ✅ Binding to transition to SignInView
     @State private var selectedZone: String = "Bogotá" // ✅ Default zone
     @State private var selectedArea: String = "" // ✅ Stores selected area
-    @State private var showNextView = false // ✅ Controls navigation to the next screen
+    @State private var showFinalSignUpView = false // ✅ Controls navigation to the next screen
+
 
     let zones = ["Bogotá", "Medellín", "Santa Marta", "Cali"] // Example zones
     let areas = ["Residential", "Commercial", "Industrial", "Other"] // Example area types
@@ -115,7 +117,7 @@ struct LocationView: View {
 
                 // ✅ Next Button
                 Button(action: {
-                    showNextView = true
+                    showFinalSignUpView = true
                 }) {
                     Text("Next")
                         .font(.headline)
@@ -130,6 +132,9 @@ struct LocationView: View {
             }
             .navigationBarBackButtonHidden(true)
             .navigationTitle("Location")
+        }
+        .fullScreenCover(isPresented: $showFinalSignUpView) {
+            FinalSignUpView(showFinalSignUpView: $showFinalSignUpView)
         }
     }
 }

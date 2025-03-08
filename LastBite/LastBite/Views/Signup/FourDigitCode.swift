@@ -2,6 +2,7 @@ import SwiftUI
 
 struct FourDigitCodeView: View {
     @Binding var showFourDigitCodeView: Bool // ✅ Controls manual navigation
+    @Binding var showSignInView: Bool // ✅ Binding to transition to SignInView
     @State private var code: String = "" // ✅ Holds the 4-digit input
     @FocusState private var isCodeFocused: Bool // ✅ Controls keyboard focus
     @State private var showLocationView = false 
@@ -85,7 +86,7 @@ struct FourDigitCodeView: View {
             .navigationTitle("4 Digit Code") // ✅ Adds a title
         }
         .fullScreenCover(isPresented: $showLocationView) {
-            LocationView(showLocationView: $showLocationView)
+            LocationView(showLocationView: $showLocationView, showSignInView: $showSignInView)
         }
     }
 }
