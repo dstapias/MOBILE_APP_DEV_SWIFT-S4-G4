@@ -1,10 +1,13 @@
 import SwiftUI
+import FirebaseAuth
 
 struct SignInView: View {
-    @Binding var showSignInView: Bool // ✅ Binding to allow closing Sign-in
+    @Binding var showSignInView: Bool
     @State private var email: String = ""
     @State private var password: String = ""
     @State private var isPasswordVisible: Bool = false
+    @State private var errorMessage: String = "" // ✅ Stores Firebase error messages
+    @State private var isLoading: Bool = false  // ✅ Shows a loading indicator
 
     var body: some View {
         GeometryReader { geometry in
@@ -12,7 +15,7 @@ struct SignInView: View {
                 // ✅ Custom Back Button
                 HStack {
                     Button(action: {
-                        showSignInView = false // ✅ Closes Sign-in view
+                        showSignInView = false
                     }) {
                         Image(systemName: "chevron.left")
                             .foregroundColor(.black)
@@ -78,30 +81,83 @@ struct SignInView: View {
                     // ✅ Forgot Password
                     HStack {
                         Spacer()
-                        Button(action: {}) {
+                        Button(action: {
+                            resetPassword()
+                        }) {
                             Text("Forgot Password?")
                                 .font(.footnote)
                                 .foregroundColor(.gray)
                         }
                     }
 
-                    // ✅ Login Button
-                    Button(action: {}) {
-                        Text("Log-in")
-                            .font(.headline)
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity, minHeight: 50)
-                            .background(Color.green)
-                            .cornerRadius(10)
+                    // ✅ Firebase Login Button
+                    Button(action: signInUser) {
+                        if isLoading {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle())
+                                .frame(maxWidth: .infinity, minHeight: 50)
+                                .background(Color.green)
+                                .cornerRadius(10)
+                        } else {
+                            Text("Log-in")
+                                .font(.headline)
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity, minHeight: 50)
+                                .background(Color.green)
+                                .cornerRadius(10)
+                        }
                     }
                     .padding(.top, 20)
+
+                    // ✅ Show Firebase Error Messages
+                    if !errorMessage.isEmpty {
+                        Text(errorMessage)
+                            .font(.footnote)
+                            .foregroundColor(.red)
+                            .padding(.top, 5)
+                    }
                 }
                 .padding(.horizontal, 30)
                 .frame(maxWidth: geometry.size.width * 0.9)
 
-                Spacer() // ✅ Centers content vertically
+                Spacer()
             }
             .frame(width: geometry.size.width, height: geometry.size.height)
+        }
+    }
+
+    // ✅ Firebase Authentication: Sign-in Function
+    private func signInUser() {
+        isLoading = true
+        errorMessage = ""
+
+        Auth.auth().signIn(withEmail: email, password: password) { result, error in
+            DispatchQueue.main.async {
+                isLoading = false
+                if let error = error {
+                    errorMessage = error.localizedDescription
+                } else {
+                    showSignInView = false // ✅ Close the sign-in screen
+                }
+            }
+        }
+    }
+
+    // ✅ Firebase Authentication: Password Reset
+    private func resetPassword() {
+        guard !email.isEmpty else {
+            errorMessage = "Please enter your email to reset the password."
+            return
+        }
+
+        Auth.auth().sendPasswordReset(withEmail: email) { error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    errorMessage = error.localizedDescription
+                } else {
+                    errorMessage = "Password reset link sent to your email."
+                }
+            }
         }
     }
 }
@@ -109,6 +165,6 @@ struct SignInView: View {
 // ✅ Preview with Correct Binding
 struct SignInView_Previews: PreviewProvider {
     static var previews: some View {
-        SignInView(showSignInView: .constant(true)) // ✅ Fix for preview
+        SignInView(showSignInView: .constant(true))
     }
 }

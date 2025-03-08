@@ -71,6 +71,9 @@
 		DE4F751F2D794F4800F20D45 /* SignupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE4F751D2D794F4800F20D45 /* SignupView.swift */; };
 		DE4F75202D794F4800F20D45 /* SignupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE4F751D2D794F4800F20D45 /* SignupView.swift */; };
 		DEC0D35F2D7BE5E30006D9B4 /* SigninView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEC0D35E2D7BE5DD0006D9B4 /* SigninView.swift */; };
+		DEC0D3632D7BFCAA0006D9B4 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = DEC0D3622D7BFCAA0006D9B4 /* GoogleService-Info.plist */; };
+		DEC0D3642D7BFCAA0006D9B4 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = DEC0D3622D7BFCAA0006D9B4 /* GoogleService-Info.plist */; };
+		DEC0D3652D7BFCAA0006D9B4 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = DEC0D3622D7BFCAA0006D9B4 /* GoogleService-Info.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -129,6 +132,7 @@
 		DE2ACE0F2D7BD74800A7D749 /* LocationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationView.swift; sourceTree = "<group>"; };
 		DE4F751D2D794F4800F20D45 /* SignupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignupView.swift; sourceTree = "<group>"; };
 		DEC0D35E2D7BE5DD0006D9B4 /* SigninView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SigninView.swift; sourceTree = "<group>"; };
+		DEC0D3622D7BFCAA0006D9B4 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		EA49284CA19DAC2A478FBBF0 /* Pods_LastBite.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_LastBite.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		EB2EC236CA2AB824464BED0B /* Pods_LastBiteTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_LastBiteTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		EF7CBFA9BDDA536AAB128359 /* Pods-LastBite-LastBiteUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LastBite-LastBiteUITests.debug.xcconfig"; path = "Target Support Files/Pods-LastBite-LastBiteUITests/Pods-LastBite-LastBiteUITests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -175,6 +179,7 @@
 		DE11E6FF2D793C1000EB9862 = {
 			isa = PBXGroup;
 			children = (
+				DEC0D3622D7BFCAA0006D9B4 /* GoogleService-Info.plist */,
 				DE11E70A2D793C1000EB9862 /* LastBite */,
 				DE11E71B2D793C1200EB9862 /* LastBiteTests */,
 				DE11E7252D793C1200EB9862 /* LastBiteUITests */,
@@ -294,7 +299,6 @@
 				483BAD0D8AAD3B21B2716729 /* Pods-LastBiteTests.debug.xcconfig */,
 				92980C0455F4A31759E3C7E1 /* Pods-LastBiteTests.release.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
@@ -419,6 +423,7 @@
 				DE11E7592D79407F00EB9862 /* RedHatDisplay-MediumItalic.ttf in Resources */,
 				DE11E7712D79407F00EB9862 /* RedHatDisplay-BoldItalic.ttf in Resources */,
 				DE11E7622D79407F00EB9862 /* RedHatDisplay-ExtraBoldItalic.ttf in Resources */,
+				DEC0D3652D7BFCAA0006D9B4 /* GoogleService-Info.plist in Resources */,
 				DE11E7102D793C1200EB9862 /* Assets.xcassets in Resources */,
 				DE11E74D2D79407F00EB9862 /* RedHatDisplay-BlackItalic.ttf in Resources */,
 				DE11E7652D79407F00EB9862 /* RedHatDisplay-Bold.ttf in Resources */,
@@ -439,6 +444,7 @@
 				DE11E7662D79407F00EB9862 /* RedHatDisplay-Bold.ttf in Resources */,
 				DE11E7632D79407F00EB9862 /* RedHatDisplay-ExtraBoldItalic.ttf in Resources */,
 				DE11E76C2D79407F00EB9862 /* RedHatDisplay-LightItalic.ttf in Resources */,
+				DEC0D3632D7BFCAA0006D9B4 /* GoogleService-Info.plist in Resources */,
 				DE11E74E2D79407F00EB9862 /* RedHatDisplay-BlackItalic.ttf in Resources */,
 				DE11E7692D79407F00EB9862 /* RedHatDisplay-SemiBoldItalic.ttf in Resources */,
 				DE11E7512D79407F00EB9862 /* RedHatDisplay-Light.ttf in Resources */,
@@ -461,6 +467,7 @@
 				DE11E7672D79407F00EB9862 /* RedHatDisplay-Bold.ttf in Resources */,
 				DE11E7642D79407F00EB9862 /* RedHatDisplay-ExtraBoldItalic.ttf in Resources */,
 				DE11E76D2D79407F00EB9862 /* RedHatDisplay-LightItalic.ttf in Resources */,
+				DEC0D3642D7BFCAA0006D9B4 /* GoogleService-Info.plist in Resources */,
 				DE11E74F2D79407F00EB9862 /* RedHatDisplay-BlackItalic.ttf in Resources */,
 				DE11E76A2D79407F00EB9862 /* RedHatDisplay-SemiBoldItalic.ttf in Resources */,
 				DE11E7522D79407F00EB9862 /* RedHatDisplay-Light.ttf in Resources */,
