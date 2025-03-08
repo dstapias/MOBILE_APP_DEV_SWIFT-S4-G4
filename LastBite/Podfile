@@ -1,0 +1,22 @@
+# Uncomment the next line to define a global platform for your project
+# platform :ios, '9.0'
+
+target 'LastBite' do
+  # Comment the next line if you don't want to use dynamic frameworks
+  use_frameworks!
+
+  # Firebase Authentication
+  pod 'Firebase/Auth'
+
+  # Pods for LastBite
+
+  target 'LastBiteTests' do
+    inherit! :search_paths
+    # Pods for testing
+  end
+
+  target 'LastBiteUITests' do
+    # Pods for testing
+  end
+
+end
