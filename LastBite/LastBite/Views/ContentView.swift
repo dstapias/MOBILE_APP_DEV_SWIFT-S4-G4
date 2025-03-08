@@ -10,7 +10,7 @@ struct ContentView: View {
             } else {
                 SplashScreenView()
                     .onAppear {
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
                             withAnimation {
                                 self.isActive = true
                             }

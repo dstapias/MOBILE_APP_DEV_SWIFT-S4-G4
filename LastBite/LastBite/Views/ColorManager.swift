@@ -1,4 +1,3 @@
-//
 //  ColorManager.swift
 //  LastBite
 //

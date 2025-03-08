@@ -58,11 +58,12 @@
 		DE11E7712D79407F00EB9862 /* RedHatDisplay-BoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DE11E7492D79407F00EB9862 /* RedHatDisplay-BoldItalic.ttf */; };
 		DE11E7722D79407F00EB9862 /* RedHatDisplay-BoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DE11E7492D79407F00EB9862 /* RedHatDisplay-BoldItalic.ttf */; };
 		DE11E7732D79407F00EB9862 /* RedHatDisplay-BoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DE11E7492D79407F00EB9862 /* RedHatDisplay-BoldItalic.ttf */; };
-		DE11E7752D7944D500EB9862 /* ColorManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE11E7742D7944D500EB9862 /* ColorManager.swift */; };
-		DE11E7762D7944D500EB9862 /* ColorManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE11E7742D7944D500EB9862 /* ColorManager.swift */; };
-		DE11E7772D7944D500EB9862 /* ColorManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE11E7742D7944D500EB9862 /* ColorManager.swift */; };
 		DE11E7782D7947EE00EB9862 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DE11E70F2D793C1200EB9862 /* Assets.xcassets */; };
 		DE11E7792D7947EF00EB9862 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DE11E70F2D793C1200EB9862 /* Assets.xcassets */; };
+		DE2ACE062D7B4FAC00A7D749 /* PhoneNumberView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE2ACE052D7B4F7800A7D749 /* PhoneNumberView.swift */; };
+		DE2ACE0C2D7BC8B600A7D749 /* ColorManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE2ACE0B2D7BC8AE00A7D749 /* ColorManager.swift */; };
+		DE2ACE0E2D7BD29300A7D749 /* FourDigitCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE2ACE0D2D7BD28C00A7D749 /* FourDigitCode.swift */; };
+		DE2ACE102D7BD74D00A7D749 /* LocationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE2ACE0F2D7BD74800A7D749 /* LocationView.swift */; };
 		DE4F751E2D794F4800F20D45 /* SignupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE4F751D2D794F4800F20D45 /* SignupView.swift */; };
 		DE4F751F2D794F4800F20D45 /* SignupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE4F751D2D794F4800F20D45 /* SignupView.swift */; };
 		DE4F75202D794F4800F20D45 /* SignupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE4F751D2D794F4800F20D45 /* SignupView.swift */; };
@@ -112,7 +113,10 @@
 		DE11E7472D79407F00EB9862 /* RedHatDisplay-LightItalic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "RedHatDisplay-LightItalic.ttf"; path = "../../../../../../Downloads/Red_Hat_Display/static/RedHatDisplay-LightItalic.ttf"; sourceTree = "<group>"; };
 		DE11E7482D79407F00EB9862 /* RedHatDisplay-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "RedHatDisplay-Regular.ttf"; path = "../../../../../../Downloads/Red_Hat_Display/static/RedHatDisplay-Regular.ttf"; sourceTree = "<group>"; };
 		DE11E7492D79407F00EB9862 /* RedHatDisplay-BoldItalic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "RedHatDisplay-BoldItalic.ttf"; path = "../../../../../../Downloads/Red_Hat_Display/static/RedHatDisplay-BoldItalic.ttf"; sourceTree = "<group>"; };
-		DE11E7742D7944D500EB9862 /* ColorManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorManager.swift; sourceTree = "<group>"; };
+		DE2ACE052D7B4F7800A7D749 /* PhoneNumberView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneNumberView.swift; sourceTree = "<group>"; };
+		DE2ACE0B2D7BC8AE00A7D749 /* ColorManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorManager.swift; sourceTree = "<group>"; };
+		DE2ACE0D2D7BD28C00A7D749 /* FourDigitCode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FourDigitCode.swift; sourceTree = "<group>"; };
+		DE2ACE0F2D7BD74800A7D749 /* LocationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationView.swift; sourceTree = "<group>"; };
 		DE4F751D2D794F4800F20D45 /* SignupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignupView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -201,11 +205,11 @@
 		DE11E7352D793D3800EB9862 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				DE2ACE112D7BDD0200A7D749 /* Signup */,
+				DE2ACE0B2D7BC8AE00A7D749 /* ColorManager.swift */,
 				DE11E70D2D793C1000EB9862 /* ContentView.swift */,
 				DE11E7362D793D7500EB9862 /* SplashScreenView.swift */,
 				DE11E7382D793DB600EB9862 /* WelcomeView.swift */,
-				DE11E7742D7944D500EB9862 /* ColorManager.swift */,
-				DE4F751D2D794F4800F20D45 /* SignupView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -229,6 +233,17 @@
 				DE11E7462D79407F00EB9862 /* RedHatDisplay-SemiBoldItalic.ttf */,
 			);
 			path = Fonts;
+			sourceTree = "<group>";
+		};
+		DE2ACE112D7BDD0200A7D749 /* Signup */ = {
+			isa = PBXGroup;
+			children = (
+				DE4F751D2D794F4800F20D45 /* SignupView.swift */,
+				DE2ACE052D7B4F7800A7D749 /* PhoneNumberView.swift */,
+				DE2ACE0D2D7BD28C00A7D749 /* FourDigitCode.swift */,
+				DE2ACE0F2D7BD74800A7D749 /* LocationView.swift */,
+			);
+			path = Signup;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -405,11 +420,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DE2ACE0C2D7BC8B600A7D749 /* ColorManager.swift in Sources */,
 				DE4F751E2D794F4800F20D45 /* SignupView.swift in Sources */,
 				DE11E70E2D793C1000EB9862 /* ContentView.swift in Sources */,
-				DE11E7752D7944D500EB9862 /* ColorManager.swift in Sources */,
+				DE2ACE062D7B4FAC00A7D749 /* PhoneNumberView.swift in Sources */,
 				DE11E70C2D793C1000EB9862 /* LastBiteApp.swift in Sources */,
 				DE11E7372D793D7500EB9862 /* SplashScreenView.swift in Sources */,
+				DE2ACE0E2D7BD29300A7D749 /* FourDigitCode.swift in Sources */,
+				DE2ACE102D7BD74D00A7D749 /* LocationView.swift in Sources */,
 				DE11E7392D793DB600EB9862 /* WelcomeView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -420,7 +438,6 @@
 			files = (
 				DE4F751F2D794F4800F20D45 /* SignupView.swift in Sources */,
 				DE11E71D2D793C1200EB9862 /* LastBiteTests.swift in Sources */,
-				DE11E7762D7944D500EB9862 /* ColorManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -429,7 +446,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				DE4F75202D794F4800F20D45 /* SignupView.swift in Sources */,
-				DE11E7772D7944D500EB9862 /* ColorManager.swift in Sources */,
 				DE11E7292D793C1200EB9862 /* LastBiteUITestsLaunchTests.swift in Sources */,
 				DE11E7272D793C1200EB9862 /* LastBiteUITests.swift in Sources */,
 			);

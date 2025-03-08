@@ -1,63 +1,77 @@
 import SwiftUI
 
 struct WelcomeView: View {
+    @State private var showSignupView = false
     var body: some View {
-        NavigationView {
-            ZStack {
-                Image("WelcomeImage") // Ensure this image is in Assets.xcassets
-                    .resizable()
-                    .scaledToFill()
-                    .edgesIgnoringSafeArea(.all)
-                    .offset(x: -30)
-                
-                VStack {
-                    Spacer()
-                    
-                    Text("Welcome to our store")
-                        .font(.largeTitle)
-                        .bold()
-                        .foregroundColor(.white)
-                        .multilineTextAlignment(.center)
-                        .offset(y: 180)
-                    
-                    Text("Get your food cheaper than anywhere")
-                        .font(.subheadline)
-                        .foregroundColor(.white)
-                        .padding(.top, 5)
-                        .offset(y: 180)
-                    
-                    Spacer()
-                    
-                    NavigationLink(destination: SignupView()) {
-                        Text("Get Started")
-                            .font(.headline)
-                            .foregroundColor(.white)
-                            .padding()
-                            .frame(maxWidth: .infinity)
-                            .background(Color.primaryGreen)
-                            .cornerRadius(10)
-                    }
-                    .padding(.horizontal, 40)
-
-                    HStack {
-                        Text("Already have an account?")
-                            .font(.subheadline)
-                            .foregroundColor(.white)
-                        
-                        Text("Sign-in")
-                            .font(.subheadline)
-                            .foregroundColor(.green)
+            GeometryReader { geometry in
+                ZStack {
+                    Image("WelcomeImage")
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: max(geometry.size.width, 1), height: max(geometry.size.height, 1))
+                        .edgesIgnoringSafeArea(.all)
+                    VStack {
+                        Spacer(minLength: geometry.size.height * 0.1)
+                        Text("Welcome to our store")
+                            .font(.system(size: min(geometry.size.width * 0.08, 36))) // ✅ Scales for iPhone/iPad
                             .bold()
+                            .foregroundColor(.white)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 20)
+                            .background(Color.black.opacity(0.5))
+                            .cornerRadius(10)
+                        Text("Get your food cheaper than anywhere")
+                            .font(.subheadline)
+                            .foregroundColor(.white.opacity(0.9))
+                            .padding(.top, 5)
+                            .padding(.horizontal, 30)
+                            .background(Color.black.opacity(0.5))
+                        Spacer()
+                        Button(action: {
+                            showSignupView = true
+                        }) {
+                            Text("Go to Signup")
+                                .font(.headline)
+                                .foregroundColor(.white)
+                                .padding()
+                                .frame(width: min(geometry.size.width * 0.7, 300))
+                                .background(Color.primaryGreen)
+                                .cornerRadius(10)
+                        }
+                        .padding(.bottom, 20)
+                        HStack {
+                            Text("Already have an account?")
+                                .font(.subheadline)
+                                .foregroundColor(.white)
+
+                            Text("Sign-in")
+                                .font(.subheadline)
+                                .foregroundColor(.green)
+                                .bold()
+                        }
+                        .padding(.bottom, max(geometry.safeAreaInsets.bottom, 20))
                     }
+                    .frame(width: geometry.size.width * 0.9)
+                    .padding()
                 }
-                .padding()
+                .frame(width: geometry.size.width, height: geometry.size.height)
             }
-        }
+            .ignoresSafeArea()
+            .fullScreenCover(isPresented: $showSignupView) {
+                       SignupView(showSignupView: $showSignupView)
+                   }
     }
 }
 
 struct WelcomeView_Previews: PreviewProvider {
     static var previews: some View {
-        WelcomeView()
+        Group {
+            WelcomeView()
+                .previewDevice("iPhone")
+
+            WelcomeView()
+                .previewDevice("iPad")
+        }
     }
 }
+
