@@ -3,11 +3,11 @@ import SwiftUI
 struct LocationView: View {
     @Binding var showLocationView: Bool // ✅ Controls manual navigation
     @Binding var showSignInView: Bool // ✅ Binding to transition to SignInView
+    @ObservedObject var userService = SignupUserService.shared // ✅ Shared user service
     @State private var selectedZone: String = "" // ✅ Stores selected zone name
-    @State private var selectedArea: String = "" // ✅ Stores selected area
     @State private var showFinalSignUpView = false // ✅ Controls navigation to the next screen
     @State private var zones: [ZoneService.Zone] = [] // ✅ Store full Zone object
-    @State private var areas: [String] = [] // ✅ Store area names
+    @State private var areas: [(id: Int, name: String)] = [] // ✅ Store area_id and area_name
     @State private var isLoading = true // ✅ Track loading state
 
     var body: some View {
@@ -84,23 +84,25 @@ struct LocationView: View {
                     .padding(.horizontal, 40)
                     .padding(.top, 20)
 
-                    // ✅ Area Picker
+                    // ✅ Area Picker (Stores Area ID)
                     VStack(alignment: .leading, spacing: 5) {
                         Text("Your Area")
                             .font(.footnote)
                             .foregroundColor(.gray)
 
                         Menu {
-                            ForEach(areas, id: \.self) { area in
-                                Button(action: { selectedArea = area }) {
-                                    Text(area)
+                            ForEach(areas, id: \.id) { area in
+                                Button(action: {
+                                    userService.selectedAreaId = area.id // ✅ Save `area_id` in UserService
+                                }) {
+                                    Text(area.name)
                                 }
                             }
                         } label: {
                             HStack {
-                                Text(selectedArea.isEmpty ? "Select an area" : selectedArea)
+                                Text(userService.selectedAreaId == nil ? "Select an area" : areas.first(where: { $0.id == userService.selectedAreaId })?.name ?? "")
                                     .font(.headline)
-                                    .foregroundColor(selectedArea.isEmpty ? .gray : .black)
+                                    .foregroundColor(userService.selectedAreaId == nil ? .gray : .black)
                                 Spacer()
                                 Image(systemName: "chevron.down")
                             }
@@ -116,19 +118,22 @@ struct LocationView: View {
 
                 Spacer()
 
-                // ✅ Next Button
+                // ✅ Next Button (Only Enables When an Area is Selected)
                 Button(action: {
-                    showFinalSignUpView = true
+                    if userService.selectedAreaId != nil {
+                        showFinalSignUpView = true
+                    }
                 }) {
                     Text("Next")
                         .font(.headline)
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity, minHeight: 50)
-                        .background(Color.green)
+                        .background(userService.selectedAreaId != nil ? Color.green : Color.gray)
                         .cornerRadius(10)
                 }
                 .padding(.horizontal, 40)
                 .padding(.bottom, 20)
+                .disabled(userService.selectedAreaId == nil) // ✅ Prevents navigation if no area is selected
             }
             .onAppear {
                 fetchZones()
@@ -165,7 +170,7 @@ struct LocationView: View {
             DispatchQueue.main.async {
                 switch result {
                 case .success(let fetchedAreas):
-                    self.areas = fetchedAreas
+                    self.areas = fetchedAreas.map { (id: $0.area_id, name: $0.area_name) } // ✅ Store (id, name)
                 case .failure(let error):
                     print("Failed to fetch areas:", error.localizedDescription)
                 }

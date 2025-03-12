@@ -52,34 +52,33 @@ class ZoneService {
     }
 
     // fetch zone areas
-    func fetchAreas(forZoneId zoneId: Int, completion: @escaping (Result<[String], Error>) -> Void) {
-        guard let url = URL(string: "\(Constants.baseURL)/zones/\(zoneId)/areas") else {
-            completion(.failure(NSError(domain: "Invalid URL", code: 0, userInfo: nil)))
-            return
+    func fetchAreas(forZoneId zoneId: Int, completion: @escaping (Result<[Area], Error>) -> Void) {
+            guard let url = URL(string: "\(Constants.baseURL)/zones/\(zoneId)/areas") else {
+                completion(.failure(NSError(domain: "Invalid URL", code: 0, userInfo: nil)))
+                return
+            }
+
+            URLSession.shared.dataTask(with: url) { data, response, error in
+                if let error = error {
+                    print("Error fetching areas:", error.localizedDescription)
+                    completion(.failure(error))
+                    return
+                }
+
+                guard let data = data else {
+                    print("Error: No Data Received")
+                    completion(.failure(NSError(domain: "No Data", code: 0, userInfo: nil)))
+                    return
+                }
+
+                do {
+                    let decodedResponse = try JSONDecoder().decode([Area].self, from: data)
+                    completion(.success(decodedResponse)) // ✅ Returns `[Area]` (id + name)
+                } catch {
+                    print("JSON Decoding Error:", error.localizedDescription)
+                    completion(.failure(error))
+                }
+            }.resume()
         }
-
-        URLSession.shared.dataTask(with: url) { data, response, error in
-            if let error = error {
-                print("Error fetching areas:", error.localizedDescription)
-                completion(.failure(error))
-                return
-            }
-
-            guard let data = data else {
-                print("Error: No Data Received")
-                completion(.failure(NSError(domain: "No Data", code: 0, userInfo: nil)))
-                return
-            }
-
-            do {
-                let decodedResponse = try JSONDecoder().decode([Area].self, from: data)
-                let areaNames = decodedResponse.map { $0.area_name } // Extract only names
-                completion(.success(areaNames))
-            } catch {
-                print("JSON Decoding Error:", error.localizedDescription)
-                completion(.failure(error))
-            }
-        }.resume()
-    }
 }
 

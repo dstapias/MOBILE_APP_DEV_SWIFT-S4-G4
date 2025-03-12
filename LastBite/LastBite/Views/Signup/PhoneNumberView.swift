@@ -3,7 +3,7 @@ import SwiftUI
 struct PhoneNumberView: View {
     @Binding var showPhoneNumberView: Bool // ✅ Controls manual navigation
     @Binding var showSignInView: Bool // ✅ Binding to transition to SignInView
-    @State private var phoneNumber: String = ""
+    @ObservedObject var userService = SignupUserService.shared // ✅ Shared user service
     @FocusState private var isPhoneNumberFocused: Bool // ✅ Controls keyboard focus
     @State private var showFourDigitCodeView = false // ✅ Controls PhoneNumberView navigation
     
@@ -48,21 +48,21 @@ struct PhoneNumberView: View {
                         Text("+57")
                             .font(.headline)
 
-                        TextField("", text: $phoneNumber)
+                        TextField("", text: $userService.phoneNumber) // ✅ Uses shared service
                             .keyboardType(.numberPad)
                             .frame(height: 40)
                             .padding(.leading, 5)
                             .background(Color.clear)
                             .focused($isPhoneNumberFocused) // ✅ Focus on appear
-                            .onChange(of: phoneNumber) { newValue in
+                            .onChange(of: userService.phoneNumber) { newValue in
                                 // ✅ Remove non-numeric characters
                                 let filtered = newValue.filter { $0.isNumber }
 
                                 // ✅ Limit to 10 digits
                                 if filtered.count > 10 {
-                                    phoneNumber = String(filtered.prefix(10))
+                                    userService.phoneNumber = String(filtered.prefix(10))
                                 } else {
-                                    phoneNumber = filtered
+                                    userService.phoneNumber = filtered
                                 }
                             }
                     }
@@ -78,20 +78,20 @@ struct PhoneNumberView: View {
 
                 // ✅ Next Button (Only Enables When 10 Digits Are Entered)
                 Button(action: {
-                    if phoneNumber.count == 10 {
+                    if userService.phoneNumber.count == 10 {
                         showFourDigitCodeView = true
                     }
                 }) {
                     Image(systemName: "arrow.right")
                         .foregroundColor(.white)
                         .padding()
-                        .background(phoneNumber.count == 10 ? Color.green : Color.gray) // ✅ Enables only when input is valid
+                        .background(userService.phoneNumber.count == 10 ? Color.green : Color.gray) // ✅ Enables only when input is valid
                         .clipShape(Circle())
                 }
                 .frame(maxWidth: .infinity, alignment: .trailing)
                 .padding(.horizontal, 20)
                 .padding(.bottom, 20)
-                .disabled(phoneNumber.count < 10) // ✅ Prevents navigation if input is incomplete
+                .disabled(userService.phoneNumber.count < 10) // ✅ Prevents navigation if input is incomplete
             }
             .navigationBarBackButtonHidden(false)
             .navigationTitle("Phone Number")

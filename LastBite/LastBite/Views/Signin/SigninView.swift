@@ -1,13 +1,10 @@
 import SwiftUI
-import FirebaseAuth
 
 struct SignInView: View {
     @Binding var showSignInView: Bool
-    @State private var email: String = ""
-    @State private var password: String = ""
+    @ObservedObject var authService = SignInUserService.shared // ✅ Uses shared SignInUserService
     @State private var isPasswordVisible: Bool = false
-    @State private var errorMessage: String = "" // ✅ Stores Firebase error messages
-    @State private var isLoading: Bool = false  // ✅ Shows a loading indicator
+    @State private var isLoading: Bool = false
 
     var body: some View {
         GeometryReader { geometry in
@@ -45,10 +42,13 @@ struct SignInView: View {
                             .font(.footnote)
                             .foregroundColor(.gray)
 
-                        TextField("Enter your email", text: $email)
-                            .autocapitalization(.none)
-                            .keyboardType(.emailAddress)
-                            .padding(.bottom, 5)
+                        TextField("Enter your email", text: Binding(
+                            get: { authService.email ?? "" },
+                            set: { authService.email = $0 }
+                        ))
+                        .autocapitalization(.none)
+                        .keyboardType(.emailAddress)
+                        .padding(.bottom, 5)
 
                         Divider()
                     }
@@ -61,9 +61,15 @@ struct SignInView: View {
 
                         HStack {
                             if isPasswordVisible {
-                                TextField("Enter your password", text: $password)
+                                TextField("Enter your password", text: Binding(
+                                    get: { authService.password ?? "" },
+                                    set: { authService.password = $0 }
+                                ))
                             } else {
-                                SecureField("Enter your password", text: $password)
+                                SecureField("Enter your password", text: Binding(
+                                    get: { authService.password ?? "" },
+                                    set: { authService.password = $0 }
+                                ))
                             }
 
                             Button(action: {
@@ -81,9 +87,7 @@ struct SignInView: View {
                     // ✅ Forgot Password
                     HStack {
                         Spacer()
-                        Button(action: {
-                            resetPassword()
-                        }) {
+                        Button(action: resetPassword) {
                             Text("Forgot Password?")
                                 .font(.footnote)
                                 .foregroundColor(.gray)
@@ -110,8 +114,8 @@ struct SignInView: View {
                     .padding(.top, 20)
 
                     // ✅ Show Firebase Error Messages
-                    if !errorMessage.isEmpty {
-                        Text(errorMessage)
+                    if !authService.errorMessage.isEmpty {
+                        Text(authService.errorMessage)
                             .font(.footnote)
                             .foregroundColor(.red)
                             .padding(.top, 5)
@@ -126,36 +130,31 @@ struct SignInView: View {
         }
     }
 
-    // ✅ Firebase Authentication: Sign-in Function
+    // ✅ Call AuthService for Sign-in
     private func signInUser() {
         isLoading = true
-        errorMessage = ""
-
-        Auth.auth().signIn(withEmail: email, password: password) { result, error in
+        authService.signInUser { result in
             DispatchQueue.main.async {
                 isLoading = false
-                if let error = error {
-                    errorMessage = error.localizedDescription
-                } else {
-                    showSignInView = false // ✅ Close the sign-in screen
+                switch result {
+                case .success:
+                    showSignInView = false
+                case .failure(let error):
+                    authService.errorMessage = error.localizedDescription
                 }
             }
         }
     }
 
-    // ✅ Firebase Authentication: Password Reset
+    // ✅ Call AuthService for Password Reset
     private func resetPassword() {
-        guard !email.isEmpty else {
-            errorMessage = "Please enter your email to reset the password."
-            return
-        }
-
-        Auth.auth().sendPasswordReset(withEmail: email) { error in
+        authService.resetPassword { result in
             DispatchQueue.main.async {
-                if let error = error {
-                    errorMessage = error.localizedDescription
-                } else {
-                    errorMessage = "Password reset link sent to your email."
+                switch result {
+                case .success(let message):
+                    authService.errorMessage = message
+                case .failure(let error):
+                    authService.errorMessage = error.localizedDescription
                 }
             }
         }

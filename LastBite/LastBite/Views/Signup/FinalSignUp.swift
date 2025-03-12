@@ -1,16 +1,20 @@
 import SwiftUI
-import FirebaseAuth
 
 struct FinalSignUpView: View {
-    @Binding var showFinalSignUpView: Bool // ✅ Control visibility
-    @State private var username: String = ""
-    @State private var email: String = ""
-    @State private var password: String = ""
+    @Binding var showFinalSignUpView: Bool // ✅ Controls visibility
+    @ObservedObject var userService = SignupUserService.shared // ✅ Shared user service
     @State private var isPasswordVisible: Bool = false
     @State private var isLoading: Bool = false
     @State private var errorMessage: String?
     @State private var showSuccessMessage: Bool = false
     @State private var navigateToSignIn = false // ✅ Controls navigation manually
+
+    // ✅ Computed property for button validation
+    private var isSubmitDisabled: Bool {
+        return userService.name.trimmingCharacters(in: .whitespaces).isEmpty ||
+               !isValidEmail(userService.email) ||
+               userService.password.count < 6
+    }
 
     var body: some View {
         GeometryReader { geometry in
@@ -39,18 +43,39 @@ struct FinalSignUpView: View {
                     .font(.footnote)
                     .foregroundColor(.gray)
                 
+                // ✅ Name Input
+                VStack(alignment: .leading, spacing: 5) {
+                    Text("Full Name")
+                        .font(.footnote)
+                        .foregroundColor(.gray)
+                    
+                    TextField("Enter your name", text: $userService.name)
+                        .autocapitalization(.words)
+                        .padding(.bottom, 5)
+                        .onChange(of: userService.name) { _ in validateFields() }
+                    
+                    Divider()
+                }
+
                 // ✅ Email Input
                 VStack(alignment: .leading, spacing: 5) {
                     Text("Email")
                         .font(.footnote)
                         .foregroundColor(.gray)
                     
-                    TextField("Enter your email", text: $email)
+                    TextField("Enter your email", text: $userService.email)
                         .keyboardType(.emailAddress)
                         .autocapitalization(.none)
                         .padding(.bottom, 5)
-                    
+                        .onChange(of: userService.email) { _ in validateFields() }
+
                     Divider()
+                }
+
+                if !isValidEmail(userService.email) && !userService.email.isEmpty {
+                    Text("Invalid email format")
+                        .font(.footnote)
+                        .foregroundColor(.red)
                 }
 
                 // ✅ Password Input
@@ -61,9 +86,9 @@ struct FinalSignUpView: View {
                     
                     HStack {
                         if isPasswordVisible {
-                            TextField("Enter your password", text: $password)
+                            TextField("Enter your password", text: $userService.password)
                         } else {
-                            SecureField("Enter your password", text: $password)
+                            SecureField("Enter your password", text: $userService.password)
                         }
 
                         Button(action: {
@@ -74,8 +99,15 @@ struct FinalSignUpView: View {
                         }
                     }
                     .padding(.bottom, 5)
-                    
+                    .onChange(of: userService.password) { _ in validateFields() }
+
                     Divider()
+                }
+
+                if userService.password.count < 6 && !userService.password.isEmpty {
+                    Text("Password must be at least 6 characters")
+                        .font(.footnote)
+                        .foregroundColor(.red)
                 }
 
                 // ✅ Terms & Privacy
@@ -86,20 +118,23 @@ struct FinalSignUpView: View {
                 
                 // ✅ Submit Button
                 Button(action: { FinalSignUpUser() }) {
-                    if isLoading {
-                        ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                    } else {
-                        Text("Submit")
-                            .font(.headline)
+                    ZStack {
+                        if isLoading {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        } else {
+                            Text("Submit")
+                                .font(.headline)
+                                .foregroundColor(.white)
+                        }
                     }
+                    .frame(maxWidth: .infinity, minHeight: 50) // ✅ Ensures the whole button is tappable
+                    .background(isSubmitDisabled || isLoading ? Color.gray : Color.green) // ✅ Disable logic
+                    .cornerRadius(10)
+                    .opacity(isSubmitDisabled ? 0.5 : 1) // ✅ Reduce opacity when disabled
                 }
-                .frame(maxWidth: .infinity, minHeight: 50)
-                .background(Color.green)
-                .foregroundColor(.white)
-                .cornerRadius(10)
                 .padding(.top, 10)
-                .disabled(isLoading)
+                .disabled(isSubmitDisabled || isLoading) // ✅ Prevent multiple taps while loading
                 .alert(isPresented: $showSuccessMessage) { // ✅ Success Alert
                     Alert(
                         title: Text("Success"),
@@ -143,25 +178,41 @@ struct FinalSignUpView: View {
         .fullScreenCover(isPresented: $navigateToSignIn) { // ✅ Opens Sign-in properly
             SignInView(showSignInView: $navigateToSignIn) // ✅ No binding required
         }
+        .onAppear {
+            userService.userType = Constants.USER_TYPE_CUSTOMER // ✅ Ensure userType is set when view appears
+        }
     }
     
-    // ✅ Firebase Signup Function
+    // ✅ Signup Function Using `SignupUserService`
     func FinalSignUpUser() {
         isLoading = true
         errorMessage = nil
         
-        Auth.auth().createUser(withEmail: email, password: password) { result, error in
+        userService.registerUser { result in
             DispatchQueue.main.async {
                 isLoading = false
                 
-                if let error = error {
-                    errorMessage = error.localizedDescription
-                } else {
+                switch result {
+                case .success:
                     print("✅ User created successfully!")
-                    showSuccessMessage = true // ✅ Show success alert
+                    showSuccessMessage = true
+                case .failure(let error):
+                    errorMessage = error.localizedDescription
                 }
             }
         }
+    }
+
+    // ✅ Email Validation Function
+    func isValidEmail(_ email: String) -> Bool {
+        let emailRegEx = #"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"#
+        return NSPredicate(format: "SELF MATCHES %@", emailRegEx).evaluate(with: email)
+    }
+
+    // ✅ Field Validation Function
+    func validateFields() {
+        // This triggers `isSubmitDisabled` to recompute
+        _ = isSubmitDisabled
     }
 }
 
