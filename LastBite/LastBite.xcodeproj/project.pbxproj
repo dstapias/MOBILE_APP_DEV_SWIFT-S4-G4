@@ -75,6 +75,12 @@
 		DEC0D3642D7BFCAA0006D9B4 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = DEC0D3622D7BFCAA0006D9B4 /* GoogleService-Info.plist */; };
 		DEC0D3652D7BFCAA0006D9B4 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = DEC0D3622D7BFCAA0006D9B4 /* GoogleService-Info.plist */; };
 		DEC0D3692D7C03960006D9B4 /* FinalSignUp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEC0D3682D7C038B0006D9B4 /* FinalSignUp.swift */; };
+		DEC0D3702D8105ED0006D9B4 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEC0D36F2D8105E00006D9B4 /* Constants.swift */; };
+		DEC0D3712D8105ED0006D9B4 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEC0D36F2D8105E00006D9B4 /* Constants.swift */; };
+		DEC0D3722D8105ED0006D9B4 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEC0D36F2D8105E00006D9B4 /* Constants.swift */; };
+		DEC0D3782D8108BD0006D9B4 /* ZoneService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEC0D3772D8108B50006D9B4 /* ZoneService.swift */; };
+		DEC0D3792D8108BD0006D9B4 /* ZoneService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEC0D3772D8108B50006D9B4 /* ZoneService.swift */; };
+		DEC0D37A2D8108BD0006D9B4 /* ZoneService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEC0D3772D8108B50006D9B4 /* ZoneService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -135,6 +141,8 @@
 		DEC0D35E2D7BE5DD0006D9B4 /* SigninView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SigninView.swift; sourceTree = "<group>"; };
 		DEC0D3622D7BFCAA0006D9B4 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		DEC0D3682D7C038B0006D9B4 /* FinalSignUp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinalSignUp.swift; sourceTree = "<group>"; };
+		DEC0D36F2D8105E00006D9B4 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		DEC0D3772D8108B50006D9B4 /* ZoneService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoneService.swift; sourceTree = "<group>"; };
 		EA49284CA19DAC2A478FBBF0 /* Pods_LastBite.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_LastBite.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		EB2EC236CA2AB824464BED0B /* Pods_LastBiteTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_LastBiteTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		EF7CBFA9BDDA536AAB128359 /* Pods-LastBite-LastBiteUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LastBite-LastBiteUITests.debug.xcconfig"; path = "Target Support Files/Pods-LastBite-LastBiteUITests/Pods-LastBite-LastBiteUITests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -204,6 +212,8 @@
 		DE11E70A2D793C1000EB9862 /* LastBite */ = {
 			isa = PBXGroup;
 			children = (
+				DEC0D36F2D8105E00006D9B4 /* Constants.swift */,
+				DEC0D36A2D80F84B0006D9B4 /* Services */,
 				DE11E73B2D79405500EB9862 /* Fonts */,
 				DE11E7352D793D3800EB9862 /* Views */,
 				DE11E70B2D793C1000EB9862 /* LastBiteApp.swift */,
@@ -290,6 +300,14 @@
 				DEC0D35E2D7BE5DD0006D9B4 /* SigninView.swift */,
 			);
 			path = Signin;
+			sourceTree = "<group>";
+		};
+		DEC0D36A2D80F84B0006D9B4 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				DEC0D3772D8108B50006D9B4 /* ZoneService.swift */,
+			);
+			path = Services;
 			sourceTree = "<group>";
 		};
 		E555CBDC9A1169B6F57F6AFC /* Pods */ = {
@@ -596,7 +614,9 @@
 				DEC0D35F2D7BE5E30006D9B4 /* SigninView.swift in Sources */,
 				DE11E70E2D793C1000EB9862 /* ContentView.swift in Sources */,
 				DE2ACE062D7B4FAC00A7D749 /* PhoneNumberView.swift in Sources */,
+				DEC0D3722D8105ED0006D9B4 /* Constants.swift in Sources */,
 				DE11E70C2D793C1000EB9862 /* LastBiteApp.swift in Sources */,
+				DEC0D37A2D8108BD0006D9B4 /* ZoneService.swift in Sources */,
 				DE11E7372D793D7500EB9862 /* SplashScreenView.swift in Sources */,
 				DE2ACE0E2D7BD29300A7D749 /* FourDigitCode.swift in Sources */,
 				DE2ACE102D7BD74D00A7D749 /* LocationView.swift in Sources */,
@@ -608,8 +628,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DEC0D3782D8108BD0006D9B4 /* ZoneService.swift in Sources */,
 				DE4F751F2D794F4800F20D45 /* SignupView.swift in Sources */,
 				DE11E71D2D793C1200EB9862 /* LastBiteTests.swift in Sources */,
+				DEC0D3712D8105ED0006D9B4 /* Constants.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -617,8 +639,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DEC0D3702D8105ED0006D9B4 /* Constants.swift in Sources */,
 				DE4F75202D794F4800F20D45 /* SignupView.swift in Sources */,
 				DE11E7292D793C1200EB9862 /* LastBiteUITestsLaunchTests.swift in Sources */,
+				DEC0D3792D8108BD0006D9B4 /* ZoneService.swift in Sources */,
 				DE11E7272D793C1200EB9862 /* LastBiteUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
