@@ -4,6 +4,8 @@ struct SignupView: View {
     @Binding var showSignupView: Bool // ✅ Binding to go back to WelcomeView
     @Binding var showSignInView: Bool // ✅ Binding to transition to SignInView
     @State private var showPhoneNumberView = false // ✅ Controls PhoneNumberView navigation
+    @Binding var isLoggedIn: Bool
+
     
     var body: some View {
         GeometryReader { geometry in
@@ -84,7 +86,7 @@ struct SignupView: View {
             .frame(width: geometry.size.width, height: geometry.size.height)
             .padding()
             .fullScreenCover(isPresented: $showPhoneNumberView) {
-                PhoneNumberView(showPhoneNumberView: $showPhoneNumberView, showSignInView: $showSignInView)
+                PhoneNumberView(showPhoneNumberView: $showPhoneNumberView, showSignInView: $showSignInView, isLoggedIn: $isLoggedIn)
             }
         }
     }
@@ -117,7 +119,8 @@ struct SignupView_Previews: PreviewProvider {
     static var previews: some View {
         SignupView(
             showSignupView: .constant(true),
-            showSignInView: .constant(false)
+            showSignInView: .constant(false),
+            isLoggedIn: .constant(false)
         )
     }
 }
