@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "https://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Identificador del bundle (importante para instalar la app) -->
+    <key>CFBundleIdentifier</key>
+    <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+
+    <!-- Nombre interno de la app -->
+    <key>CFBundleName</key>
+    <string>$(PRODUCT_NAME)</string>
+
+    <!-- Nombre del ejecutable -->
+    <key>CFBundleExecutable</key>
+    <string>$(EXECUTABLE_NAME)</string>
+
+    <!-- Versión corta (visible para el usuario) -->
+    <key>CFBundleShortVersionString</key>
+    <string>1.0</string>
+
+    <!-- Número de build interno -->
+    <key>CFBundleVersion</key>
+    <string>1</string>
+
+    <!-- Región de desarrollo (usualmente 'en') -->
+    <key>CFBundleDevelopmentRegion</key>
+    <string>en</string>
+
+    <!-- Tipo de paquete (APPL = app) -->
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+
+    <!-- Indica que es para iOS -->
+    <key>LSRequiresIPhoneOS</key>
+    <true/>
+
+    <!-- Si usas storyboard de LaunchScreen, puedes especificarlo aquí -->
+    <key>UILaunchStoryboardName</key>
+    <string>LaunchScreen</string>
+
+    <!-- Forzar modo claro -->
+    <key>UIUserInterfaceStyle</key>
+    <string>Light</string>
+</dict>
+</plist>
+

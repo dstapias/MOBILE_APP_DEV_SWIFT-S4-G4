@@ -15,11 +15,17 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 struct YourApp: App {
   // register app delegate for Firebase setup
   @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+    
+    @AppStorage("isLoggedIn") var isLoggedIn: Bool = false
 
 
   var body: some Scene {
     WindowGroup {
-        ContentView()
+        if isLoggedIn {
+            MainTabView()
+        } else {
+            ContentView(isLoggedIn: $isLoggedIn)
+        }
     }
   }
 }

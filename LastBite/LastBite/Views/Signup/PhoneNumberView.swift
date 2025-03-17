@@ -6,6 +6,8 @@ struct PhoneNumberView: View {
     @ObservedObject var userService = SignupUserService.shared // ✅ Shared user service
     @FocusState private var isPhoneNumberFocused: Bool // ✅ Controls keyboard focus
     @State private var showFourDigitCodeView = false // ✅ Controls PhoneNumberView navigation
+    @Binding var isLoggedIn: Bool
+
     
     var body: some View {
         GeometryReader { geometry in
@@ -100,7 +102,7 @@ struct PhoneNumberView: View {
             }
         }
         .fullScreenCover(isPresented: $showFourDigitCodeView) {
-            FourDigitCodeView(showFourDigitCodeView: $showFourDigitCodeView, showSignInView: $showSignInView)
+            FourDigitCodeView(showFourDigitCodeView: $showFourDigitCodeView, showSignInView: $showSignInView, isLoggedIn: $isLoggedIn)
         }
     }
 }
