@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		2D0566345A0980C82C1F4659 /* Pods_LastBite.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EA49284CA19DAC2A478FBBF0 /* Pods_LastBite.framework */; };
+		4100F29A2D8911A9007FE254 /* ProductDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4100F2992D8911A9007FE254 /* ProductDetailView.swift */; };
 		4125E7E62D8801BA007B99FD /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 4125E7E52D8801BA007B99FD /* GoogleService-Info.plist */; };
 		4125E7E72D8801BA007B99FD /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 4125E7E52D8801BA007B99FD /* GoogleService-Info.plist */; };
 		4125E7E82D8801BA007B99FD /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 4125E7E52D8801BA007B99FD /* GoogleService-Info.plist */; };
@@ -76,6 +77,7 @@
 
 /* Begin PBXFileReference section */
 		03F148106758A64FEFEF9607 /* Pods-LastBite-LastBiteUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LastBite-LastBiteUITests.release.xcconfig"; path = "Target Support Files/Pods-LastBite-LastBiteUITests/Pods-LastBite-LastBiteUITests.release.xcconfig"; sourceTree = "<group>"; };
+		4100F2992D8911A9007FE254 /* ProductDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductDetailView.swift; sourceTree = "<group>"; };
 		4125E7E52D8801BA007B99FD /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		41A2F1CD2D86A32D006C467C /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		41A2F1D32D86AAA6006C467C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -145,6 +147,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		4100F2982D891128007FE254 /* ProductDetail */ = {
+			isa = PBXGroup;
+			children = (
+				4100F2992D8911A9007FE254 /* ProductDetailView.swift */,
+			);
+			path = ProductDetail;
+			sourceTree = "<group>";
+		};
 		41A2F1CC2D86A316006C467C /* Home */ = {
 			isa = PBXGroup;
 			children = (
@@ -248,6 +258,7 @@
 		DE11E7352D793D3800EB9862 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				4100F2982D891128007FE254 /* ProductDetail */,
 				41A2F1DA2D86B9C8006C467C /* Components */,
 				41A2F1CC2D86A316006C467C /* Home */,
 				DEC0D35D2D7BE5D50006D9B4 /* Signin */,
@@ -559,6 +570,7 @@
 				41A2F1D92D86B9A0006C467C /* CategoryItemData.swift in Sources */,
 				DE11E70E2D793C1000EB9862 /* ContentView.swift in Sources */,
 				DE2ACE062D7B4FAC00A7D749 /* PhoneNumberView.swift in Sources */,
+				4100F29A2D8911A9007FE254 /* ProductDetailView.swift in Sources */,
 				DEC0D3812D810C1C0006D9B4 /* SignupUserService.swift in Sources */,
 				DEC0D3722D8105ED0006D9B4 /* Constants.swift in Sources */,
 				41A2F1DE2D86BA0C006C467C /* CategorySectionView.swift in Sources */,
