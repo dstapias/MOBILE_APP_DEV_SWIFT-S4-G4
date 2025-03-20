@@ -11,4 +11,5 @@ struct CategoryItemData: Identifiable {
     let id = UUID()
     let title: String
     let imageName: String
+    var store: StoreService.Store? = nil 
 }

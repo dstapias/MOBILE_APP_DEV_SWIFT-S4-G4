@@ -15,24 +15,9 @@ struct MainTabView: View {
                     Label("Shop", systemImage: "house")
                 }
             
-            Text("Explore")
-                .tabItem {
-                    Label("Explore", systemImage: "magnifyingglass")
-                }
-            
             Text("Cart")
                 .tabItem {
                     Label("Cart", systemImage: "cart")
-                }
-            
-            Text("Favourite")
-                .tabItem {
-                    Label("Favourite", systemImage: "heart")
-                }
-            
-            Text("Account")
-                .tabItem {
-                    Label("Account", systemImage: "person")
                 }
         }
     }
