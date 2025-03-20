@@ -16,6 +16,9 @@
 		41A2F1DC2D86B9E0006C467C /* CategoryItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41A2F1DB2D86B9E0006C467C /* CategoryItemView.swift */; };
 		41A2F1DE2D86BA0C006C467C /* CategorySectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41A2F1DD2D86BA0C006C467C /* CategorySectionView.swift */; };
 		41A2F1E02D86BD2E006C467C /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41A2F1DF2D86BD2E006C467C /* MainTabView.swift */; };
+		41A4D5212D8C69B1006EDEBA /* OrderAcceptedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41A4D5202D8C69B1006EDEBA /* OrderAcceptedView.swift */; };
+		41A4D5272D8C7151006EDEBA /* CartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41A4D5262D8C7151006EDEBA /* CartView.swift */; };
+		41A4D5292D8C7313006EDEBA /* CheckoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41A4D5282D8C7313006EDEBA /* CheckoutView.swift */; };
 		41D32C722D853AC500D08D54 /* Podfile in Resources */ = {isa = PBXBuildFile; fileRef = 41D32C712D853AC500D08D54 /* Podfile */; };
 		41D32C732D853AC500D08D54 /* Podfile in Resources */ = {isa = PBXBuildFile; fileRef = 41D32C712D853AC500D08D54 /* Podfile */; };
 		41D32C742D853AC500D08D54 /* Podfile in Resources */ = {isa = PBXBuildFile; fileRef = 41D32C712D853AC500D08D54 /* Podfile */; };
@@ -95,6 +98,9 @@
 		41A2F1DB2D86B9E0006C467C /* CategoryItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryItemView.swift; sourceTree = "<group>"; };
 		41A2F1DD2D86BA0C006C467C /* CategorySectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategorySectionView.swift; sourceTree = "<group>"; };
 		41A2F1DF2D86BD2E006C467C /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
+		41A4D5202D8C69B1006EDEBA /* OrderAcceptedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrderAcceptedView.swift; sourceTree = "<group>"; };
+		41A4D5262D8C7151006EDEBA /* CartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CartView.swift; sourceTree = "<group>"; };
+		41A4D5282D8C7313006EDEBA /* CheckoutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckoutView.swift; sourceTree = "<group>"; };
 		41D32C712D853AC500D08D54 /* Podfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Podfile; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		43701770524729CEF4EF2407 /* Pods_LastBite_LastBiteUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_LastBite_LastBiteUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		483BAD0D8AAD3B21B2716729 /* Pods-LastBiteTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LastBiteTests.debug.xcconfig"; path = "Target Support Files/Pods-LastBiteTests/Pods-LastBiteTests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -198,6 +204,23 @@
 			path = Components;
 			sourceTree = "<group>";
 		};
+		41A4D51F2D8C698D006EDEBA /* Order */ = {
+			isa = PBXGroup;
+			children = (
+				41A4D5202D8C69B1006EDEBA /* OrderAcceptedView.swift */,
+				41A4D5282D8C7313006EDEBA /* CheckoutView.swift */,
+			);
+			path = Order;
+			sourceTree = "<group>";
+		};
+		41A4D5252D8C712F006EDEBA /* Cart */ = {
+			isa = PBXGroup;
+			children = (
+				41A4D5262D8C7151006EDEBA /* CartView.swift */,
+			);
+			path = Cart;
+			sourceTree = "<group>";
+		};
 		B312962D6BFC9EE4D5DEC579 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -276,6 +299,8 @@
 		DE11E7352D793D3800EB9862 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				41A4D5252D8C712F006EDEBA /* Cart */,
+				41A4D51F2D8C698D006EDEBA /* Order */,
 				4100F2982D891128007FE254 /* ProductDetail */,
 				41A2F1DA2D86B9C8006C467C /* Components */,
 				41A2F1CC2D86A316006C467C /* Home */,
@@ -597,6 +622,7 @@
 				41A2F1DC2D86B9E0006C467C /* CategoryItemView.swift in Sources */,
 				DEC0D35F2D7BE5E30006D9B4 /* SigninView.swift in Sources */,
 				41A2F1D92D86B9A0006C467C /* CategoryItemData.swift in Sources */,
+				41A4D5212D8C69B1006EDEBA /* OrderAcceptedView.swift in Sources */,
 				DE678CA22D8BBBDC004485D2 /* TagService.swift in Sources */,
 				DE11E70E2D793C1000EB9862 /* ContentView.swift in Sources */,
 				DE2ACE062D7B4FAC00A7D749 /* PhoneNumberView.swift in Sources */,
@@ -608,10 +634,12 @@
 				41A2F1DE2D86BA0C006C467C /* CategorySectionView.swift in Sources */,
 				DE11E70C2D793C1000EB9862 /* LastBiteApp.swift in Sources */,
 				DE678C972D8BA070004485D2 /* StoreService.swift in Sources */,
+				41A4D5292D8C7313006EDEBA /* CheckoutView.swift in Sources */,
 				DEC0D37A2D8108BD0006D9B4 /* ZoneService.swift in Sources */,
 				DE11E7372D793D7500EB9862 /* SplashScreenView.swift in Sources */,
 				DE678C9F2D8BAB4F004485D2 /* ProductService.swift in Sources */,
 				DE2ACE0E2D7BD29300A7D749 /* FourDigitCode.swift in Sources */,
+				41A4D5272D8C7151006EDEBA /* CartView.swift in Sources */,
 				DEC0D3842D81250A0006D9B4 /* SigninUserService.swift in Sources */,
 				41A2F1CE2D86A32D006C467C /* HomeView.swift in Sources */,
 				DE2ACE102D7BD74D00A7D749 /* LocationView.swift in Sources */,
@@ -792,7 +820,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"LastBite/Preview Content\"";
-				DEVELOPMENT_TEAM = 585XBRU6ZG;
+				DEVELOPMENT_TEAM = W3QFYRJQQN;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Info.plist;
@@ -806,7 +834,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = co.uniandes.LastBiteV3;
+				PRODUCT_BUNDLE_IDENTIFIER = co.uniandes.LastBite;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -823,7 +851,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"LastBite/Preview Content\"";
-				DEVELOPMENT_TEAM = 585XBRU6ZG;
+				DEVELOPMENT_TEAM = W3QFYRJQQN;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Info.plist;
@@ -837,7 +865,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = co.uniandes.LastBiteV3;
+				PRODUCT_BUNDLE_IDENTIFIER = co.uniandes.LastBite;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;

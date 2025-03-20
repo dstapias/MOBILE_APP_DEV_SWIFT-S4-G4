@@ -104,8 +104,6 @@ and varied diet.
                             Image(systemName: "star.fill")
                                 .foregroundColor(.yellow)
                         }
-                        
-                        // Podrías mostrar un texto con la calificación
                         Text("5/5")
                             .font(.subheadline)
                             .foregroundColor(.secondary)
@@ -114,9 +112,7 @@ and varied diet.
                 .padding(.horizontal)
                 
                 // Botón "Add To Basket"
-                Button(action: {
-                    // Acción al presionar el botón
-                }) {
+                NavigationLink(destination: HomeView()) {
                     Text("Add To Basket")
                         .fontWeight(.bold)
                         .foregroundColor(.white)
