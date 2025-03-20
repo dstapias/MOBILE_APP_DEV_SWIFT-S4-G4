@@ -9,9 +9,6 @@
 /* Begin PBXBuildFile section */
 		2D0566345A0980C82C1F4659 /* Pods_LastBite.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EA49284CA19DAC2A478FBBF0 /* Pods_LastBite.framework */; };
 		4100F29A2D8911A9007FE254 /* ProductDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4100F2992D8911A9007FE254 /* ProductDetailView.swift */; };
-		4125E7E62D8801BA007B99FD /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 4125E7E52D8801BA007B99FD /* GoogleService-Info.plist */; };
-		4125E7E72D8801BA007B99FD /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 4125E7E52D8801BA007B99FD /* GoogleService-Info.plist */; };
-		4125E7E82D8801BA007B99FD /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 4125E7E52D8801BA007B99FD /* GoogleService-Info.plist */; };
 		41A2F1CE2D86A32D006C467C /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41A2F1CD2D86A32D006C467C /* HomeView.swift */; };
 		41A2F1D52D86AAA6006C467C /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 41A2F1D32D86AAA6006C467C /* Info.plist */; };
 		41A2F1D62D86AAA6006C467C /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 41A2F1D32D86AAA6006C467C /* Info.plist */; };
@@ -42,6 +39,12 @@
 		DE4F751E2D794F4800F20D45 /* SignupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE4F751D2D794F4800F20D45 /* SignupView.swift */; };
 		DE4F751F2D794F4800F20D45 /* SignupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE4F751D2D794F4800F20D45 /* SignupView.swift */; };
 		DE4F75202D794F4800F20D45 /* SignupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE4F751D2D794F4800F20D45 /* SignupView.swift */; };
+		DE678C932D8B9FFB004485D2 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = DE678C922D8B9FFB004485D2 /* GoogleService-Info.plist */; };
+		DE678C942D8B9FFB004485D2 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = DE678C922D8B9FFB004485D2 /* GoogleService-Info.plist */; };
+		DE678C952D8B9FFB004485D2 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = DE678C922D8B9FFB004485D2 /* GoogleService-Info.plist */; };
+		DE678C972D8BA070004485D2 /* StoreService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE678C962D8BA06B004485D2 /* StoreService.swift */; };
+		DE678C982D8BA070004485D2 /* StoreService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE678C962D8BA06B004485D2 /* StoreService.swift */; };
+		DE678C992D8BA070004485D2 /* StoreService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE678C962D8BA06B004485D2 /* StoreService.swift */; };
 		DEC0D35F2D7BE5E30006D9B4 /* SigninView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEC0D35E2D7BE5DD0006D9B4 /* SigninView.swift */; };
 		DEC0D3692D7C03960006D9B4 /* FinalSignUp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEC0D3682D7C038B0006D9B4 /* FinalSignUp.swift */; };
 		DEC0D3702D8105ED0006D9B4 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEC0D36F2D8105E00006D9B4 /* Constants.swift */; };
@@ -78,7 +81,6 @@
 /* Begin PBXFileReference section */
 		03F148106758A64FEFEF9607 /* Pods-LastBite-LastBiteUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LastBite-LastBiteUITests.release.xcconfig"; path = "Target Support Files/Pods-LastBite-LastBiteUITests/Pods-LastBite-LastBiteUITests.release.xcconfig"; sourceTree = "<group>"; };
 		4100F2992D8911A9007FE254 /* ProductDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductDetailView.swift; sourceTree = "<group>"; };
-		4125E7E52D8801BA007B99FD /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		41A2F1CD2D86A32D006C467C /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		41A2F1D32D86AAA6006C467C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		41A2F1D82D86B9A0006C467C /* CategoryItemData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryItemData.swift; sourceTree = "<group>"; };
@@ -108,6 +110,8 @@
 		DE2ACE0D2D7BD28C00A7D749 /* FourDigitCode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FourDigitCode.swift; sourceTree = "<group>"; };
 		DE2ACE0F2D7BD74800A7D749 /* LocationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationView.swift; sourceTree = "<group>"; };
 		DE4F751D2D794F4800F20D45 /* SignupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignupView.swift; sourceTree = "<group>"; };
+		DE678C922D8B9FFB004485D2 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		DE678C962D8BA06B004485D2 /* StoreService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreService.swift; sourceTree = "<group>"; };
 		DEC0D35E2D7BE5DD0006D9B4 /* SigninView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SigninView.swift; sourceTree = "<group>"; };
 		DEC0D3682D7C038B0006D9B4 /* FinalSignUp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinalSignUp.swift; sourceTree = "<group>"; };
 		DEC0D36F2D8105E00006D9B4 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
@@ -195,7 +199,7 @@
 			isa = PBXGroup;
 			children = (
 				41A2F1D32D86AAA6006C467C /* Info.plist */,
-				4125E7E52D8801BA007B99FD /* GoogleService-Info.plist */,
+				DE678C922D8B9FFB004485D2 /* GoogleService-Info.plist */,
 				41D32C712D853AC500D08D54 /* Podfile */,
 				DE11E70A2D793C1000EB9862 /* LastBite */,
 				DE11E71B2D793C1200EB9862 /* LastBiteTests */,
@@ -294,6 +298,7 @@
 		DEC0D36A2D80F84B0006D9B4 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				DE678C962D8BA06B004485D2 /* StoreService.swift */,
 				DEC0D3832D8125030006D9B4 /* SigninUserService.swift */,
 				DEC0D37F2D810C120006D9B4 /* SignupUserService.swift */,
 				DEC0D3772D8108B50006D9B4 /* ZoneService.swift */,
@@ -424,7 +429,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				DE11E7132D793C1200EB9862 /* Preview Assets.xcassets in Resources */,
-				4125E7E82D8801BA007B99FD /* GoogleService-Info.plist in Resources */,
+				DE678C942D8B9FFB004485D2 /* GoogleService-Info.plist in Resources */,
 				41D32C722D853AC500D08D54 /* Podfile in Resources */,
 				DE11E7102D793C1200EB9862 /* Assets.xcassets in Resources */,
 			);
@@ -435,7 +440,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				41A2F1D62D86AAA6006C467C /* Info.plist in Resources */,
-				4125E7E62D8801BA007B99FD /* GoogleService-Info.plist in Resources */,
+				DE678C952D8B9FFB004485D2 /* GoogleService-Info.plist in Resources */,
 				41D32C732D853AC500D08D54 /* Podfile in Resources */,
 				DE11E7782D7947EE00EB9862 /* Assets.xcassets in Resources */,
 			);
@@ -446,7 +451,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				41A2F1D52D86AAA6006C467C /* Info.plist in Resources */,
-				4125E7E72D8801BA007B99FD /* GoogleService-Info.plist in Resources */,
+				DE678C932D8B9FFB004485D2 /* GoogleService-Info.plist in Resources */,
 				41D32C742D853AC500D08D54 /* Podfile in Resources */,
 				DE11E7792D7947EF00EB9862 /* Assets.xcassets in Resources */,
 			);
@@ -575,6 +580,7 @@
 				DEC0D3722D8105ED0006D9B4 /* Constants.swift in Sources */,
 				41A2F1DE2D86BA0C006C467C /* CategorySectionView.swift in Sources */,
 				DE11E70C2D793C1000EB9862 /* LastBiteApp.swift in Sources */,
+				DE678C972D8BA070004485D2 /* StoreService.swift in Sources */,
 				DEC0D37A2D8108BD0006D9B4 /* ZoneService.swift in Sources */,
 				DE11E7372D793D7500EB9862 /* SplashScreenView.swift in Sources */,
 				DE2ACE0E2D7BD29300A7D749 /* FourDigitCode.swift in Sources */,
@@ -595,6 +601,7 @@
 				DE4F751F2D794F4800F20D45 /* SignupView.swift in Sources */,
 				DE11E71D2D793C1200EB9862 /* LastBiteTests.swift in Sources */,
 				DEC0D3712D8105ED0006D9B4 /* Constants.swift in Sources */,
+				DE678C992D8BA070004485D2 /* StoreService.swift in Sources */,
 				DEC0D3822D810C1C0006D9B4 /* SignupUserService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -606,6 +613,7 @@
 				DEC0D3702D8105ED0006D9B4 /* Constants.swift in Sources */,
 				DE4F75202D794F4800F20D45 /* SignupView.swift in Sources */,
 				DEC0D3862D81250A0006D9B4 /* SigninUserService.swift in Sources */,
+				DE678C982D8BA070004485D2 /* StoreService.swift in Sources */,
 				DE11E7292D793C1200EB9862 /* LastBiteUITestsLaunchTests.swift in Sources */,
 				DEC0D3792D8108BD0006D9B4 /* ZoneService.swift in Sources */,
 				DEC0D3802D810C1C0006D9B4 /* SignupUserService.swift in Sources */,
@@ -752,7 +760,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"LastBite/Preview Content\"";
-				DEVELOPMENT_TEAM = W3QFYRJQQN;
+				DEVELOPMENT_TEAM = 585XBRU6ZG;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Info.plist;
@@ -766,7 +774,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = co.uniandes.LastBite;
+				PRODUCT_BUNDLE_IDENTIFIER = co.uniandes.LastBiteV3;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -783,7 +791,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"LastBite/Preview Content\"";
-				DEVELOPMENT_TEAM = W3QFYRJQQN;
+				DEVELOPMENT_TEAM = 585XBRU6ZG;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Info.plist;
@@ -797,7 +805,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = co.uniandes.LastBite;
+				PRODUCT_BUNDLE_IDENTIFIER = co.uniandes.LastBiteV3;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
