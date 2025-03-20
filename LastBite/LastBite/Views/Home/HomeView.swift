@@ -46,7 +46,7 @@ struct HomeView: View {
             }
             .navigationTitle("Shop")
             .onAppear(perform: fetchStores) // ✅ Fetch stores when view appears
-        }
+        }.navigationViewStyle(StackNavigationViewStyle())
     }
 
     // ✅ Fetch stores from backend
@@ -55,15 +55,25 @@ struct HomeView: View {
             DispatchQueue.main.async {
                 switch result {
                 case .success(let stores):
-                    storeItems = stores.map {
-                        CategoryItemData(title: $0.name, imageName: $0.logo) // ✅ Uses name & logo
+                    print("✅ Successfully fetched \(stores.count) stores") // Debugging
+                    for store in stores {
+                        print("➡️ Store Attached: \(store.name)") // Debugging
+                    }
+                    
+                    storeItems = stores.map { store in
+                        CategoryItemData(
+                            title: store.name,
+                            imageName: store.logo,
+                            store: store // ✅ Ensure store object is attached
+                        )
                     }
                 case .failure(let error):
-                    print("Failed to fetch stores:", error.localizedDescription)
+                    print("❌ Failed to fetch stores:", error.localizedDescription)
                 }
             }
         }
     }
+
 }
 
 
