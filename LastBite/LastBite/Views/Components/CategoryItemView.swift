@@ -9,15 +9,9 @@ struct CategoryItemView: View {
             if let store = item.store { // ✅ If it's a store, make it clickable
                 NavigationLink(destination: ProductView(store: store)) {
                     content
-                        .onAppear {
-                            print("✅ NavigationLink added for: \(store.name)")
-                        }
                 }
             } else {
                 content
-                    .onAppear {
-                        print("❌ No store attached to: \(item.title)")
-                    }
             }
         }
     }
@@ -35,6 +29,7 @@ struct CategoryItemView: View {
                 .font(.caption)
                 .multilineTextAlignment(.center)
                 .lineLimit(2)
+                .foregroundColor(.black)
         }
         .frame(width: 100, height: 120)
         .background(Color.white)

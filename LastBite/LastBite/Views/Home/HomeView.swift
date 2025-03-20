@@ -2,69 +2,69 @@ import SwiftUI
 import SDWebImageSwiftUI
 
 struct HomeView: View {
+    @StateObject private var locationManager = LocationManager() // ✅ Location Manager
     @State private var searchText = ""
-    @State private var storeItems: [CategoryItemData] = [] // ✅ Store items from backend
-    
+    @State private var storeItems: [CategoryItemData] = []
+    @State private var nearbyStores: [CategoryItemData] = []
+
     let forYouItems = [
         CategoryItemData(title: "Hornitos", imageName: "hornitos"),
         CategoryItemData(title: "Cascabel", imageName: "cascabel")
-    ]
-    
-    let nearbyItems = [
-        CategoryItemData(title: "KFC", imageName: "kfc"),
-        CategoryItemData(title: "Fried Chicken", imageName: "chicken")
     ]
 
     var body: some View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 16) {
-                    
+
                     TextField("Search store", text: $searchText)
                         .padding(10)
                         .background(Color(.systemGray6))
                         .cornerRadius(8)
                         .padding(.horizontal)
-                    
+
                     // Banner
                     Image("fresh_vegetables_banner")
                         .resizable()
                         .scaledToFit()
                         .cornerRadius(8)
                         .padding(.horizontal)
-                    
+
                     // Sección Bakery
                     CategorySectionView(title: "For you", items: forYouItems)
-                    
+
                     // Sección Supermarkets
-                    CategorySectionView(title: "Stores", items: storeItems) // ✅ Uses fetched stores
-                    
-                    // Sección Chicken
-                    CategorySectionView(title: "Nearby Stores", items: nearbyItems)
+                    CategorySectionView(title: "Stores", items: storeItems)
+
+                    // Sección Nearby Stores
+                    if !nearbyStores.isEmpty {
+                        CategorySectionView(title: "Nearby Stores", items: nearbyStores)
+                    }
                 }
                 .padding(.vertical)
             }
             .navigationTitle("Shop")
-            .onAppear(perform: fetchStores) // ✅ Fetch stores when view appears
-        }.navigationViewStyle(StackNavigationViewStyle())
+            .onAppear {
+                fetchStores()
+            }
+            .onChange(of: locationManager.latitude) { _ in
+                fetchNearbyStores()
+            }
+        }
+        .navigationViewStyle(StackNavigationViewStyle())
     }
 
-    // ✅ Fetch stores from backend
+    // ✅ Fetch all stores
     private func fetchStores() {
         StoreService.shared.fetchStores { result in
             DispatchQueue.main.async {
                 switch result {
                 case .success(let stores):
-                    print("✅ Successfully fetched \(stores.count) stores") // Debugging
-                    for store in stores {
-                        print("➡️ Store Attached: \(store.name)") // Debugging
-                    }
-                    
                     storeItems = stores.map { store in
                         CategoryItemData(
                             title: store.name,
                             imageName: store.logo,
-                            store: store // ✅ Ensure store object is attached
+                            store: store
                         )
                     }
                 case .failure(let error):
@@ -74,6 +74,31 @@ struct HomeView: View {
         }
     }
 
+    // ✅ Fetch nearby stores **after location updates**
+    private func fetchNearbyStores() {
+        guard let lat = locationManager.latitude, let lon = locationManager.longitude else {
+            print("❌ Location not available yet")
+            return
+        }
+        print("✅ Fetching nearby stores at Latitude: \(lat), Longitude: \(lon)") // ✅ Debugging
+        StoreService.shared.fetchNearbyStores(latitude: lat, longitude: lon) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let stores):
+                    print("✅ Nearby stores fetched: \(stores.count)")
+                    nearbyStores = stores.map { store in
+                        CategoryItemData(
+                            title: store.name,
+                            imageName: store.logo,
+                            store: store
+                        )
+                    }
+                case .failure(let error):
+                    print("❌ Failed to fetch nearby stores:", error.localizedDescription)
+                }
+            }
+        }
+    }
 }
 
 
