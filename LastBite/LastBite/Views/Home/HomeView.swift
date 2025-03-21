@@ -7,11 +7,7 @@ struct HomeView: View {
     @State private var searchText = ""
     @State private var storeItems: [CategoryItemData] = []
     @State private var nearbyStores: [CategoryItemData] = []
-
-    let forYouItems = [
-        CategoryItemData(title: "Hornitos", imageName: "hornitos"),
-        CategoryItemData(title: "Cascabel", imageName: "cascabel")
-    ]
+    @State private var forYouItems: [CategoryItemData] = []
 
     var body: some View {
         NavigationView {
@@ -42,10 +38,13 @@ struct HomeView: View {
                         .padding(.horizontal)
 
                     // Sección Bakery
-                    CategorySectionView(title: "For you", items: forYouItems)
-
+                    if !forYouItems.isEmpty {
+                        CategorySectionView(title: "For you", items: forYouItems)
+                    }
                     // Sección Supermarkets
-                    CategorySectionView(title: "Stores", items: storeItems)
+                    if !storeItems.isEmpty {
+                        CategorySectionView(title: "Stores", items: storeItems)
+                    }
 
                     // Sección Nearby Stores
                     if !nearbyStores.isEmpty {
@@ -57,6 +56,7 @@ struct HomeView: View {
             .navigationTitle("Shop")
             .onAppear {
                 fetchStores()
+                fetchTopStores()
             }
             .onChange(of: locationManager.latitude) { _ in
                 fetchNearbyStores()
@@ -110,6 +110,27 @@ struct HomeView: View {
             }
         }
     }
+    
+    private func fetchTopStores() {
+           StoreService.shared.fetchTopStores { result in
+               DispatchQueue.main.async {
+                   switch result {
+                   case .success(let stores):
+                       print("✅ Top stores fetched: \(stores.count)")
+                       forYouItems = stores.map { store in
+                           CategoryItemData(
+                               title: store.name,
+                               imageName: store.logo,
+                               store: store
+                           )
+                       }
+                   case .failure(let error):
+                       print("❌ Failed to fetch top stores:", error.localizedDescription)
+                   }
+               }
+           }
+       }
+    
 }
 
 
