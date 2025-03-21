@@ -36,6 +36,16 @@
 				<string>app-1-279460729617-ios-c30bbeca3ade56843032b0</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>FireBaseAuthCallBack2</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>app-1-279460729617-ios-bc939264591898d03032b0</string>
+			</array>
+		</dict>
 	</array>
 	<key>CFBundleVersion</key>
 	<string>1</string>

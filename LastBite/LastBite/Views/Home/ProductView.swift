@@ -2,6 +2,7 @@ import SwiftUI
 import SDWebImageSwiftUI
 
 struct ProductView: View {
+    @EnvironmentObject var signInService: SignInUserService
     let store: StoreService.Store // ✅ Store details
     @State private var products: [ProductService.Product] = [] // ✅ Store products
     @State private var tags: [Int: [TagService.Tag]] = [:] // ✅ Stores tags by product_id
@@ -25,7 +26,11 @@ struct ProductView: View {
 
                     LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
                         ForEach(products.filter { searchText.isEmpty || $0.name.localizedCaseInsensitiveContains(searchText) }, id: \.product_id) { product in
-                            ProductCard(product: product, tags: tags[product.product_id] ?? [])
+                            ProductCard(
+                                product: product,
+                                tags: tags[product.product_id] ?? [],
+                                onAddToCart: { addToCart(product: product) } // ✅ Pass function correctly
+                            )
                         }
                     }
                     .padding(.horizontal)
@@ -68,13 +73,38 @@ struct ProductView: View {
             }
         }
     }
+    
+    private func addToCart(product: ProductService.Product) {
+        guard let userId = signInService.userId else {
+            print("❌ No user email found")
+            return
+        }
+
+        CartService.shared.fetchActiveCart(for: userId) { result in
+            switch result {
+            case .success(let cart):
+                CartProductService.shared.addProductToCart(cartID: cart.cart_id, productID: product.product_id) { addResult in
+                    switch addResult {
+                    case .success:
+                        print("✅ Product added to cart")
+                    case .failure(let error):
+                        print("❌ Failed to add product:", error.localizedDescription)
+                    }
+                }
+            case .failure(let error):
+                print("❌ Failed to find active cart:", error.localizedDescription)
+            }
+        }
+    }
+
+    
 }
 
 // ✅ Product Card Component with Tags
 struct ProductCard: View {
     let product: ProductService.Product
     let tags: [TagService.Tag] // ✅ Tags for this product
-
+    let onAddToCart: () -> Void
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             WebImage(url: URL(string: product.image))
@@ -102,7 +132,8 @@ struct ProductCard: View {
             HStack {
                 Spacer()
                 Button(action: {
-                    print("Added \(product.name) to cart")
+                    //Here should be added the product to the cart
+                    onAddToCart()
                 }) {
                     Image(systemName: "plus")
                         .font(.title2)

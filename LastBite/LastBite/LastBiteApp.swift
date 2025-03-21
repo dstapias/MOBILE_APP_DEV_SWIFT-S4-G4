@@ -40,15 +40,18 @@ struct YourApp: App {
   @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     
     @AppStorage("isLoggedIn") var isLoggedIn: Bool = false
+    let signInService = SignInUserService.shared
 
 
-  var body: some Scene {
-    WindowGroup {
-        if isLoggedIn {
-            MainTabView()
-        } else {
-            ContentView(isLoggedIn: $isLoggedIn)
-        }
+    var body: some Scene {
+            WindowGroup {
+                if isLoggedIn {
+                    MainTabView()
+                        .environmentObject(signInService) // ✅ Inyectar aquí directamente
+                } else {
+                    ContentView(isLoggedIn: $isLoggedIn)
+                        .environmentObject(signInService) // ✅ Inyectar aquí también
+                }
+            }
     }
-  }
 }

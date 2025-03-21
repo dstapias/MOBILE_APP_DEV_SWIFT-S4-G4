@@ -99,7 +99,7 @@ struct CheckoutView: View {
 }
 
 // MARK: - Vista de previsualización
-struct CheckoutView_Previews: PreviewProvider {
+/*struct CheckoutView_Previews: PreviewProvider {
     static var previews: some View {
         // Ejemplo con algunos ítems de prueba
         CheckoutView(
@@ -110,3 +110,4 @@ struct CheckoutView_Previews: PreviewProvider {
         )
     }
 }
+*/

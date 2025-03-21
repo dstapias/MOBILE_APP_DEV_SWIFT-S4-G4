@@ -3,6 +3,7 @@ import SwiftUI
 struct ContentView: View {
     @State private var isActive = false
     @Binding var isLoggedIn: Bool
+    @EnvironmentObject var signInService: SignInUserService
 
 
     var body: some View {
@@ -26,6 +27,7 @@ struct ContentView: View {
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView(isLoggedIn: .constant(false))
+            .environmentObject(SignInUserService.shared)
     }
 }
 

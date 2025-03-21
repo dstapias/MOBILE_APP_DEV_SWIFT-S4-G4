@@ -1,35 +1,25 @@
-//
-//  CartView.swift
-//  LastBite
-//
-//  Created by Andrés Romero on 20/03/25.
-//
-
 import SwiftUI
+import SDWebImageSwiftUI
 
-// Modelo para cada ítem del carrito
 struct CartItem: Identifiable {
     let id = UUID()
+    let productId: Int
     let name: String
-    let weight: String
+    let detail: String
     var quantity: Int
     let price: Double
-    let imageName: String
+    let imageUrl: String
 }
 
-// Vista principal del carrito
 struct CartView: View {
-    @State private var cartItems: [CartItem] = [
-        CartItem(name: "Bell Pepper Red", weight: "1kg", quantity: 1, price: 4.99, imageName: "red_pepper"),
-        CartItem(name: "Egg Chicken Red", weight: "4pcs", quantity: 1, price: 1.99, imageName: "chicken_eggs"),
-        CartItem(name: "Organic Bananas", weight: "12kg", quantity: 1, price: 3.00, imageName: "bananas"),
-        CartItem(name: "Ginger", weight: "250gm", quantity: 1, price: 2.99, imageName: "ginger")
-    ]
+    @EnvironmentObject var signInService: SignInUserService
+    @State private var cartItems: [CartItem] = [] // ✅ Holds products in the cart
     @State private var showCheckout = false
+    @State private var activeCartId: Int? = nil // ✅ Store active cart ID
+
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                
                 // Encabezado
                 HStack {
                     Text("My Cart")
@@ -43,111 +33,220 @@ struct CartView: View {
                 // Lista de productos
                 ScrollView {
                     VStack(spacing: 0) {
-                        ForEach(cartItems.indices, id: \.self) { index in
-                            CartRowView(
-                                item: $cartItems[index],
-                                removeAction: {
-                                    cartItems.remove(at: index)
-                                }
-                            )
+                        if cartItems.isEmpty {
+                            Text("Your cart is empty.")
+                                .foregroundColor(.gray)
+                                .padding()
+                        } else {
+                            ForEach(cartItems.indices, id: \.self) { index in
+                                CartRowView(
+                                    item: $cartItems[index],
+                                    removeAction: {
+                                        removeItemFromCart(productId: cartItems[index].productId)
+                                    },
+                                    updateQuantity: { newQuantity in
+                                        updateCartQuantity(productID: cartItems[index].productId, newQuantity: newQuantity)
+                                    }
+                                )
+                            }
                         }
                     }
                 }
                 
                 // Botón de Checkout
                 Button(action: {
-                        showCheckout = true
-                    }) {
-                        Text("Go to Checkout")
-                            .fontWeight(.bold)
-                            .foregroundColor(.white)
-                            .padding()
-                            .frame(maxWidth: .infinity)
-                            .background(Color.green)
-                            .cornerRadius(8)
+                    showCheckout = true
+                }) {
+                    Text("Go to Checkout")
+                        .fontWeight(.bold)
+                        .foregroundColor(.white)
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(Color.green)
+                        .cornerRadius(8)
+                }
+                .padding()
+                .sheet(isPresented: $showCheckout) {
+                    NavigationStack {
+                        CheckoutView(cartItems: cartItems)
+                            .presentationDetents([.medium, .large]) // Opcional, iOS 16+
                     }
-                    .padding()
-                    .sheet(isPresented: $showCheckout) {
-                        NavigationStack {
-                            CheckoutView(cartItems: cartItems)
-                                .presentationDetents([.medium, .large]) // Opcional, iOS 16+
-                        }
-                    }
+                }
             }
             .navigationBarHidden(true)  // Oculta la barra de navegación si quieres
+            .onAppear {
+                fetchActiveCart() // ✅ Fetch active cart when view appears
+            }
+        }
+    }
+
+    // ✅ Fetch the active cart for the user
+    private func fetchActiveCart() {
+        guard let userId = signInService.userId else {
+            print("❌ No user ID found")
+            return
+        }
+
+        CartService.shared.fetchActiveCart(for: userId) { result in
+            switch result {
+            case .success(let cart):
+                DispatchQueue.main.async {
+                    self.activeCartId = cart.cart_id
+                    print("✅ Active Cart ID:", cart.cart_id)
+                    fetchCartProducts() // ✅ Fetch cart products using stored activeCartId
+                }
+            case .failure(let error):
+                print("❌ Failed to find active cart:", error.localizedDescription)
+            }
+        }
+    }
+
+    // ✅ Fetch products in the active cart
+    private func fetchCartProducts() {
+        guard let cartId = activeCartId else {
+            print("❌ No active cart found")
+            return
+        }
+
+        CartProductService.shared.fetchDetailedCartProducts(for: cartId) { result in
+            switch result {
+            case .success(let cartProducts):
+                DispatchQueue.main.async {
+                    self.cartItems = cartProducts.map { cartProduct in
+                        CartItem(
+                            productId: cartProduct.product_id,
+                            name: cartProduct.name,
+                            detail: cartProduct.detail,
+                            quantity: cartProduct.quantity,
+                            price: cartProduct.unit_price,
+                            imageUrl: cartProduct.image
+                        )
+                    }
+                    print("✅ Fetched \(cartProducts.count) products in the cart")
+                }
+            case .failure(let error):
+                print("❌ Failed to fetch cart products:", error.localizedDescription)
+            }
+        }
+    }
+
+    // ✅ Remove product from cart
+    private func removeItemFromCart(productId: Int) {
+        guard let cartId = activeCartId else {
+            print("❌ No active cart found")
+            return
+        }
+
+        CartProductService.shared.removeProductFromCart(cartID: cartId, productID: productId) { result in
+            switch result {
+            case .success:
+                DispatchQueue.main.async {
+                    self.cartItems.removeAll { $0.productId == productId }
+                    print("✅ Product removed from cart")
+                }
+            case .failure(let error):
+                print("❌ Failed to remove product:", error.localizedDescription)
+            }
+        }
+    }
+
+    // ✅ Update quantity in the backend
+    private func updateCartQuantity(productID: Int, newQuantity: Int) {
+        guard let cartId = activeCartId else {
+            print("❌ No active cart found")
+            return
+        }
+
+        CartProductService.shared.updateProductQuantity(cartID: cartId, productID: productID, quantity: newQuantity) { result in
+            switch result {
+            case .success:
+                DispatchQueue.main.async {
+                    if let index = self.cartItems.firstIndex(where: { $0.productId == productID }) {
+                        self.cartItems[index].quantity = newQuantity
+                    }
+                    print("✅ Cart updated successfully")
+                }
+            case .failure(let error):
+                print("❌ Failed to update cart:", error.localizedDescription)
+            }
         }
     }
 }
 
-// Vista individual para cada producto del carrito
+// ✅ Updated CartRowView to accept quantity update function
 struct CartRowView: View {
     @Binding var item: CartItem
     var removeAction: () -> Void
-    
+    var updateQuantity: (Int) -> Void
+
     var body: some View {
         HStack(alignment: .center, spacing: 8) {
-            // Imagen del producto
-            Image(item.imageName)
+            // ✅ Load Image from URL using SDWebImage
+            WebImage(url: URL(string: item.imageUrl))
                 .resizable()
                 .scaledToFill()
                 .frame(width: 50, height: 50)
                 .cornerRadius(8)
-                .padding(.leading)
-            
-            // Nombre y descripción
+                .padding(.leading, 8)
+
+            // ✅ Product Name & Description
             VStack(alignment: .leading, spacing: 4) {
                 Text(item.name)
                     .font(.subheadline)
                     .fontWeight(.semibold)
-                Text("\(item.weight), Price")
+                Text(item.detail)
                     .font(.caption)
                     .foregroundColor(.gray)
+                    .lineLimit(2)
             }
-            
+
             Spacer()
-            
-            // Controles de cantidad
+
+            // ✅ Quantity Controls
             HStack(spacing: 8) {
                 Button(action: {
                     if item.quantity > 1 {
-                        item.quantity -= 1
+                        let newQuantity = item.quantity - 1
+                        updateQuantity(newQuantity)
                     }
                 }) {
                     Image(systemName: "minus.circle")
                         .foregroundColor(.green)
                         .font(.title2)
                 }
-                
+
                 Text("\(item.quantity)")
                     .frame(width: 24)
-                
+
                 Button(action: {
-                    item.quantity += 1
+                    let newQuantity = item.quantity + 1
+                    updateQuantity(newQuantity)
                 }) {
                     Image(systemName: "plus.circle")
                         .foregroundColor(.green)
                         .font(.title2)
                 }
             }
-            
-            // Precio
-            Text(String(format: "$%.2f", item.price))
-                .frame(width: 60, alignment: .trailing)
-            
-            // Botón para eliminar
+
+            // ✅ Product Price (Multiplying by Quantity)
+            Text(String(format: "$%.2f", item.price * Double(item.quantity))) // ✅ Shows total price
+                .frame(width: 80, alignment: .trailing)
+
+            // ✅ Remove Button
             Button(action: removeAction) {
                 Image(systemName: "xmark")
                     .foregroundColor(.gray)
             }
-            .padding(.trailing)
+            .padding(.trailing, 8)
         }
         .padding(.vertical, 8)
     }
 }
 
-// Vista de previsualización
+// ✅ Preview
 struct CartView_Previews: PreviewProvider {
     static var previews: some View {
         CartView()
+            .environmentObject(SignInUserService.shared) // ✅ Ensure environment object is injected
     }
 }

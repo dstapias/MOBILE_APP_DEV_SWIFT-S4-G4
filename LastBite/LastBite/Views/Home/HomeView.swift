@@ -2,6 +2,7 @@ import SwiftUI
 import SDWebImageSwiftUI
 
 struct HomeView: View {
+    @EnvironmentObject var signInService: SignInUserService
     @StateObject private var locationManager = LocationManager() // ✅ Location Manager
     @State private var searchText = ""
     @State private var storeItems: [CategoryItemData] = []
@@ -16,7 +17,17 @@ struct HomeView: View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 16) {
-
+                    if let userId = signInService.userId {
+                        Text("Logged in as: \(userId)")
+                            .font(.footnote)
+                            .foregroundColor(.gray)
+                            .padding(.top, 5)
+                    } else {
+                        Text("Not logged in")
+                            .font(.footnote)
+                            .foregroundColor(.red)
+                            .padding(.top, 5)
+                    }
                     TextField("Search store", text: $searchText)
                         .padding(10)
                         .background(Color(.systemGray6))
