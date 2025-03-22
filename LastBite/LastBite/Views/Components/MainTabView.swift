@@ -18,6 +18,10 @@ struct MainTabView: View {
                 .tabItem {
                     Label("Cart", systemImage: "cart")
                 }
+            LogoutView()
+                            .tabItem {
+                                Label("Logout", systemImage: "arrow.backward.circle")
+                            }
         }
     }
 }
