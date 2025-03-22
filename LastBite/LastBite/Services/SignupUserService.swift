@@ -100,4 +100,59 @@ class SignupUserService: ObservableObject {
             completion(.success(()))
         }
     }
+    func sendVerificationCode(completion: @escaping (Result<Void, Error>) -> Void) {
+        guard !phoneNumber.isEmpty else {
+            completion(.failure(NSError(domain: "Auth", code: 400, userInfo: [NSLocalizedDescriptionKey: "Phone number is missing"])))
+            return
+        }
+
+        PhoneAuthProvider.provider().verifyPhoneNumber(phoneNumber, uiDelegate: nil) { verificationID, error in
+            if let error = error as NSError? {
+                print("❌ Firebase Error:", error.localizedDescription)
+                print("❌ Firebase Error Code:", error.code)
+                print("❌ Firebase Error UserInfo:", error.userInfo)
+                completion(.failure(error))
+                return
+            }
+
+            guard let verificationID = verificationID else {
+                completion(.failure(NSError(domain: "Auth", code: 500, userInfo: [NSLocalizedDescriptionKey: "Failed to obtain verification ID"])))
+                return
+            }
+
+            UserDefaults.standard.set(verificationID, forKey: "verificationID")
+            print("✅ Código enviado correctamente a \(self.phoneNumber)")
+            completion(.success(()))
+        }
+    }
+    
+    // Function to verify the SMS code using Firebase
+    func verifyCode(completion: @escaping (Result<Void, Error>) -> Void) {
+        guard let verificationID = UserDefaults.standard.string(forKey: "verificationID") else {
+            completion(.failure(NSError(domain: "Auth", code: 400, userInfo: [NSLocalizedDescriptionKey: "Verification ID not found"])))
+            return
+        }
+        
+        let credential = PhoneAuthProvider.provider().credential(withVerificationID: verificationID, verificationCode: verificationCode)
+        
+        Auth.auth().signIn(with: credential) { authResult, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            
+            print("✅ Phone authentication successful!")
+            
+            // Optionally, fetch the Firebase ID token
+            Auth.auth().currentUser?.getIDToken { token, error in
+                if let token = token {
+                    print("Firebase ID Token: \(token)")
+                } else if let error = error {
+                    print("Error fetching token: \(error.localizedDescription)")
+                }
+            }
+            
+            completion(.success(()))
+        }
+    }
 }

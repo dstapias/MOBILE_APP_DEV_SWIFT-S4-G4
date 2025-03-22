@@ -9,6 +9,8 @@ struct LocationView: View {
     @State private var zones: [ZoneService.Zone] = [] // ✅ Store full Zone object
     @State private var areas: [(id: Int, name: String)] = [] // ✅ Store area_id and area_name
     @State private var isLoading = true // ✅ Track loading state
+    @Binding var isLoggedIn: Bool
+
 
     var body: some View {
         GeometryReader { geometry in
@@ -140,7 +142,7 @@ struct LocationView: View {
             }
         }
         .fullScreenCover(isPresented: $showFinalSignUpView) {
-            FinalSignUpView(showFinalSignUpView: $showFinalSignUpView)
+            FinalSignUpView(showFinalSignUpView: $showFinalSignUpView, isLoggedIn: $isLoggedIn)
         }
     }
 
@@ -184,7 +186,8 @@ struct LocationView_Previews: PreviewProvider {
     static var previews: some View {
         LocationView(
             showLocationView: .constant(true),
-            showSignInView: .constant(false)
+            showSignInView: .constant(false),
+            isLoggedIn: .constant(false)
         )
     }
 }

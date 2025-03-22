@@ -2,11 +2,14 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var isActive = false
+    @Binding var isLoggedIn: Bool
+    @EnvironmentObject var signInService: SignInUserService
+
 
     var body: some View {
         ZStack {
             if isActive {
-                WelcomeView()
+                WelcomeView(isLoggedIn: $isLoggedIn)
             } else {
                 SplashScreenView()
                     .onAppear {
@@ -23,7 +26,8 @@ struct ContentView: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView()
+        ContentView(isLoggedIn: .constant(false))
+            .environmentObject(SignInUserService.shared)
     }
 }
 

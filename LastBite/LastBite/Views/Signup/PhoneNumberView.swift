@@ -6,6 +6,8 @@ struct PhoneNumberView: View {
     @ObservedObject var userService = SignupUserService.shared // ✅ Shared user service
     @FocusState private var isPhoneNumberFocused: Bool // ✅ Controls keyboard focus
     @State private var showFourDigitCodeView = false // ✅ Controls PhoneNumberView navigation
+    @Binding var isLoggedIn: Bool
+
     
     var body: some View {
         GeometryReader { geometry in
@@ -78,20 +80,36 @@ struct PhoneNumberView: View {
 
                 // ✅ Next Button (Only Enables When 10 Digits Are Entered)
                 Button(action: {
-                    if userService.phoneNumber.count == 10 {
-                        showFourDigitCodeView = true
+                    if userService.phoneNumber.count == 10 || (userService.phoneNumber.count > 10 && !userService.phoneNumber.hasPrefix("+")) {
+                        // Only add the country code if it's not already there
+                        if !userService.phoneNumber.hasPrefix("+") {
+                            let fullPhoneNumber = "+57" + userService.phoneNumber
+                            userService.phoneNumber = fullPhoneNumber
+                        }
+                        
+                        SignupUserService.shared.sendVerificationCode { result in
+                            DispatchQueue.main.async {
+                                switch result {
+                                case .success:
+                                    print("Verification code sent successfully.")
+                                    showFourDigitCodeView = true
+                                case .failure(let error):
+                                    print("Error sending verification code: \(error.localizedDescription)")
+                                    // Optionally, show an alert or message to the user
+                                }
+                            }
+                        }
                     }
                 }) {
                     Image(systemName: "arrow.right")
                         .foregroundColor(.white)
                         .padding()
-                        .background(userService.phoneNumber.count == 10 ? Color.green : Color.gray) // ✅ Enables only when input is valid
+                        .background(userService.phoneNumber.count >= 10 ? Color.green : Color.gray)
                         .clipShape(Circle())
                 }
                 .frame(maxWidth: .infinity, alignment: .trailing)
                 .padding(.horizontal, 20)
                 .padding(.bottom, 20)
-                .disabled(userService.phoneNumber.count < 10) // ✅ Prevents navigation if input is incomplete
             }
             .navigationBarBackButtonHidden(false)
             .navigationTitle("Phone Number")
@@ -100,7 +118,7 @@ struct PhoneNumberView: View {
             }
         }
         .fullScreenCover(isPresented: $showFourDigitCodeView) {
-            FourDigitCodeView(showFourDigitCodeView: $showFourDigitCodeView, showSignInView: $showSignInView)
+            FourDigitCodeView(showFourDigitCodeView: $showFourDigitCodeView, showSignInView: $showSignInView, isLoggedIn: $isLoggedIn)
         }
     }
 }

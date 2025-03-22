@@ -5,6 +5,8 @@ struct SignInView: View {
     @ObservedObject var authService = SignInUserService.shared // ✅ Uses shared SignInUserService
     @State private var isPasswordVisible: Bool = false
     @State private var isLoading: Bool = false
+    @Binding var isLoggedIn: Bool
+
 
     var body: some View {
         GeometryReader { geometry in
@@ -139,6 +141,7 @@ struct SignInView: View {
                 switch result {
                 case .success:
                     showSignInView = false
+                    isLoggedIn = true
                 case .failure(let error):
                     authService.errorMessage = error.localizedDescription
                 }
@@ -164,6 +167,6 @@ struct SignInView: View {
 // ✅ Preview with Correct Binding
 struct SignInView_Previews: PreviewProvider {
     static var previews: some View {
-        SignInView(showSignInView: .constant(true))
+        SignInView(showSignInView: .constant(true), isLoggedIn: .constant(false))
     }
 }

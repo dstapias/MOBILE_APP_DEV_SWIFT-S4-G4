@@ -8,6 +8,8 @@ struct FinalSignUpView: View {
     @State private var errorMessage: String?
     @State private var showSuccessMessage: Bool = false
     @State private var navigateToSignIn = false // ✅ Controls navigation manually
+    @Binding var isLoggedIn: Bool
+
 
     // ✅ Computed property for button validation
     private var isSubmitDisabled: Bool {
@@ -176,7 +178,7 @@ struct FinalSignUpView: View {
             .frame(maxWidth: geometry.size.width * 0.9)
         }
         .fullScreenCover(isPresented: $navigateToSignIn) { // ✅ Opens Sign-in properly
-            SignInView(showSignInView: $navigateToSignIn) // ✅ No binding required
+            SignInView(showSignInView: $navigateToSignIn, isLoggedIn: $isLoggedIn) // ✅ No binding required
         }
         .onAppear {
             userService.userType = Constants.USER_TYPE_CUSTOMER // ✅ Ensure userType is set when view appears
@@ -219,6 +221,6 @@ struct FinalSignUpView: View {
 // ✅ Preview
 struct FinalSignUpView_Previews: PreviewProvider {
     static var previews: some View {
-        FinalSignUpView(showFinalSignUpView: .constant(true))
+        FinalSignUpView(showFinalSignUpView: .constant(true), isLoggedIn: .constant(false))
     }
 }

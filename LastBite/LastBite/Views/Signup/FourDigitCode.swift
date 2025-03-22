@@ -6,6 +6,10 @@ struct FourDigitCodeView: View {
     @ObservedObject var userService = SignupUserService.shared // ✅ Shared user service
     @FocusState private var isCodeFocused: Bool // ✅ Controls keyboard focus
     @State private var showLocationView = false
+    @Binding var isLoggedIn: Bool
+    @State private var isLoading = false
+    @State private var errorMessage: String = ""
+
 
     var body: some View {
         GeometryReader { geometry in
@@ -27,16 +31,16 @@ struct FourDigitCodeView: View {
                 .frame(maxWidth: .infinity)
 
                 // ✅ Title
-                Text("Enter your 4-digit code")
+                Text("Enter your 6-digit code")
                     .font(.title)
                     .bold()
                     .padding(.horizontal, 20)
                     .padding(.top, 20)
 
-                // ✅ 4-Digit Code Input (Hidden with `*`)
+                // ✅ 6-Digit Code Input (Hidden with `*`)
                 VStack {
                     HStack(spacing: 15) {
-                        ForEach(0..<4, id: \.self) { index in
+                        ForEach(0..<6, id: \.self) { index in
                             Text(userService.verificationCode.count > index ? "•" : "_") // ✅ Uses `SignupUserService`
                                 .font(.largeTitle)
                                 .frame(width: 40, height: 40)
@@ -54,9 +58,9 @@ struct FourDigitCodeView: View {
                         .frame(width: 1, height: 1)
                         .opacity(0.01)
                         .onChange(of: userService.verificationCode) { newValue in
-                            // ✅ Ensures only 4 digits
-                            if newValue.count > 4 {
-                                userService.verificationCode = String(newValue.prefix(4))
+                            // ✅ Ensures only 6 digits
+                            if newValue.count > 6 {
+                                userService.verificationCode = String(newValue.prefix(6))
                             }
                         }
                         .onAppear {
@@ -69,26 +73,44 @@ struct FourDigitCodeView: View {
 
                 // ✅ Next Button
                 Button(action: {
-                    if userService.verificationCode.count == 4 {
-                        showLocationView = true
+                    if userService.verificationCode.count == 6 {
+                        isLoading = true
+                        SignupUserService.shared.verifyCode { result in
+                            DispatchQueue.main.async {
+                                isLoading = false
+                                switch result {
+                                case .success:
+                                    // On successful verification, update the login state and navigate forward
+                                    showLocationView = true
+                                    print("User authenticated successfully!")
+                                case .failure(let error):
+                                    errorMessage = "Error: \(error.localizedDescription)"
+                                    print(errorMessage)
+                                }
+                            }
+                        }
                     }
                 }) {
-                    Image(systemName: "arrow.right")
-                        .foregroundColor(.white)
-                        .padding()
-                        .background(userService.verificationCode.count == 4 ? Color.green : Color.gray)
-                        .clipShape(Circle())
+                    if isLoading {
+                        ProgressView()
+                    } else {
+                        Image(systemName: "arrow.right")
+                            .foregroundColor(.white)
+                            .padding()
+                            .background(userService.verificationCode.count == 6 ? Color.green : Color.gray)
+                            .clipShape(Circle())
+                    }
                 }
                 .frame(maxWidth: .infinity, alignment: .trailing)
                 .padding(.horizontal, 20)
                 .padding(.bottom, 20)
-                .disabled(userService.verificationCode.count < 4) // ✅ Prevents navigation if incomplete
+                .disabled(userService.verificationCode.count < 6 || isLoading) // Prevents navigation if incomplete or loading
             }
             .navigationBarBackButtonHidden(false)
-            .navigationTitle("4 Digit Code")
+            .navigationTitle("6 Digit Code")
         }
         .fullScreenCover(isPresented: $showLocationView) {
-            LocationView(showLocationView: $showLocationView, showSignInView: $showSignInView)
+            LocationView(showLocationView: $showLocationView, showSignInView: $showSignInView, isLoggedIn: $isLoggedIn)
         }
     }
 }

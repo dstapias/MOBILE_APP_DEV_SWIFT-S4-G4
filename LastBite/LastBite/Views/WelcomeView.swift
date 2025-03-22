@@ -3,6 +3,8 @@ import SwiftUI
 struct WelcomeView: View {
     @State private var showSignupView = false
     @State private var showSignInView = false
+    @Binding var isLoggedIn: Bool
+
     var body: some View {
             GeometryReader { geometry in
                 ZStack {
@@ -63,10 +65,10 @@ struct WelcomeView: View {
             }
             .ignoresSafeArea()
             .fullScreenCover(isPresented: $showSignupView) {
-                SignupView(showSignupView: $showSignupView, showSignInView: $showSignInView)
+                SignupView(showSignupView: $showSignupView, showSignInView: $showSignInView, isLoggedIn: $isLoggedIn)
                    }
             .fullScreenCover(isPresented: $showSignInView) {
-                       SignInView(showSignInView: $showSignInView)
+                       SignInView(showSignInView: $showSignInView, isLoggedIn: $isLoggedIn)
                    }
     }
 }
@@ -74,10 +76,10 @@ struct WelcomeView: View {
 struct WelcomeView_Previews: PreviewProvider {
     static var previews: some View {
         Group {
-            WelcomeView()
+            WelcomeView(isLoggedIn: .constant(false))
                 .previewDevice("iPhone")
 
-            WelcomeView()
+            WelcomeView(isLoggedIn: .constant(false))
                 .previewDevice("iPad")
         }
     }
