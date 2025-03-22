@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		2D0566345A0980C82C1F4659 /* Pods_LastBite.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EA49284CA19DAC2A478FBBF0 /* Pods_LastBite.framework */; };
 		4100F29A2D8911A9007FE254 /* ProductDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4100F2992D8911A9007FE254 /* ProductDetailView.swift */; };
+		416BFA372D8E28B5006C77E1 /* OrderStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416BFA362D8E28B5006C77E1 /* OrderStatusView.swift */; };
 		41A2F1CE2D86A32D006C467C /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41A2F1CD2D86A32D006C467C /* HomeView.swift */; };
 		41A2F1D52D86AAA6006C467C /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 41A2F1D32D86AAA6006C467C /* Info.plist */; };
 		41A2F1D62D86AAA6006C467C /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 41A2F1D32D86AAA6006C467C /* Info.plist */; };
@@ -98,6 +99,7 @@
 /* Begin PBXFileReference section */
 		03F148106758A64FEFEF9607 /* Pods-LastBite-LastBiteUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LastBite-LastBiteUITests.release.xcconfig"; path = "Target Support Files/Pods-LastBite-LastBiteUITests/Pods-LastBite-LastBiteUITests.release.xcconfig"; sourceTree = "<group>"; };
 		4100F2992D8911A9007FE254 /* ProductDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductDetailView.swift; sourceTree = "<group>"; };
+		416BFA362D8E28B5006C77E1 /* OrderStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrderStatusView.swift; sourceTree = "<group>"; };
 		41A2F1CD2D86A32D006C467C /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		41A2F1D32D86AAA6006C467C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		41A2F1D82D86B9A0006C467C /* CategoryItemData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryItemData.swift; sourceTree = "<group>"; };
@@ -183,6 +185,14 @@
 				4100F2992D8911A9007FE254 /* ProductDetailView.swift */,
 			);
 			path = ProductDetail;
+			sourceTree = "<group>";
+		};
+		416BFA332D8E287E006C77E1 /* OrderStatusView */ = {
+			isa = PBXGroup;
+			children = (
+				416BFA362D8E28B5006C77E1 /* OrderStatusView.swift */,
+			);
+			path = OrderStatusView;
 			sourceTree = "<group>";
 		};
 		41A2F1CC2D86A316006C467C /* Home */ = {
@@ -307,6 +317,7 @@
 		DE11E7352D793D3800EB9862 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				416BFA332D8E287E006C77E1 /* OrderStatusView */,
 				41A4D5252D8C712F006EDEBA /* Cart */,
 				41A4D51F2D8C698D006EDEBA /* Order */,
 				4100F2982D891128007FE254 /* ProductDetail */,
@@ -637,6 +648,7 @@
 				DE678CB12D8CE376004485D2 /* CartProductService.swift in Sources */,
 				DE678CA22D8BBBDC004485D2 /* TagService.swift in Sources */,
 				DE11E70E2D793C1000EB9862 /* ContentView.swift in Sources */,
+				416BFA372D8E28B5006C77E1 /* OrderStatusView.swift in Sources */,
 				DE2ACE062D7B4FAC00A7D749 /* PhoneNumberView.swift in Sources */,
 				4100F29A2D8911A9007FE254 /* ProductDetailView.swift in Sources */,
 				DEC0D3812D810C1C0006D9B4 /* SignupUserService.swift in Sources */,
@@ -836,7 +848,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"LastBite/Preview Content\"";
-				DEVELOPMENT_TEAM = 585XBRU6ZG;
+				DEVELOPMENT_TEAM = W3QFYRJQQN;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Info.plist;
@@ -850,7 +862,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = co.uniandes.LastBiteV3;
+				PRODUCT_BUNDLE_IDENTIFIER = co.uniandes.LastBite;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -867,7 +879,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"LastBite/Preview Content\"";
-				DEVELOPMENT_TEAM = 585XBRU6ZG;
+				DEVELOPMENT_TEAM = W3QFYRJQQN;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Info.plist;
@@ -881,7 +893,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = co.uniandes.LastBiteV3;
+				PRODUCT_BUNDLE_IDENTIFIER = co.uniandes.LastBite;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;

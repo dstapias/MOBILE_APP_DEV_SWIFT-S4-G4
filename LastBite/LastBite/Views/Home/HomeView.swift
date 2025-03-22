@@ -8,6 +8,9 @@ struct HomeView: View {
     @State private var storeItems: [CategoryItemData] = []
     @State private var nearbyStores: [CategoryItemData] = []
     @State private var forYouItems: [CategoryItemData] = []
+    
+    @State private var isOrderActive: Bool = true
+
 
     var body: some View {
         NavigationView {
@@ -31,13 +34,24 @@ struct HomeView: View {
                         .padding(.horizontal)
 
                     // Banner
-                    Image("fresh_vegetables_banner")
-                        .resizable()
-                        .scaledToFit()
-                        .cornerRadius(8)
-                        .padding(.horizontal)
-
-                    // Sección Bakery
+                    if isOrderActive {
+                                            OrderStatusView(
+                                                statusMessage: "Tu pedido está en progreso...",
+                                                buttonTitle: "Ya lo recogí",
+                                                imageName: "imageen"
+                                            ) {
+                                                isOrderActive = false
+                                            }
+                                            .cornerRadius(8)                .padding(.horizontal)
+                                        }
+                    else {
+                        Image("fresh_vegetables_banner")
+                            .resizable()
+                            .scaledToFit()
+                            .cornerRadius(8)
+                            .padding(.horizontal)
+                    }
+                    // Sección
                     if !forYouItems.isEmpty {
                         CategorySectionView(title: "For you", items: forYouItems)
                     }
