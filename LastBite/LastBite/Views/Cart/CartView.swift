@@ -68,7 +68,7 @@ struct CartView: View {
                 .padding()
                 .sheet(isPresented: $showCheckout) {
                     NavigationStack {
-                        CheckoutView(cartItems: cartItems)
+                        CheckoutView(cartItems: cartItems, cartId: activeCartId ?? -1)
                             .presentationDetents([.medium, .large]) // Opcional, iOS 16+
                     }
                 }

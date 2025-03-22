@@ -1,33 +1,27 @@
-//
-//  CheckoutView.swift
-//  LastBite
-//
-//  Created by Andrés Romero on 20/03/25.
-//
-
 import SwiftUI
 
 struct CheckoutView: View {
-    // Recibimos los ítems para calcular el costo total
     let cartItems: [CartItem]
-    
-    // Opciones seleccionadas (puedes hacerlas dinámicas si gustas)
+    let cartId: Int
+
+    @EnvironmentObject var signInService: SignInUserService
     @State private var deliveryMethod: String = "In-store Pickup"
     @State private var paymentMethod: String = "PSE"
-    
-    // Controla la presentación de la pantalla de Order Accepted
     @State private var showOrderAccepted = false
-    
+    @State private var createdOrderId: Int? = nil // ✅ To store order ID after creation
+
+    // ✅ Calculate total cost
+    private var totalCost: Double {
+        cartItems.reduce(0) { $0 + ($1.price * Double($1.quantity)) }
+    }
+
     var body: some View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 16) {
-                
-                // Título principal
                 Text("Checkout")
                     .font(.title2)
                     .fontWeight(.semibold)
-                
-                // Delivery
+
                 HStack {
                     Text("Delivery")
                         .font(.subheadline)
@@ -36,10 +30,9 @@ struct CheckoutView: View {
                         .foregroundColor(.gray)
                         .font(.subheadline)
                 }
-                
+
                 Divider()
-                
-                // Payment
+
                 HStack {
                     Text("Payment")
                         .font(.subheadline)
@@ -48,14 +41,9 @@ struct CheckoutView: View {
                         .foregroundColor(.gray)
                         .font(.subheadline)
                 }
-                
+
                 Divider()
-                
-                // Cálculo del total
-                let totalCost = cartItems.reduce(0) { partialResult, item in
-                    partialResult + (item.price * Double(item.quantity))
-                }
-                
+
                 HStack {
                     Text("Total Cost")
                         .fontWeight(.semibold)
@@ -63,18 +51,16 @@ struct CheckoutView: View {
                     Text(String(format: "$%.2f", totalCost))
                         .fontWeight(.bold)
                 }
-                
+
                 Divider()
-                
-                // Términos y condiciones
+
                 Text("By placing an order you agree to our Terms And Conditions")
                     .font(.footnote)
                     .foregroundColor(.gray)
                     .multilineTextAlignment(.leading)
-                
-                // Botón de confirmación
+
                 Button(action: {
-                    showOrderAccepted = true
+                    createOrder(with: cartId)
                 }) {
                     Text("Confirm Checkout")
                         .fontWeight(.bold)
@@ -85,29 +71,64 @@ struct CheckoutView: View {
                         .cornerRadius(8)
                 }
                 .padding(.top, 8)
-                
+
                 Spacer()
             }
             .padding()
             .navigationBarTitleDisplayMode(.inline)
         }
-        // Presentamos OrderAcceptedView en pantalla completa
         .fullScreenCover(isPresented: $showOrderAccepted) {
             OrderAcceptedView()
         }
     }
-}
 
-// MARK: - Vista de previsualización
-/*struct CheckoutView_Previews: PreviewProvider {
-    static var previews: some View {
-        // Ejemplo con algunos ítems de prueba
-        CheckoutView(
-            cartItems: [
-                CartItem(name: "Bell Pepper Red", weight: "1kg", quantity: 1, price: 4.99, imageName: "red_pepper"),
-                CartItem(name: "Organic Bananas", weight: "12kg", quantity: 2, price: 3.00, imageName: "bananas")
-            ]
-        )
+    // ✅ Create order then update it
+    private func createOrder(with cartId: Int) {
+        guard let userId = signInService.userId else {
+            print("❌ User ID not found")
+            return
+        }
+
+        print("🛒 Creating order for cart ID: \(cartId), user ID: \(userId), total: \(totalCost)")
+
+        OrderService.shared.createOrder(cartId: cartId, userId: userId, totalPrice: totalCost) { result in
+            switch result {
+            case .success(let orderId):
+                print("✅ Order placed with ID:", orderId)
+                self.createdOrderId = orderId
+                updateOrder(orderId: orderId)
+                updateCartStatus(cartId: cartId, userId: userId) // ✅ Update cart status after order
+            case .failure(let error):
+                print("❌ Failed to place order:", error.localizedDescription)
+            }
+        }
+    }
+
+    // ✅ Update order after creation
+    private func updateOrder(orderId: Int) {
+        OrderService.shared.updateOrder(orderId: orderId, status: "BILLED", totalPrice: totalCost) { result in
+            switch result {
+            case .success:
+                print("✅ Order updated successfully")
+            case .failure(let error):
+                print("❌ Failed to update order:", error.localizedDescription)
+            }
+        }
+    }
+
+    // ✅ Update cart status to PAYMENT_PROGRESS
+    private func updateCartStatus(cartId: Int, userId: Int) {
+        print("📦 Updating cart \(cartId) status to PAYMENT_PROGRESS")
+        CartService.shared.updateCartStatus(cartId: cartId, status: "BILLED", userId: userId) { result in
+            switch result {
+            case .success:
+                print("✅ Cart status updated")
+                DispatchQueue.main.async {
+                    showOrderAccepted = true
+                }
+            case .failure(let error):
+                print("❌ Failed to update cart status:", error.localizedDescription)
+            }
+        }
     }
 }
-*/
