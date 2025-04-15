@@ -12,16 +12,6 @@ class StoreService {
 
     private init() {} // Prevents accidental initialization
 
-    struct Store: Codable {
-        let store_id: Int
-        let name: String
-        let address: String
-        let latitude: Double
-        let longitude: Double
-        let logo: String
-        let nit: String
-    }
-
     // Fetch Stores from Backend
     func fetchStores(completion: @escaping (Result<[Store], Error>) -> Void) {
         guard let url = URL(string: "\(Constants.baseURL)/stores") else {

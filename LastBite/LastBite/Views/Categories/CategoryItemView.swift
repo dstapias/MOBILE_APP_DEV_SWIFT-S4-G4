@@ -46,7 +46,7 @@ struct CategoryItemView_Previews: PreviewProvider {
                 item: CategoryItemData(
                     title: "Hornitos",
                     imageName: "https://example.com/logo.png",
-                    store: StoreService.Store(
+                    store: Store(
                         store_id: 1,
                         name: "Example Store",
                         address: "123 Street, City",

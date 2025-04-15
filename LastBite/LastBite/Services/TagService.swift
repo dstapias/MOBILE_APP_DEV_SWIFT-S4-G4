@@ -12,12 +12,6 @@ class TagService {
 
     private init() {} // Prevents accidental initialization
 
-    struct Tag: Codable {
-        let product_id: Int
-        let product_tag_id: Int
-        let value: String // ✅ Stores tag value (e.g., "Organic", "Gluten-Free")
-    }
-
     // ✅ Fetch Tags for a Product
     func fetchTags(for productID: Int, completion: @escaping (Result<[Tag], Error>) -> Void) {
         guard let url = URL(string: "\(Constants.baseURL)/tags/product/\(productID)") else {

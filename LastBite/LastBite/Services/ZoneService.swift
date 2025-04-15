@@ -11,16 +11,6 @@ class ZoneService {
 
     private init() {} // Prevents accidental initialization
 
-    struct Zone: Codable {
-        let zone_id: Int
-        let zone_name: String
-    }
-
-    struct Area: Codable {
-        let area_id: Int
-        let area_name: String
-    }
-
     // Fetch Zones from Backend
     func fetchZones(completion: @escaping (Result<[Zone], Error>) -> Void) {
         guard let url = URL(string: "\(Constants.baseURL)/zones") else {

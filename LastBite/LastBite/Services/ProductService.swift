@@ -12,17 +12,6 @@ class ProductService {
 
     private init() {} // Prevents accidental initialization
 
-    struct Product: Codable {
-        let product_id: Int
-        let name: String
-        let detail: String
-        let unit_price: Double // ✅ Matches JSON "unit_price"
-        let image: String
-        let score: Double
-        let store_id: Int
-        let product_type: String // ✅ Matches JSON "product_type"
-    }
-
     // ✅ Fetch Products from Backend for a Store
     func fetchProducts(for storeID: Int, completion: @escaping (Result<[Product], Error>) -> Void) {
         guard let url = URL(string: "\(Constants.baseURL)/products/store/\(storeID)") else {

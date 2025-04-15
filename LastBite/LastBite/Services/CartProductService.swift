@@ -11,21 +11,7 @@ class CartProductService {
     static let shared = CartProductService() // ✅ Singleton instance
 
     private init() {} // Prevents accidental initialization
-
-    struct CartProduct: Codable {
-        let cart_id: Int
-        let product_id: Int
-        let quantity: Int
-    }
     
-    struct DetailedCartProduct: Codable {
-          let product_id: Int
-          let name: String
-          let detail: String
-          let quantity: Int
-          let unit_price: Double
-          let image: String
-      }
     
     func fetchDetailedCartProducts(for cartID: Int, completion: @escaping (Result<[DetailedCartProduct], Error>) -> Void) {
             guard let url = URL(string: "\(Constants.baseURL)/cart_products/cart/\(cartID)/detailed") else {

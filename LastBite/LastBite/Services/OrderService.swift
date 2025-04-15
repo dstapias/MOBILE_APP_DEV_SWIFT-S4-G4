@@ -11,16 +11,6 @@ class OrderService {
 
     private init() {} // Prevents accidental initialization
 
-    struct Order: Codable {
-        let order_id: Int
-        let cart_id: Int
-        let status: String
-        let total_price: Double
-        let user_id: Int
-        let creation_date: String?
-        let billed_date: String?
-        let enabled: Bool?
-    }
 
     // ✅ Create New Order
     func createOrder(cartId: Int, userId: Int, totalPrice: Double, completion: @escaping (Result<Int, Error>) -> Void) {

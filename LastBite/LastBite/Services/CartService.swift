@@ -11,14 +11,6 @@ class CartService {
 
     private init() {} // Prevents accidental initialization
 
-    struct Cart: Codable {
-        let cart_id: Int
-        let creation_date: String
-        let status: String
-        let status_date: String
-        let user_id: Int
-    }
-
     // ✅ Fetch Active Cart for a User
     func fetchActiveCart(for userID: Int, completion: @escaping (Result<Cart, Error>) -> Void) {
         guard let url = URL(string: "\(Constants.baseURL)/carts/user/\(userID)/active") else {
