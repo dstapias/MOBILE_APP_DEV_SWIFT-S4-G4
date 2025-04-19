@@ -14,26 +14,26 @@ struct HomeView: View {
 
     // 2. Inicializador que crea el HomeController inyectando dependencias
     init() {
-        // Crea el HomeController aquí, pasándole las dependencias necesarias.
-        // Asume que SignInUserService.shared y los otros servicios son accesibles.
-        // Si locationManager necesita ser inyectado explícitamente, ajusta el init.
-        let homeController = HomeController(
-            signInService: SignInUserService.shared, // Usa el singleton o inyectado
-            locationManager: LocationManager() // Crea una instancia o pasa la @StateObject
-                                               // Pasar @StateObject directamente es complejo,
-                                               // es más fácil si HomeController crea/recibe LocationManager
-                                               // O si LocationManager es un Singleton/EnvironmentObject
-        )
-        // Alternativa: Si LocationManager es un EnvObj:
-        // init(signInService: SignInUserService, locationManager: LocationManager) {
-        //    _controller = StateObject(wrappedValue: HomeController(signInService: signInService, locationManager: locationManager))
-        // }
-        // Por ahora, asumimos que HomeController puede instanciar/obtener LocationManager si lo necesita
-        // o que el locationManager local es suficiente para pasar datos.
+            // 1. Crea las instancias de AMBOS repositorios concretos
+            let storeRepository = APIStoreRepository()
+            let orderRepository = APIOrderRepository()
 
-        _controller = StateObject(wrappedValue: homeController)
-        print("🏠 HomeView initialized and owns HomeController.")
-    }
+            // (Opcional) Obtener otras dependencias
+            let signInService = SignInUserService.shared
+            let locationManagerInstance = LocationManager() // O usa singleton/inyectado
+
+            // 2. Crea el HomeController pasándole AMBOS repositorios
+            let homeController = HomeController(
+                signInService: signInService,
+                locationManager: locationManagerInstance,
+                storeRepository: storeRepository,   // <- Inyecta Store Repo
+                orderRepository: orderRepository    // <- Inyecta Order Repo
+            )
+
+            // 3. Asigna al StateObject wrapper
+            self._controller = StateObject(wrappedValue: homeController)
+            print("🏠 HomeView initialized and injected Store & Order Repositories into HomeController.")
+        }
 
 
     var body: some View {
@@ -138,16 +138,21 @@ struct HomeView: View {
                         statusMessage: "Pedido #\(order.order_id) en progreso...",
                         buttonTitle: "Ya lo recibí",
                         imageName: "orderClock"
-                    ) {
-                        // 11. Llama al método del controller directamente
-                        controller.receiveOrder(orderId: order.order_id)
+                    ) { // Inicio del closure de acción del botón
+                        // Crea una Task para ejecutar la llamada async
+                        Task {
+                            // Ahora puedes usar 'await' para llamar a la función async
+                            await controller.receiveOrder(orderId: order.order_id)
+                            // El manejo de errores y la actualización de activeOrders
+                            // ya ocurren DENTRO del método receiveOrder del controller.
+                        }
                     }
                     .cornerRadius(8)
                     .padding(.horizontal)
                 }
             } else {
                  // Muestra banner si no hay órdenes y no está cargando
-                if !controller.isLoading { // O usa un isLoadingOrders específico
+                if !controller.isLoading {
                     Image("fresh_vegetables_banner")
                         .resizable()
                         .scaledToFit()

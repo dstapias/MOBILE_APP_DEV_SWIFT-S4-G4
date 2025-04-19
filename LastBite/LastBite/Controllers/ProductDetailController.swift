@@ -8,115 +8,89 @@
 import Foundation
 import Combine
 
+@MainActor // Asegura updates en hilo principal
 class ProductDetailController: ObservableObject {
 
-    // MARK: - Published State
     @Published var quantity: Int = 1
-    @Published var isLoading: Bool = false // Para la acción de añadir al carrito
+    @Published var isLoading: Bool = false
     @Published var successMessage: String? = nil
     @Published var errorMessage: String? = nil
 
-    // MARK: - Properties
     let product: Product // El producto que estamos mostrando
 
-    // MARK: - Dependencies
+    // --- CAMBIO 1: Dependencias -> Usa CartRepository ---
     private let signInService: SignInUserService
-    private let cartService: CartService
-    private let cartProductService: CartProductService
+    private let cartRepository: CartRepository // <- USA CartRepository
+    // Ya no necesita CartService ni CartProductService
     private var cancellables = Set<AnyCancellable>()
 
-    // MARK: - Initialization
+    // --- CAMBIO 2: Init -> Recibe CartRepository ---
     init(
         product: Product,
         signInService: SignInUserService = SignInUserService.shared,
-        cartService: CartService = CartService.shared,
-        cartProductService: CartProductService = CartProductService.shared
+        cartRepository: CartRepository // <- Recibe CartRepository
     ) {
         self.product = product
         self.signInService = signInService
-        self.cartService = cartService
-        self.cartProductService = cartProductService
-        print("📦 ProductDetailController initialized for product: \(product.name) (ID: \(product.id))")
+        self.cartRepository = cartRepository // <- Guarda el repositorio
+        print("📦 ProductDetailController initialized with Repository for product: \(product.name)")
 
-        // Podrías añadir lógica para limitar quantity si el producto tiene stock, etc.
+        // Pipeline para cantidad (sin cambios)
         $quantity
-            .map { max(1, $0) } // Asegura que la cantidad sea al menos 1
+            .map { max(1, $0) }
             .assign(to: &$quantity)
     }
 
-    // MARK: - Actions
-    func addToCart() {
+    // --- CAMBIO 3: Acción AddToCart (Ahora Async usando Repo) ---
+    func addToCart() async { // Marcado como async
         guard let userId = signInService.userId else {
             errorMessage = "Please sign in to add items to your cart."
             successMessage = nil
             print("❌ Cannot add to cart, user not logged in.")
             return
         }
-
         guard !isLoading else { return } // Evita múltiples taps
 
-        print("🛒 Attempting to add \(quantity) x \(product.name) (ID: \(product.id)) to cart for user \(userId)...")
+        print("🛒 Attempting to add \(quantity) x \(product.name) (ID: \(product.id)) to cart via Repository...")
 
         isLoading = true
         errorMessage = nil
         successMessage = nil
 
-        // 1. Obtener Carrito Activo
-        cartService.fetchActiveCart(for: userId) { [weak self] cartResult in
-            guard let self = self else { return }
+        do {
+            // 1. Obtener Carrito Activo (usando repo)
+            // Nota: fetchActiveCart lanzará error si no se encuentra o falla la red
+            let cart = try await cartRepository.fetchActiveCart(for: userId)
 
-            switch cartResult {
-            case .success(let cart):
-                // 2. Añadir Producto al Carrito (o actualizar cantidad)
-                // Nota: La lógica exacta aquí depende de tu backend/servicio.
-                // Esto asume que addProductToCart maneja la lógica de
-                // añadir/actualizar cantidad si el producto ya existe.
-                self.addProductToSpecificCart(cartId: cart.cart_id, productId: self.product.id, quantityToAdd: self.quantity)
+            // 2. Añadir Producto al Carrito (usando repo)
+            // Asume que addProductToCart en el repo/servicio maneja la lógica
+            // de añadir nuevo o actualizar cantidad si ya existe.
+            try await cartRepository.addProductToCart(cartId: cart.id, productId: product.id, quantity: quantity)
 
-            case .failure(let error):
-                 print("❌ Failed to find active cart: \(error.localizedDescription)")
-                 DispatchQueue.main.async {
-                     self.isLoading = false
-                     self.errorMessage = "Could not find your active cart."
+            // Éxito
+            print("✅ Product \(product.id) added/updated in cart \(cart.id) via Repo. Quantity: \(quantity)")
+            successMessage = "\(quantity) x \(product.name) added!"
+             // Limpia el mensaje después de un tiempo
+             Task { // Tarea corta para el delay sin bloquear
+                 try? await Task.sleep(nanoseconds: 2_500_000_000) // Espera 2.5 segundos
+                 // Verifica si el mensaje sigue siendo el mismo antes de limpiarlo
+                 if self.successMessage == "\(quantity) x \(self.product.name) added!" {
+                    self.successMessage = nil
                  }
-            }
+             }
+
+        } catch let error as ServiceError { // Captura errores específicos
+            print("❌ Failed to add product to cart via Repo: \(error.localizedDescription)")
+            // Muestra un mensaje de error más específico si es posible
+            self.errorMessage = "Failed to add item: \(error.localizedDescription)"
+        } catch { // Captura otros errores inesperados
+             print("❌ Unexpected error adding product to cart via Repo: \(error.localizedDescription)")
+             self.errorMessage = "An unexpected error occurred while adding the item."
         }
+
+        // Termina la carga independientemente del resultado
+        isLoading = false
     }
 
-    private func addProductToSpecificCart(cartId: Int, productId: Int, quantityToAdd: Int) {
-        // NOTA IMPORTANTE: Tu servicio `addProductToCart` actual probablemente solo añade 1.
-        // Necesitarás un servicio que añada una CANTIDAD específica o que actualice
-        // la cantidad si el producto ya está. Aquí simulamos llamando al servicio existente
-        // repetidamente o asumiendo que tienes un servicio `updateProductQuantity` o similar.
-        // Por simplicidad, llamaremos al servicio que ya tenías, pero esto puede no ser
-        // lo correcto para añadir MÁS de 1 o actualizar. ¡DEBES AJUSTAR ESTO!
-
-        // *** Inicio de Lógica de Ejemplo (¡AJUSTAR A TU SERVICIO REAL!) ***
-        // Esto es solo un placeholder. Necesitas llamar al servicio correcto.
-        // Si tu servicio solo añade 1, necesitarías llamarlo 'quantityToAdd' veces
-        // o mejor, tener un endpoint/servicio que acepte cantidad.
-        cartProductService.addProductToCart(cartID: cartId, productID: productId) { [weak self] addResult in
-             guard let self = self else { return }
-             DispatchQueue.main.async {
-                 self.isLoading = false // Termina la carga
-                 switch addResult {
-                 case .success:
-                     print("✅ Product \(productId) added/updated in cart \(cartId). Quantity: \(quantityToAdd)")
-                     self.successMessage = "\(quantityToAdd) x \(self.product.name) added!"
-                      // Limpia el mensaje después de un tiempo
-                     DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
-                         if self.successMessage != nil { self.successMessage = nil }
-                     }
-                 case .failure(let error):
-                     print("❌ Failed to add product \(productId) to cart \(cartId): \(error.localizedDescription)")
-                     self.errorMessage = "Failed to add item: \(error.localizedDescription)"
-                 }
-            }
-        }
-         // *** Fin de Lógica de Ejemplo ***
-    }
-
-    // Helper para incrementar/decrementar cantidad (opcional, Stepper lo hace)
-    // func incrementQuantity() { quantity += 1 }
-    // func decrementQuantity() { quantity = max(1, quantity - 1) }
+    // 4. El método privado addProductToSpecificCart ya no es necesario aquí
 }

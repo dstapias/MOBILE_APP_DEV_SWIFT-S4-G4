@@ -19,12 +19,24 @@ struct PhoneNumberView: View {
 
     // 5. Inicializador
     init(showPhoneNumberView: Binding<Bool>, showSignInView: Binding<Bool>, isLoggedIn: Binding<Bool>) {
+        // 1. Crear instancia del Repositorio
+        let authRepository = APIAuthRepository(
+            signInService: .shared, // Asegúrate que el repo reciba los servicios que necesita
+            signupService: .shared
+        )
+
+        // 2. Crear el Controller inyectando el Repositorio
+        let phoneController = PhoneNumberController(authRepository: authRepository)
+
+        // 3. Asignar al StateObject wrapper
+        self._controller = StateObject(wrappedValue: phoneController)
+
+        // Asignar bindings (sin cambios)
         self._showPhoneNumberView = showPhoneNumberView
         self._showSignInView = showSignInView
         self._isLoggedIn = isLoggedIn
-        // Crea el controller (asume que usa el singleton del servicio)
-        self._controller = StateObject(wrappedValue: PhoneNumberController())
-        print("📞 PhoneNumberView initialized.")
+
+        print("📞 PhoneNumberView initialized and injected AuthRepository into Controller.")
     }
 
     var body: some View {

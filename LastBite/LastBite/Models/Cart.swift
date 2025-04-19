@@ -7,10 +7,16 @@
 
 import Foundation
 
-struct Cart: Codable {
+// Añade Identifiable, Equatable
+struct Cart: Codable, Identifiable, Equatable {
+    // Define 'id' para Identifiable
+    var id: Int { cart_id }
+
     let cart_id: Int
-    let creation_date: String
+    let creation_date: String // Considera usar Date si es posible con un DateFormatter
     let status: String
-    let status_date: String
+    let status_date: String // Considera usar Date
     let user_id: Int
+
+    // Swift genera '==' para Equatable automáticamente
 }

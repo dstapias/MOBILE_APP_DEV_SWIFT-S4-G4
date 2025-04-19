@@ -8,10 +8,25 @@ struct ProductView: View {
 
     // Inicializador (sin cambios, asume que funciona como lo configuraste)
     init(store: Store) {
-         // Solución temporal usando Singleton
-         self._controller = StateObject(wrappedValue: ProductController(store: store, signInService: SignInUserService.shared))
-         print("🛒 ProductView initialized for store: \(store.name)")
-    }
+            // 1. Crear instancias de TODOS los repositorios necesarios
+            let productRepository = APIProductRepository()
+            let tagRepository = APITagRepository()
+            let cartRepository = APICartRepository()
+            let signInService = SignInUserService.shared // Obtener servicio
+
+            // 2. Crear el ProductController inyectando TODO
+            let productController = ProductController(
+                store: store,
+                signInService: signInService,
+                productRepository: productRepository, // <- Inyecta Repo Producto
+                tagRepository: tagRepository,         // <- Inyecta Repo Tag
+                cartRepository: cartRepository        // <- Inyecta Repo Carrito
+            )
+
+            // 3. Asignar al StateObject wrapper
+            self._controller = StateObject(wrappedValue: productController)
+            print("🛒 ProductView initialized and injected Repositories into ProductController for store: \(store.name)")
+        }
 
     // --- Cuerpo Principal (Simplificado) ---
     var body: some View {
@@ -86,7 +101,11 @@ struct ProductView: View {
                         ProductCard(
                             product: product,
                             tags: controller.tags[product.product_id] ?? [],
-                            onAddToCart: { controller.addToCart(product: product) }
+                            onAddToCart: {
+                                Task {
+                                    await controller.addToCart(product: product)
+                                }
+                                }
                         )
                     }
                 }

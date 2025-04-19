@@ -6,137 +6,114 @@
 //
 
 import Foundation
-import Combine // Necesario para ObservableObject
+import Combine
 
-// Asumiendo que tienes estos servicios (pueden seguir siendo singletons o inyectados)
-// class OrderService { static let shared = OrderService(); /* ... métodos ... */ }
-// class CartService { static let shared = CartService(); /* ... métodos ... */ }
-// class SignInUserService: ObservableObject { @Published var userId: Int? = 123 }
-
-
+@MainActor
 class CheckoutController: ObservableObject {
 
     // MARK: - Published Properties (Estado para la Vista)
-    @Published var deliveryMethod: String = "In-store Pickup" // Puedes inicializar o configurar luego
-    @Published var paymentMethod: String = "Cash"         // Puedes inicializar o configurar luego
-    @Published var totalCost: Double = 0.0
+    @Published var deliveryMethod: String = "In-store Pickup"
+    @Published var paymentMethod: String = "Cash"
+    @Published var totalCost: Double = 0.0 // Se calcula al inicio
     @Published var showOrderAccepted: Bool = false
     @Published var createdOrderId: Int? = nil
     @Published var isLoading: Bool = false
     @Published var errorMessage: String? = nil
 
-    // MARK: - Dependencies (Inyectadas)
+    // MARK: - Properties (Datos necesarios)
     private let cartItems: [CartItem]
     private let cartId: Int
-    private let signInService: SignInUserService
-    private let orderService: OrderService // Usaremos instancias inyectadas
-    private let cartService: CartService   // Usaremos instancias inyectadas
 
-    // MARK: - Initialization
+    // --- CAMBIO 1: Dependencias -> Repositorios ---
+    private let signInService: SignInUserService
+    private let orderRepository: OrderRepository // <- USA OrderRepository
+    private let cartRepository: CartRepository  // <- USA CartRepository
+    // Ya no necesita OrderService ni CartService directamente
+
+    // --- CAMBIO 2: Init -> Recibe Repositorios ---
     init(
         cartItems: [CartItem],
         cartId: Int,
         signInService: SignInUserService,
-        orderService: OrderService = OrderService.shared, // Puedes usar singletons aquí o pasar instancias específicas
-        cartService: CartService = CartService.shared
+        orderRepository: OrderRepository, // <- Recibe OrderRepository
+        cartRepository: CartRepository   // <- Recibe CartRepository
     ) {
         self.cartItems = cartItems
         self.cartId = cartId
         self.signInService = signInService
-        self.orderService = orderService
-        self.cartService = cartService
-        self.calculateTotalCost() // Calcular al iniciar
-        print("🛒 CheckoutController initialized for cart ID: \(cartId)")
+        self.orderRepository = orderRepository // <- Guarda OrderRepository
+        self.cartRepository = cartRepository   // <- Guarda CartRepository
+        print("🛒 CheckoutController initialized with Repositories for cart ID: \(cartId)")
+        // Calcula costo total al inicio
+        self.calculateTotalCost()
     }
 
-    // MARK: - Private Methods
+    // MARK: - Private Methods (Cálculo - Sin cambios)
     private func calculateTotalCost() {
         self.totalCost = cartItems.reduce(0) { $0 + ($1.price * Double($1.quantity)) }
         print("💰 Total cost calculated: \(self.totalCost)")
     }
 
-    // MARK: - Public Actions (Llamados desde la Vista)
+    // MARK: - Public Actions (Refactorizado a Async)
 
-    /// Inicia el proceso de checkout completo.
-    func confirmCheckout() {
+    /// Inicia y ejecuta todo el proceso de checkout de forma asíncrona.
+    func confirmCheckout() async { // Marcado como async
         print("▶️ Controller: confirmCheckout action initiated")
         guard let userId = signInService.userId else {
-            print("❌ Controller: User ID not found in SignInService")
-            self.errorMessage = "User is not logged in. Please sign in." // Mensaje más descriptivo
+            errorMessage = "User is not logged in. Please sign in."
             return
         }
+        guard !isLoading else { return } // Evita doble ejecución
 
-        // Reiniciar estado de error/carga
-        self.errorMessage = nil
-        self.isLoading = true
-        print("⏳ Controller: Starting checkout process for cart ID: \(cartId), user ID: \(userId), total: \(totalCost)")
+        // Reiniciar estado
+        isLoading = true
+        errorMessage = nil
+        createdOrderId = nil
+        showOrderAccepted = false
+        print("⏳ Controller: Starting checkout process via Repositories...")
 
-        // 1. Crear Pedido
-        orderService.createOrder(cartId: cartId, userId: userId, totalPrice: totalCost) { [weak self] createResult in
-            guard let self = self else { return }
+        do {
+            // --- Llama a los repositorios secuencialmente usando try await ---
+            // 1. Crear Orden (obtiene ID)
+            print("   Attempting to create order...")
+            let newOrderId = try await orderRepository.createOrder(
+                cartId: cartId, userId: userId, totalPrice: totalCost
+            )
+            self.createdOrderId = newOrderId // Guarda el ID por si lo necesitas
+            print("   ✅ Order created with ID: \(newOrderId)")
 
-            switch createResult {
-            case .success(let orderId):
-                print("✅ Controller: Order created with ID \(orderId). Proceeding to update order...")
-                // 2. Actualizar Pedido (si la creación fue exitosa)
-                self.updateOrder(orderId: orderId, userId: userId) // Pasamos userId por si se necesita en updateCartStatus
+            // 2. Actualizar Orden a "BILLED"
+            print("   Attempting to update order status...")
+            try await orderRepository.updateOrder(
+                orderId: newOrderId, status: "BILLED", totalPrice: totalCost
+            )
+            print("   ✅ Order \(newOrderId) updated.")
 
-            case .failure(let error):
-                print("❌ Controller: Failed to create order: \(error.localizedDescription)")
-                DispatchQueue.main.async {
-                    self.isLoading = false
-                    self.errorMessage = "Failed to create order: \(error.localizedDescription)"
-                }
-            }
+            // 3. Actualizar Estado del Carrito a "BILLED"
+            print("   Attempting to update cart status...")
+            // Asegúrate que updateCartStatus en CartRepository/Service no necesite userId si no es parte de la URL/body
+            try await cartRepository.updateCartStatus(
+                cartId: cartId, status: "BILLED", userId: userId
+            )
+            print("   ✅ Cart \(cartId) status updated.")
+
+            // --- Éxito Total ---
+            print("✅ Controller: Checkout complete!")
+            showOrderAccepted = true // Dispara la navegación en la vista
+
+        } catch let error as ServiceError { // Captura errores específicos
+            print("❌ Controller: Checkout failed: \(error.localizedDescription)")
+            errorMessage = "Checkout failed: \(error.localizedDescription)"
+            // Considera si necesitas lógica de rollback aquí si un paso falla después de otro exitoso
+        } catch { // Otros errores
+            print("❌ Controller: Unexpected checkout error: \(error.localizedDescription)")
+            errorMessage = "An unexpected error occurred during checkout."
         }
+
+        // Termina la carga independientemente del resultado
+        isLoading = false
     }
 
-    /// Actualiza el pedido y, si tiene éxito, actualiza el carrito.
-    private func updateOrder(orderId: Int, userId: Int) {
-        print("⏳ Controller: Updating order \(orderId)...")
-        orderService.updateOrder(orderId: orderId, status: "BILLED", totalPrice: totalCost) { [weak self] updateOrderResult in
-            guard let self = self else { return }
-
-            switch updateOrderResult {
-            case .success:
-                print("✅ Controller: Order \(orderId) updated successfully. Proceeding to update cart...")
-                // 3. Actualizar Carrito (si la actualización del pedido fue exitosa)
-                self.updateCartStatus(orderId: orderId, userId: userId) // Pasamos orderId para el final
-
-            case .failure(let error):
-                print("❌ Controller: Failed to update order \(orderId): \(error.localizedDescription)")
-                // Podrías intentar revertir o manejar este error de forma más específica
-                DispatchQueue.main.async {
-                    self.isLoading = false
-                    self.errorMessage = "Failed to update order details: \(error.localizedDescription)"
-                }
-            }
-        }
-    }
-
-    /// Actualiza el estado del carrito. Es el último paso.
-    private func updateCartStatus(orderId: Int, userId: Int) {
-         print("⏳ Controller: Updating cart \(cartId) status...")
-        cartService.updateCartStatus(cartId: cartId, status: "BILLED", userId: userId) { [weak self] updateCartResult in
-            guard let self = self else { return }
-
-            // Asegurarse de actualizar la UI en el hilo principal
-            DispatchQueue.main.async {
-                self.isLoading = false // Termina la carga independientemente del resultado final
-
-                switch updateCartResult {
-                case .success:
-                    print("✅ Controller: Cart \(self.cartId) status updated. Checkout complete!")
-                    self.createdOrderId = orderId
-                    self.showOrderAccepted = true // Dispara la navegación en la vista
-
-                case .failure(let error):
-                    print("❌ Controller: Failed to update cart \(self.cartId) status: \(error.localizedDescription)")
-                    // Error crítico, el pedido se creó/actualizó pero el carrito no.
-                    self.errorMessage = "Checkout partially failed: Could not update cart status. Please contact support. Order ID: \(orderId)"
-                }
-            }
-        }
-    }
+    // 4. Los métodos privados updateOrder y updateCartStatus ya no son necesarios
+    //    porque su lógica está ahora dentro de confirmCheckout.
 }
-

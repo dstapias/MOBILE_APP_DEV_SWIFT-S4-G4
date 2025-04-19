@@ -17,9 +17,14 @@ class SignupController: ObservableObject {
     // acciones de social login fueran asíncronas y pudieran fallar.
 
     // MARK: - Initialization
-    init() {
-        print("👋 SignupController initialized.")
-        // Aquí podrías inyectar servicios si fueran necesarios (ej: para social login)
+    // --- AÑADIR DEPENDENCIA ---
+    private let authRepository: AuthRepository
+    // --- FIN AÑADIR DEPENDENCIA ---
+
+    // --- ACTUALIZAR INIT ---
+    init(authRepository: AuthRepository) { // Recibe el repositorio
+        self.authRepository = authRepository // Guarda el repositorio
+        print("👋 SignupController initialized with Repository.")
     }
 
     // MARK: - Public Actions

@@ -7,228 +7,137 @@
 
 import Foundation
 import Combine
-import CoreLocation // Necesario si pasas el LocationManager
+import CoreLocation
 
-// --- Asumiendo que tienes estos modelos y servicios ---
-// struct Store { let id: Int; let name: String; let logo: String; /* ... */ }
-// struct Order { let order_id: Int; /* ... */ }
-// struct CategoryItemData: Identifiable, Equatable { let id: UUID; let title: String; let imageName: String; let store: Store? } // Necesita ser Equatable para animación
-// struct Order: Identifiable, Equatable { var id: Int { order_id }; let order_id: Int } // Necesita ser Identifiable y Equatable
-
-// class StoreService { static let shared = StoreService(); /* ... métodos fetch ... */ }
-// class OrderService { static let shared = OrderService(); /* ... métodos fetch y receive ... */ }
-// class SignInUserService: ObservableObject { static let shared = SignInUserService(); @Published var userId: Int? }
-// class LocationManager: ObservableObject { @Published var latitude: Double?; @Published var longitude: Double?; @Published var lastLocation: CLLocation? }
-// --- Fin de Asunciones ---
-
-
-// 1. Hacerlo ObservableObject
+@MainActor
 class HomeController: ObservableObject {
 
-    // 2. Publicar el estado que necesita la vista
     @Published var storeItems: [CategoryItemData] = []
     @Published var nearbyStores: [CategoryItemData] = []
     @Published var forYouItems: [CategoryItemData] = []
-    @Published var activeOrders: [Order] = []
-
-    // Estados para UI (carga y errores)
-    @Published var isLoading: Bool = false // Un indicador general o varios específicos
+    @Published var activeOrders: [Order] = [] // <- Los datos vienen del OrderRepository
+    @Published var isLoading: Bool = false
     @Published var errorMessage: String? = nil
 
-    // 3. Dependencias (Inyectadas)
+    // --- CAMBIO 1: Dependencias (Ahora ambos Repos) ---
     private let signInService: SignInUserService
-    private let locationManager: LocationManager // Recibe el manager para observar cambios
-    private let storeService: StoreService
-    private let orderService: OrderService
-    private var cancellables = Set<AnyCancellable>() // Para observar cambios de ubicación
+    private let locationManager: LocationManager
+    private let storeRepository: StoreRepository
+    private let orderRepository: OrderRepository // <- USA OrderRepository
+    private var cancellables = Set<AnyCancellable>()
 
-    // 4. Inicializador para inyectar dependencias
+    // --- CAMBIO 2: Init (Recibe ambos Repos) ---
     init(
         signInService: SignInUserService,
         locationManager: LocationManager,
-        storeService: StoreService = StoreService.shared, // Usar singletons o instancias inyectadas
-        orderService: OrderService = OrderService.shared
+        storeRepository: StoreRepository,
+        orderRepository: OrderRepository // <- Recibe OrderRepository
     ) {
         self.signInService = signInService
         self.locationManager = locationManager
-        self.storeService = storeService
-        self.orderService = orderService
-        print("🏠 HomeController initialized.")
-
-        // 5. Observar cambios de ubicación desde el LocationManager inyectado
+        self.storeRepository = storeRepository
+        self.orderRepository = orderRepository // <- Guarda OrderRepository
+        print("🏠 HomeController initialized with ALL Repositories.")
         subscribeToLocationUpdates()
     }
 
-    // MARK: - Observation Setup
+    // --- Observation Setup (Sin Cambios) ---
     private func subscribeToLocationUpdates() {
+        // ... (código igual que antes, llama a fetchNearbyStores async) ...
         print("🏠 Setting up location observation...")
-
-        // 1. Combina los publicadores de $latitude y $longitude
-        Publishers.CombineLatest(locationManager.$latitude, locationManager.$longitude)
-            // 2. Opcional: Puedes quitar el nil inicial si no quieres reaccionar hasta tener valores
-            // .compactMap { lat, lon -> (Double, Double)? in
-            //     guard let lat = lat, let lon = lon else { return nil }
-            //     return (lat, lon)
-            // }
-            // 3. Aplica debounce si todavía quieres esperar un poco después de que ambos cambien
-            .debounce(for: .seconds(1), scheduler: RunLoop.main) // O ajusta/elimina el debounce
-            .sink { [weak self] (latitude, longitude) in // 4. Recibe la tupla (Double?, Double?)
+        locationManager.$latitude.combineLatest(locationManager.$longitude)
+            .debounce(for: .seconds(1), scheduler: RunLoop.main)
+            .sink { [weak self] (latitude, longitude) in
                 guard let self = self else { return }
-
-                // 5. Asegúrate de que ambos valores no sean nil
                 if let lat = latitude, let lon = longitude {
-                    print("📍 HomeController observed valid location update: Lat: \(lat), Lon: \(lon)")
-                    // 6. Crea el objeto CLLocation
-                    let location = CLLocation(latitude: lat, longitude: lon)
-                    // 7. Llama a tu función de fetch
-                    self.fetchNearbyStores(location: location)
+                     print("📍 HomeController observed valid location update: Lat: \(lat), Lon: \(lon)")
+                     let location = CLLocation(latitude: lat, longitude: lon)
+                     Task { await self.fetchNearbyStores(location: location) }
                 } else {
-                    // Opcional: Manejar el caso donde uno o ambos son nil después del debounce
                      print("📍 HomeController observed location update but lat/lon is nil.")
                 }
             }
-            .store(in: &cancellables) // Guarda la suscripción
+            .store(in: &cancellables)
     }
 
 
     // MARK: - Data Loading Methods
 
-    /// Carga todos los datos iniciales necesarios para la vista.
     func loadInitialData() {
-        print("🏠 Loading initial data...")
-        // Podrías usar un indicador de carga general
-        // DispatchQueue.main.async { self.isLoading = true }
-
-        // Ejecuta todas las cargas iniciales
-        // (Considera usar TaskGroup si quieres paralelizar y manejar errores/carga de forma conjunta)
-        fetchStores()
-        fetchTopStores()
-        fetchNotReceivedOrders()
-
-        // Opcional: Podrías querer esperar a que todas terminen para poner isLoading = false
-    }
-
-    func fetchStores() {
-        // isLoading = true // O un isLoadingStores específico
+        guard !isLoading else { return }
+        print("🏠 Loading initial data via Repositories...")
+        isLoading = true
         errorMessage = nil
-        print("⏳ Fetching stores...")
-        storeService.fetchStores { [weak self] result in
-            guard let self = self else { return }
-            DispatchQueue.main.async {
-                // self.isLoading = false
-                switch result {
-                case .success(let stores):
-                    // Mapeo dentro del controlador
-                    self.storeItems = stores.map {
-                        CategoryItemData(title: $0.name, imageName: $0.logo, store: $0)
-                    }
-                    print("✅ Stores fetched: \(self.storeItems.count)")
-                case .failure(let error):
-                    print("❌ Failed to fetch stores:", error.localizedDescription)
-                    self.errorMessage = "Could not load stores."
-                }
+
+        Task {
+            do {
+                // Ejecuta todo en paralelo
+                async let storesTaskResult = storeRepository.fetchStores()
+                async let topStoresTaskResult = storeRepository.fetchTopStores()
+                async let ordersTaskResult = fetchNotReceivedOrders() // Llama al método del controller
+
+                // Espera resultados
+                let fetchedStores = try await storesTaskResult
+                let fetchedTopStores = try await topStoresTaskResult
+                try await ordersTaskResult // Espera a que termine
+
+                // Actualiza estado (ya estamos en @MainActor)
+                self.storeItems = fetchedStores.map { CategoryItemData(title: $0.name, imageName: $0.logo, store: $0) }
+                self.forYouItems = fetchedTopStores.map { CategoryItemData(title: $0.name, imageName: $0.logo, store: $0) }
+
+                print("✅ Initial data loaded successfully.")
+
+            } catch {
+                print("❌ Failed to load initial data: \(error.localizedDescription)")
+                self.errorMessage = "Failed to load data. Please try again."
             }
+            self.isLoading = false
         }
     }
 
-    func fetchNearbyStores(location: CLLocation) {
-        // isLoading = true // O isLoadingNearby
-        errorMessage = nil
-        let lat = location.coordinate.latitude
-        let lon = location.coordinate.longitude
-        print("⏳ Fetching nearby stores (\(lat), \(lon))...")
-        storeService.fetchNearbyStores(latitude: lat, longitude: lon) { [weak self] result in
-            guard let self = self else { return }
-            DispatchQueue.main.async {
-                // self.isLoading = false
-                switch result {
-                case .success(let stores):
-                    self.nearbyStores = stores.map {
-                        CategoryItemData(title: $0.name, imageName: $0.logo, store: $0)
-                    }
-                     print("✅ Nearby stores fetched: \(self.nearbyStores.count)")
-                case .failure(let error):
-                    print("❌ Failed to fetch nearby stores:", error.localizedDescription)
-                    // Podrías no querer mostrar un error si solo falla la ubicación
-                    // self.errorMessage = "Could not load nearby stores."
-                }
-            }
+    // Métodos de Store (ya usan storeRepository, sin cambios aquí)
+    func fetchNearbyStores(location: CLLocation) async { /* ... usa storeRepository ... */
+        print("⏳ Fetching nearby stores via Repository...")
+        do {
+            let stores = try await storeRepository.fetchNearbyStores(location: location)
+            self.nearbyStores = stores.map { CategoryItemData(title: $0.name, imageName: $0.logo, store: $0) }
+            print("✅ Nearby stores fetched: \(self.nearbyStores.count)")
+        } catch {
+             print("❌ Failed to fetch nearby stores via Repository: \(error.localizedDescription)")
         }
     }
+    private func fetchStores() async throws -> [Store] { try await storeRepository.fetchStores() }
+    private func fetchTopStores() async throws -> [Store] { try await storeRepository.fetchTopStores() }
 
-    func fetchTopStores() {
-        // isLoading = true // O isLoadingForYou
-        errorMessage = nil
-        print("⏳ Fetching top stores...")
-        storeService.fetchTopStores { [weak self] result in
-            guard let self = self else { return }
-            DispatchQueue.main.async {
-                 // self.isLoading = false
-                switch result {
-                case .success(let stores):
-                    self.forYouItems = stores.map {
-                        CategoryItemData(title: $0.name, imageName: $0.logo, store: $0)
-                    }
-                    print("✅ Top stores fetched: \(self.forYouItems.count)")
-                case .failure(let error):
-                    print("❌ Failed to fetch top stores:", error.localizedDescription)
-                    self.errorMessage = "Could not load recommendations."
-                }
-            }
-        }
-    }
 
-    func fetchNotReceivedOrders() {
+    // --- CAMBIO 3: Métodos de Order usan OrderRepository ---
+    // Marcado con throws para que loadInitialData maneje el error
+    func fetchNotReceivedOrders() async throws {
         guard let userId = signInService.userId else {
-            print("ℹ️ Cannot fetch orders, user not logged in.")
             self.activeOrders = [] // Limpia si no hay usuario
-            return
+            print("ℹ️ Cannot fetch orders, user not logged in.")
+            return // No es un error lanzable si no hay usuario
         }
-        // isLoading = true // O isLoadingOrders
-        errorMessage = nil
-        print("⏳ Fetching active orders for user \(userId)...")
-        orderService.fetchNotReceivedOrdersForUser(userId: userId) { [weak self] result in
-             guard let self = self else { return }
-            DispatchQueue.main.async {
-                // self.isLoading = false
-                switch result {
-                case .success(let orders):
-                    self.activeOrders = orders
-                    print("✅ Active orders fetched: \(self.activeOrders.count)")
-                case .failure(let error):
-                    print("❌ Failed to fetch not received orders:", error.localizedDescription)
-                    self.errorMessage = "Could not load active orders."
-                    self.activeOrders = [] // Limpia si falla
-                }
-            }
-        }
+        print("⏳ Fetching active orders via Repository for user \(userId)...")
+        // Llama al repositorio directamente
+        let orders = try await orderRepository.fetchNotReceivedOrders(userId: userId)
+        self.activeOrders = orders // Actualiza la propiedad publicada
+        print("✅ Active orders fetched via Repository: \(self.activeOrders.count)")
     }
 
-    // MARK: - Action Methods
-
-    func receiveOrder(orderId: Int) {
-        // Podrías añadir un estado de carga específico para esta acción si quieres
-        print("📦 Marking order \(orderId) as received...")
-        orderService.receiveOrder(orderId: orderId) { [weak self] result in
-             guard let self = self else { return }
-            DispatchQueue.main.async {
-                switch result {
-                case .success:
-                    print("✅ Order \(orderId) marked as received. Refreshing list...")
-                    // Refresca la lista de órdenes activas en lugar de modificarla localmente
-                    self.fetchNotReceivedOrders()
-                case .failure(let error):
-                    print("❌ Failed to mark order as received:", error.localizedDescription)
-                     self.errorMessage = "Failed to update order status."
-                }
-            }
+    // --- CAMBIO 4: Acción de Order usa OrderRepository ---
+    func receiveOrder(orderId: Int) async {
+        print("📦 Marking order \(orderId) as received via Repository...")
+        self.errorMessage = nil // Limpia errores antes de intentar
+        do {
+            // Llama al repositorio
+            try await orderRepository.markOrderAsReceived(orderId: orderId)
+            print("✅ Order \(orderId) marked as received. Refreshing list...")
+            // Refresca la lista llamando al método async de este controller
+            try await self.fetchNotReceivedOrders()
+        } catch {
+             print("❌ Failed to mark/refresh order as received: \(error.localizedDescription)")
+             self.errorMessage = "Failed to update order status."
         }
     }
-
-    // Opcional: Método para búsqueda (si mueves la lógica aquí)
-    // func searchStores(query: String) { ... }
 }
-
-
-// --- Define tus modelos aquí o impórtalos ---
-// Asegúrate que sean Identifiable y Equatable si los usas con .animation o ForEach directamente

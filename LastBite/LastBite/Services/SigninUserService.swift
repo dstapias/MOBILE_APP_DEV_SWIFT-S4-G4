@@ -8,128 +8,213 @@
 import Foundation
 import FirebaseAuth
 import SwiftUI
+import Combine
 
-// MARK: - Servicio de Autenticación y Usuario
+// Reutilizamos el enum de Error definido antes (o asegúrate que esté accesible)
+// Asegúrate de tener ServiceError.missingCredentials, ServiceError.authenticationError, etc.
+/*
+ enum ServiceError: Error, LocalizedError { ... }
+ */
+
+// Asegúrate que tu modelo User sea Codable, Identifiable, Equatable
+// struct User: Codable, Identifiable, Equatable { let id: Int; let name: String; let email: String; ... }
+
+@MainActor // ✅ Asegura actualizaciones de @Published en hilo principal
 class SignInUserService: ObservableObject {
     static let shared = SignInUserService() // ✅ Singleton
 
+    // --- Estado Persistido ---
     @AppStorage("userEmail") private var storedEmail: String = ""
-    @AppStorage("userId") private var storedUserId: Int = -1 // ✅ Persistente
+    @AppStorage("userId") private var storedUserId: Int = -1 // Usa -1 o 0 como indicador de "no ID"
 
-    @Published var email: String? {
-        didSet {
-            storedEmail = email ?? ""
-        }
-    }
-
-    @Published var userId: Int? {
-        didSet {
-            storedUserId = userId ?? -1
-        }
-    }
-
+    // --- Estado Publicado (la fuente de verdad para la UI) ---
+    // El email y userId se sincronizan con AppStorage
+    @Published var email: String? { didSet { storedEmail = email ?? "" } }
+    @Published var userId: Int? { didSet { storedUserId = userId ?? -1 } }
+    // La contraseña NO se guarda en el servicio después de usarla
     @Published var password: String? = nil
+    // El mensaje de error específico de la última operación fallida
     @Published var errorMessage: String = ""
+    // El objeto User cargado desde el backend
     @Published var user: User? = nil
 
     private init() {
-        // ✅ Restaurar email e ID al iniciar la app
-        if !storedEmail.isEmpty {
-            self.email = storedEmail
-        }
-        if storedUserId != -1 {
-            self.userId = storedUserId
-        }
+        // Restaurar estado desde AppStorage
+        if !storedEmail.isEmpty { self.email = storedEmail }
+        if storedUserId != -1 { self.userId = storedUserId }
 
-        // Intentar cargar el usuario
-        if self.user == nil {
-            fetchUserInfo()
+        // Intentar cargar info del usuario si tenemos email/ID pero no el objeto User
+        if self.user == nil && (self.userId != nil || self.email != nil) {
+             Task {
+                 print("🔑 Initializing SignInUserService - Attempting initial user info fetch...")
+                 // Intenta buscar info. Si falla, no es crítico aquí, solo loggea.
+                 _ = try? await fetchUserInfoAsync() // Llama pero ignora el resultado/error aquí
+             }
+        } else {
+            print("🔑 Initializing SignInUserService - User state: ID=\(String(describing: userId)), Email=\(String(describing: email)), UserObjectPresent=\(user != nil)")
         }
     }
 
-    // MARK: - Iniciar sesión con Firebase
-    func signInUser(completion: @escaping (Result<Void, Error>) -> Void) {
-        guard let email = email, let password = password else {
-            completion(.failure(NSError(domain: "Auth", code: 400, userInfo: [NSLocalizedDescriptionKey: "Email and password cannot be empty."])))
-            return
-        }
+    // MARK: - Async Methods (Aceptan Parámetros)
 
-        Auth.auth().signIn(withEmail: email, password: password) { result, error in
-            if let error = error {
-                self.errorMessage = error.localizedDescription
-                completion(.failure(error))
-            } else {
-                self.fetchUserInfo() // ✅ Cargar info del usuario desde el backend
-                completion(.success(()))
-            }
+    /// Inicia sesión con Firebase y busca info del backend, RECIBIENDO email/password.
+    func signInUserAsync(email: String, password: String) async throws {
+        guard !email.isEmpty, !password.isEmpty else {
+            throw ServiceError.missingCredentials // Lanza error específico
         }
-    }
+        print("🔑 Service: Attempting Firebase sign in for \(email)...")
+        self.errorMessage = "" // Limpia errores previos
 
-    // MARK: - Reset de contraseña
-    func resetPassword(completion: @escaping (Result<String, Error>) -> Void) {
-        guard let email = email, !email.isEmpty else {
-            completion(.failure(NSError(domain: "Auth", code: 400, userInfo: [NSLocalizedDescriptionKey: "Please enter your email to reset the password."])))
-            return
-        }
+        do {
+            // 1. Autentica con Firebase
+            let authResult = try await Auth.auth().signIn(withEmail: email, password: password)
+            print("✅ Service: Firebase sign in successful for user: \(authResult.user.uid)")
 
-        Auth.auth().sendPasswordReset(withEmail: email) { error in
-            if let error = error {
-                completion(.failure(error))
-            } else {
-                completion(.success("Password reset link sent to your email."))
-            }
+            // 2. Si Firebase OK, *actualiza el estado interno* del servicio con el email logueado
+            self.email = email // <-- IMPORTANTE: Guarda el email para fetchUserInfoAsync
+
+            // 3. Busca info del backend (esta función usa self.email)
+            //    Actualizará self.user y self.userId internamente si tiene éxito
+            _ = try await fetchUserInfoAsync() // Lanza error si el fetch falla
+
+            // La función retorna Void implícitamente si todo OK
+
+        } catch let error {
+            print("❌ Service: Sign In failed: \(error.localizedDescription)")
+            self.signOut() // Limpia todo el estado local en caso de fallo
+            throw ServiceError.authenticationError(error) // Lanza un error encapsulado
         }
     }
 
-    // MARK: - Obtener información del usuario desde el backend
-    func fetchUserInfo() {
-        guard let email = email else {
-            print("❌ Email is nil")
-            return
+    /// Envía email de reset, RECIBIENDO el email.
+    func resetPasswordAsync(email: String) async throws {
+        guard !email.isEmpty else {
+             throw ServiceError.missingEmailForPasswordReset
+         }
+        print("🔑 Service: Attempting password reset for \(email)...")
+        self.errorMessage = ""
+
+        do {
+             try await Auth.auth().sendPasswordReset(withEmail: email) // Usa el parámetro email
+             print("✅ Service: Password reset email sent successfully to \(email).")
+         } catch let error {
+             print("❌ Service: Password Reset failed: \(error.localizedDescription)")
+             throw ServiceError.authenticationError(error)
+         }
+    }
+
+    /// Busca info del usuario en el backend usando el email guardado en el servicio.
+    /// Actualiza self.user y self.userId en éxito.
+    @discardableResult // Permite llamar sin usar el valor de retorno
+    func fetchUserInfoAsync() async throws -> User {
+        guard let currentEmail = self.email, !currentEmail.isEmpty else {
+            print("❌ Service: fetchUserInfoAsync Error: Email is nil or empty in service")
+            throw ServiceError.missingEmailForPasswordReset // O un error tipo "not logged in"
         }
 
-        guard let encodedEmail = email.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
+        guard let encodedEmail = currentEmail.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
               let url = URL(string: "\(Constants.baseURL)/users/email?email=\(encodedEmail)") else {
-            print("❌ Invalid URL")
-            return
+            throw ServiceError.invalidURL
         }
 
-        URLSession.shared.dataTask(with: url) { data, response, error in
-            if let error = error {
-                print("❌ Error fetching user info: \(error.localizedDescription)")
-                return
-            }
+        print("🌐 Service: Fetching user info from \(url)...")
+        let (data, response) = try await URLSession.shared.data(from: url)
 
-            guard let data = data else {
-                print("❌ No data received")
-                return
-            }
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+             print("❌ Service: fetchUserInfoAsync Error: Bad server response. Status: \((response as? HTTPURLResponse)?.statusCode ?? -1)")
+            throw ServiceError.badServerResponse(statusCode: (response as? HTTPURLResponse)?.statusCode ?? -1)
+        }
 
-            do {
-                let fetchedUser = try JSONDecoder().decode(User.self, from: data)
-                DispatchQueue.main.async {
-                    self.user = fetchedUser
-                    self.userId = fetchedUser.id // ✅ Guardar el ID del usuario
-                    print("✅ User info fetched: \(fetchedUser.name), ID: \(fetchedUser.id)")
-                }
-            } catch {
-                print("❌ Failed to decode user:", error.localizedDescription)
-            }
-        }.resume()
+        do {
+            let decoder = JSONDecoder()
+            // decoder.keyDecodingStrategy = .convertFromSnakeCase // Si aplica
+            let fetchedUser = try decoder.decode(User.self, from: data)
+
+            // --- Actualiza el estado del servicio ---
+            self.user = fetchedUser
+            self.userId = fetchedUser.id // Asume que User tiene id
+            self.email = fetchedUser.email // Asegura consistencia del email guardado
+             // No limpiamos errorMessage aquí, podría haber uno de una acción anterior
+            print("✅ Service: User info fetched and updated: \(fetchedUser.name), ID: \(fetchedUser.id)")
+            return fetchedUser // Devuelve el usuario
+
+        } catch {
+             print("❌ Service: fetchUserInfoAsync Error: Failed to decode user: \(error.localizedDescription)")
+             // Limpia estado si no se pudo decodificar el usuario esperado
+             self.user = nil
+             self.userId = nil
+            throw ServiceError.decodingError(error)
+        }
     }
 
-    // MARK: - Cerrar sesión
+    // MARK: - Cerrar sesión (Sigue Síncrona)
     func signOut() {
+        print("🔑 Service: Signing out...")
         do {
             try Auth.auth().signOut()
-            email = nil
-            password = nil
-            user = nil
-            userId = nil
-            storedEmail = ""
-            storedUserId = -1
-        } catch {
-            errorMessage = "Failed to sign out: \(error.localizedDescription)"
+            // Limpia todo el estado publicado y persistido
+            self.email = nil
+            self.password = nil // Limpia la contraseña temporal si estaba
+            self.user = nil
+            self.userId = nil // Esto actualizará AppStorage a -1
+            self.errorMessage = "" // Limpia errores
+             print("✅ Service: Sign out successful.")
+        } catch let error {
+            print("❌ Service: Sign out failed: \(error.localizedDescription)")
+            // Establece el mensaje de error
+            self.errorMessage = "Failed to sign out: \(error.localizedDescription)"
         }
     }
+
+    // MARK: - Original Methods (Adaptados para llamar a Async o eliminar)
+
+    func signInUser(completion: @escaping (Result<Void, Error>) -> Void) {
+         // Obtiene email/password de las propiedades @Published (si aún los necesitas aquí)
+         // Es MEJOR que el Controller pase los datos al método async directamente.
+         guard let email = self.email, let password = self.password else {
+             completion(.failure(ServiceError.missingCredentials)); return
+         }
+         Task {
+             do {
+                 try await signInUserAsync(email: email, password: password) // Llama al async con los datos
+                 completion(.success(()))
+             } catch {
+                 completion(.failure(error))
+             }
+         }
+     }
+
+     func resetPassword(completion: @escaping (Result<String, Error>) -> Void) {
+          guard let email = self.email else {
+              completion(.failure(ServiceError.missingEmailForPasswordReset)); return
+          }
+          Task {
+             do {
+                 try await resetPasswordAsync(email: email) // Llama al async
+                 completion(.success("Password reset link sent to your email."))
+             } catch {
+                 completion(.failure(error))
+             }
+         }
+     }
+
+     // El fetchUserInfo original era fire-and-forget, no necesita wrapper público con completion.
+     // Si alguna parte MUY vieja lo necesita, puedes hacer:
+     /*
+     func fetchUserInfoOld(completion: @escaping (Result<User, Error>) -> Void) {
+         Task {
+             do {
+                 let user = try await fetchUserInfoAsync()
+                 completion(.success(user))
+             } catch {
+                 completion(.failure(error))
+             }
+         }
+     }
+     */
 }
+
+// --- Asegúrate que ServiceError y User estén definidos ---
+// enum ServiceError: Error, LocalizedError { ... }
+// struct User: Codable, Identifiable, Equatable { ... }
+// class Constants { static let baseURL = "..." }

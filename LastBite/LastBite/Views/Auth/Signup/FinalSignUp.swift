@@ -18,12 +18,23 @@ struct FinalSignUpView: View {
     // 4. Estados locales de carga/error/navegación ELIMINADOS
 
     // 5. Inicializador
-    init(showFinalSignUpView: Binding<Bool>, isLoggedIn: Binding<Bool>) {
+    init(showFinalSignUpView: Binding<Bool>, isLoggedIn: Binding<Bool>) { // Mantiene sus bindings
         self._showFinalSignUpView = showFinalSignUpView
-        self._isLoggedIn = isLoggedIn // Asegúrate de que este binding se use o elimine si no es necesario aquí
-        // Crea el controller (asume que usa el singleton del servicio)
-        self._controller = StateObject(wrappedValue: FinalSignupController())
-        print("✅ FinalSignUpView initialized.")
+        self._isLoggedIn = isLoggedIn
+
+        // 1. Crear instancia del Repositorio
+        let authRepository = APIAuthRepository(
+            signInService: .shared, // APIAuthRepository necesita ambos servicios
+            signupService: .shared
+        )
+
+        // 2. Crear el Controller inyectando el Repositorio
+        //    (No necesita pasar signupStateService explícitamente si el controller usa el singleton)
+        let finalController = FinalSignupController(authRepository: authRepository)
+
+        // 3. Asignar al StateObject wrapper
+        self._controller = StateObject(wrappedValue: finalController)
+        print("✅ FinalSignUpView initialized and injected AuthRepository into Controller.")
     }
 
     var body: some View {

@@ -8,185 +8,179 @@
 import Foundation
 import Combine
 
+@MainActor // Asegura updates en hilo principal
 class ProductController: ObservableObject {
 
     // MARK: - Published State
-    @Published var products: [Product] = [] // Lista original de productos
-    @Published var tags: [Int: [Tag]] = [:] // Diccionario de tags por product_id
-    @Published var filteredProducts: [Product] = [] // Lista filtrada para la UI
-    @Published var searchText: String = "" // Texto de búsqueda bindeado a la UI
+    @Published var products: [Product] = [] // Lista original (fuente para el filtro)
+    @Published var tags: [Int: [Tag]] = [:] // Diccionario de tags por product.id
+    @Published var filteredProducts: [Product] = [] // Lista que muestra la UI
+    @Published var searchText: String = "" // Para el TextField
 
     @Published var isLoading: Bool = false
     @Published var errorMessage: String? = nil
-    @Published var successMessage: String? = nil // ej: "Added to cart!"
+    @Published var successMessage: String? = nil // Para "Added to cart!"
 
-    // MARK: - Dependencies
-    let store: Store // Necesitamos saber para qué tienda buscar productos
+    // MARK: - Dependencies (Ahora Repositorios)
+    let store: Store // La tienda actual
     private let signInService: SignInUserService
-    private let productService: ProductService
-    private let tagService: TagService
-    private let cartService: CartService
-    private let cartProductService: CartProductService
+    private let productRepository: ProductRepository // <- Usa Repo
+    private let tagRepository: TagRepository       // <- Usa Repo
+    private let cartRepository: CartRepository     // <- Usa Repo
     private var cancellables = Set<AnyCancellable>()
 
-    // MARK: - Initialization
+    // MARK: - Initialization (Recibe Repositorios)
     init(
         store: Store,
         signInService: SignInUserService,
-        productService: ProductService = ProductService.shared,
-        tagService: TagService = TagService.shared,
-        cartService: CartService = CartService.shared,
-        cartProductService: CartProductService = CartProductService.shared
+        productRepository: ProductRepository, // <- Inyecta Repo
+        tagRepository: TagRepository,       // <- Inyecta Repo
+        cartRepository: CartRepository      // <- Inyecta Repo
     ) {
         self.store = store
         self.signInService = signInService
-        self.productService = productService
-        self.tagService = tagService
-        self.cartService = cartService
-        self.cartProductService = cartProductService
-        print("🛒 ProductController initialized for store: \(store.name)")
-
-        // Configurar la reacción a los cambios de búsqueda y productos
-        setupFiltering()
+        self.productRepository = productRepository
+        self.tagRepository = tagRepository
+        self.cartRepository = cartRepository
+        print("📦 ProductController initialized with Repositories for store: \(store.name)")
+        setupFiltering() // Configura el filtro reactivo
     }
 
-    // MARK: - Filtering Logic
+    // MARK: - Filtering Logic (Sin Cambios Internos)
+    // Sigue funcionando con las propiedades @Published locales
     private func setupFiltering() {
-        // Combina los cambios en el texto de búsqueda y la lista de productos
         Publishers.CombineLatest($searchText, $products)
-            .debounce(for: .milliseconds(300), scheduler: RunLoop.main) // Pequeña espera
+            .debounce(for: .milliseconds(300), scheduler: RunLoop.main)
             .map { searchText, products in
-                // Aplica el filtro
                 if searchText.isEmpty {
-                    return products // Sin búsqueda, muestra todos
+                    return products
                 } else {
                     return products.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
                 }
             }
-            .assign(to: &$filteredProducts) // Asigna el resultado a la lista publicada filtrada
+            .assign(to: &$filteredProducts)
     }
 
+    // MARK: - Data Loading (Async con Repos y TaskGroup)
 
-    // MARK: - Data Loading
+    /// Carga productos y luego sus tags en paralelo.
     func loadProductsAndTags() {
-        guard !isLoading else { return } // Prevenir cargas múltiples simultáneas
-        print("⏳ Loading products and tags for store ID: \(store.store_id)...")
-        DispatchQueue.main.async {
-            self.isLoading = true
-            self.errorMessage = nil
-            self.successMessage = nil
-        }
+        // Evita recargar si ya está cargando
+        guard !isLoading else { return }
+        print("⏳ Loading products and tags via Repositories for store ID: \(store.store_id)...")
+        isLoading = true
+        errorMessage = nil
+        successMessage = nil
 
-        productService.fetchProducts(for: store.store_id) { [weak self] result in
-            guard let self = self else { return }
-            DispatchQueue.main.async {
-                // La carga principal de productos terminó (aunque falten tags)
-                // Podríamos poner isLoading = false aquí o esperar a los tags
+        Task { // Lanza la tarea principal async
+            do {
+                // 1. Obtener Productos
+                print("   Fetching products...")
+                let fetchedProducts = try await productRepository.fetchProducts(for: store.store_id)
+                self.products = fetchedProducts // Actualiza la lista original (dispara filtro)
+                print("   ✅ Fetched \(fetchedProducts.count) products.")
 
-                switch result {
-                case .success(let fetchedProducts):
-                    print("✅ Fetched \(fetchedProducts.count) products.")
-                    self.products = fetchedProducts // Actualiza la lista original (dispara el filtro)
-                    // Ahora busca los tags para cada producto
-                    self.fetchAllTags(for: fetchedProducts)
-
-                case .failure(let error):
-                    print("❌ Failed to fetch products:", error.localizedDescription)
-                    self.errorMessage = "Could not load products."
-                    self.isLoading = false // Termina la carga si falla aquí
+                // 2. Obtener Tags para los productos obtenidos (en paralelo)
+                if !fetchedProducts.isEmpty {
+                    print("   Fetching tags for \(fetchedProducts.count) products...")
+                    // Usa TaskGroup para lanzar llamadas concurrentes para los tags
+                    var fetchedTagsDict: [Int: [Tag]] = [:]
+                    try await withThrowingTaskGroup(of: (Int, [Tag]).self) { group in
+                        for product in fetchedProducts {
+                            // Añade una tarea al grupo por cada producto
+                            group.addTask {
+                                print("      Fetching tags for product \(product.id)...")
+                                // Llama al repo de tags
+                                let tags = try await self.tagRepository.fetchTags(for: product.id)
+                                // Devuelve el ID del producto y sus tags
+                                return (product.id, tags)
+                            }
+                        }
+                        // Recolecta los resultados de cada tarea a medida que terminan
+                        for try await (productId, tags) in group {
+                            fetchedTagsDict[productId] = tags
+                        }
+                    } // El TaskGroup maneja errores automaticamente (si uno falla, lanza)
+                    self.tags = fetchedTagsDict // Actualiza el diccionario de tags
+                    print("   ✅ Fetched tags completed.")
+                } else {
+                    self.tags = [:] // Limpia tags si no hay productos
                 }
+
+                print("✅ Products and Tags loaded successfully.")
+
+            } catch let error as ServiceError {
+                print("❌ Failed to load products/tags: \(error.localizedDescription)")
+                self.errorMessage = error.localizedDescription
+                 self.products = [] // Limpia en caso de error
+                 self.tags = [:]
+            } catch {
+                print("❌ Unexpected error loading products/tags: \(error.localizedDescription)")
+                self.errorMessage = "Failed to load products."
+                 self.products = []
+                 self.tags = [:]
             }
+            // Termina la carga general
+            self.isLoading = false
         }
     }
 
-    private func fetchAllTags(for productsToFetch: [Product]) {
-        // Si no hay productos, termina la carga
-        if productsToFetch.isEmpty {
-             DispatchQueue.main.async { self.isLoading = false }
-             return
-        }
+    // Ya no necesitamos fetchAllTags como función separada gracias a TaskGroup
 
-        let group = DispatchGroup() // Para saber cuándo terminan todas las llamadas de tags
+    // MARK: - Actions (Async con Repositorio)
 
-        for product in productsToFetch {
-            group.enter() // Entra al grupo antes de iniciar la llamada
-            tagService.fetchTags(for: product.product_id) { [weak self] result in
-                guard let self = self else { group.leave(); return } // Asegúrate de salir del grupo
-                DispatchQueue.main.async {
-                    switch result {
-                    case .success(let fetchedTags):
-                        self.tags[product.product_id] = fetchedTags // Actualiza el diccionario de tags
-                    case .failure(let error):
-                        // Podrías decidir mostrar un error o simplemente omitir los tags para ese producto
-                        print("⚠️ Failed to fetch tags for product \(product.product_id):", error.localizedDescription)
-                        self.tags[product.product_id] = [] // Poner vacío si falla?
-                    }
-                    group.leave() // Sale del grupo al completar la llamada (éxito o fallo)
-                }
-            }
-        }
-
-        // Notifica cuando todas las llamadas de tags hayan terminado
-        group.notify(queue: .main) { [weak self] in
-            print("✅ All tag fetches completed.")
-            self?.isLoading = false // Termina la carga general aquí
-        }
-    }
-
-
-    // MARK: - Actions
-    func addToCart(product: Product) {
+    /// Añade un producto al carrito usando CartRepository.
+    func addToCart(product: Product) async { // La función es async
         guard let userId = signInService.userId else {
-            print("❌ Cannot add to cart, user not logged in.")
-            self.errorMessage = "Please sign in first."
-            self.successMessage = nil
+            errorMessage = "Please sign in first."
+            successMessage = nil
             return
         }
+        // Puedes añadir un estado isLoading específico para esta acción si quieres
+        // pero por simplicidad usaremos el general por ahora.
+        guard !isLoading else { return } // Evita si ya hay otra carga en curso
 
-        // Opcional: Indicar carga específica para esta acción
-        print("⏳ Adding product \(product.product_id) to cart for user \(userId)...")
-        self.errorMessage = nil
-        self.successMessage = nil
+        print("🛒 Adding product \(product.id) to cart via Repository...")
+        // isLoading = true // Podrías activar aquí si no usaras el flag general
+        errorMessage = nil
+        successMessage = nil
 
+        do {
+            // 1. Obtener carrito activo (usando repo)
+            let cart = try await cartRepository.fetchActiveCart(for: userId)
 
-        // 1. Obtener carrito activo
-        cartService.fetchActiveCart(for: userId) { [weak self] cartResult in
-            guard let self = self else { return }
+            // 2. Añadir producto con cantidad 1 (usando repo)
+            //    (Asume que tu repo/servicio maneja la lógica de añadir/actualizar)
+            try await cartRepository.addProductToCart(cartId: cart.id, productId: product.id, quantity: 1)
 
-            switch cartResult {
-            case .success(let cart):
-                // 2. Añadir producto al carrito obtenido
-                self.addProductToSpecificCart(cartId: cart.cart_id, productId: product.product_id)
-
-            case .failure(let error):
-                print("❌ Failed to find active cart:", error.localizedDescription)
-                DispatchQueue.main.async {
-                    self.errorMessage = "Could not find your cart to add the item."
-                }
+            // Éxito
+            print("✅ Product \(product.id) added to cart \(cart.id) via Repo.")
+            successMessage = "\(product.name) added to cart!"
+            // Limpia mensaje después de un tiempo
+            Task {
+                 try? await Task.sleep(nanoseconds: 2_000_000_000) // 2 segundos
+                 if self.successMessage != nil { self.successMessage = nil }
             }
+        } catch let error as ServiceError {
+             print("❌ Failed to add product \(product.id) to cart: \(error.localizedDescription)")
+             errorMessage = "Failed to add item: \(error.localizedDescription)"
+        } catch {
+            print("❌ Unexpected error adding product \(product.id) to cart: \(error.localizedDescription)")
+            errorMessage = "Could not add item to cart."
         }
+        // isLoading = false // Desactiva si usaste un flag específico
     }
 
-    private func addProductToSpecificCart(cartId: Int, productId: Int) {
-         cartProductService.addProductToCart(cartID: cartId, productID: productId) { [weak self] addResult in
-             guard let self = self else { return }
-             DispatchQueue.main.async {
-                switch addResult {
-                case .success:
-                    print("✅ Product \(productId) added to cart \(cartId).")
-                    self.successMessage = "Item added to cart!"
-                    // Limpia el mensaje de éxito después de un tiempo
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                        if self.successMessage == "Item added to cart!" { // Solo si no ha cambiado
-                           self.successMessage = nil
-                        }
-                    }
-                case .failure(let error):
-                    print("❌ Failed to add product \(productId) to cart \(cartId):", error.localizedDescription)
-                    // Podría ser un error de duplicado, conexión, etc.
-                    self.errorMessage = "Failed to add item: \(error.localizedDescription)"
-                 }
-            }
-        }
-    }
+    // addProductToSpecificCart ya no es necesario, la lógica está en addToCart
 }
+
+// --- Asegúrate que existan ---
+// protocol ProductRepository { ... }
+// class APIProductRepository: ProductRepository { ... }
+// protocol TagRepository { ... }
+// class APITagRepository: TagRepository { ... }
+// protocol CartRepository { func fetchActiveCart... func addProductToCart... }
+// class APICartRepository: CartRepository { ... }
+// struct Product, Tag, Cart, CartItem, CategoryItemData, Store (Identifiable, Equatable, Codable)
+// class SignInUserService: ObservableObject { ... }
+// enum ServiceError: Error, LocalizedError { ... }

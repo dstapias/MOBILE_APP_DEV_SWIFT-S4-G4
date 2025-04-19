@@ -6,13 +6,29 @@ struct SignupView: View {
     @Binding var showSignInView: Bool
     @Binding var isLoggedIn: Bool
 
-    // 1. StateObject para el nuevo Controller
-    @StateObject private var controller = SignupController()
+    @StateObject private var controller: SignupController
 
-    // 2. El estado local para navegación se elimina
-    // @State private var showPhoneNumberView = false // ELIMINADO
+        // --- INICIALIZADOR CORREGIDO ---
+        init(showSignupView: Binding<Bool>, showSignInView: Binding<Bool>, isLoggedIn: Binding<Bool>) {
+            // Asigna los bindings (sin cambios)
+            self._showSignupView = showSignupView
+            self._showSignInView = showSignInView
+            self._isLoggedIn = isLoggedIn
 
-    // El inicializador por defecto está bien si SignupController no necesita parámetros.
+            // 1. Crea la instancia del Repositorio pasándole los servicios
+            let authRepository = APIAuthRepository(
+                signInService: SignInUserService.shared,
+                signupService: SignupUserService.shared
+            )
+
+            // 2. Crea el Controller CORRECTO (SignupController) inyectando el Repositorio
+            //    Asegúrate que SignupController tenga init(authRepository: AuthRepository)
+            let signupController = SignupController(authRepository: authRepository)
+
+            // 3. Asigna al StateObject wrapper
+            self._controller = StateObject(wrappedValue: signupController)
+            print("👋 SignupView initialized and injected AuthRepository into Controller.")
+        }
 
     var body: some View {
         GeometryReader { geometry in
@@ -116,14 +132,4 @@ struct SignupView: View {
     }
 } // Fin struct SignupView
 
-// --- Preview ---
-struct SignupView_Previews: PreviewProvider {
-    static var previews: some View {
-        SignupView(
-            showSignupView: .constant(true),
-            showSignInView: .constant(false),
-            isLoggedIn: .constant(false)
-        )
-        // No necesita EnvironmentObject por ahora, ya que el controller no usa servicios compartidos (aún)
-    }
-}
+

@@ -7,152 +7,232 @@
 
 import Foundation
 import FirebaseAuth
+import SwiftUI // Para ObservableObject
+import Combine // Para ObservableObject
 
+// Asegúrate que ServiceError y Constants estén definidos y accesibles
+// enum ServiceError: Error, LocalizedError { ... }
+// struct Constants { static let baseURL = "..." }
+
+@MainActor
 class SignupUserService: ObservableObject {
-    static let shared = SignupUserService() // ✅ Singleton instance
+    static let shared = SignupUserService()
 
+    // --- Estado Publicado (se actualiza DESDE los controllers o por el flujo) ---
+    // Los controllers son responsables de mantener la información del flujo actual.
+    // El servicio puede guardar el estado FINAL si es necesario, pero no debería
+    // ser la fuente principal durante el flujo multi-paso.
+    // Mantenemos algunos para compatibilidad con el diseño anterior, pero considera
+    // si el AuthRepository o los controllers deberían manejar esto más directamente.
     @Published var name: String = ""
     @Published var email: String = ""
-    @Published var phoneNumber: String = ""
+    @Published var phoneNumber: String = "" // Guardará el número usado para enviar/verificar código
     @Published var selectedAreaId: Int?
-    @Published var verificationCode: String = ""
-    @Published var userType: String = ""
-    @Published var password: String = ""
+    @Published var verificationCode: String = "" // Código SMS ingresado por el usuario
+    @Published var userType: String = Constants.USER_TYPE_CUSTOMER
+    @Published var password: String = "" // Contraseña ingresada
 
-    private let baseURL = Constants.baseURL // ✅ Use centralized backend URL
+    private let baseURL = Constants.baseURL
+    private init() {
+        print("👤 SignupUserService initialized.")
+    }
 
-    private init() {}
+    // MARK: - Async Methods (Aceptan Parámetros)
 
-    // ✅ Function to handle Backend Registration first, then Firebase Authentication
-    func registerUser(completion: @escaping (Result<String, Error>) -> Void) {
-        guard let areaId = selectedAreaId else {
-            completion(.failure(NSError(domain: "UserService", code: 400, userInfo: [NSLocalizedDescriptionKey: "Area ID is missing"])))
-            return
+    /// Registra usuario en backend y Firebase, RECIBIENDO todos los datos.
+    func registerUserAsync(
+        name: String, email: String, password: String, phoneNumber: String,
+        areaId: Int, userType: String, verificationCode: String // Opcional: ¿necesitas el código aquí?
+    ) async throws {
+        print("👤 Service: Registering user async...")
+
+        // Guarda el estado si necesitas mantenerlo en el servicio
+        self.name = name
+        self.email = email
+        // self.password = password // ¿Realmente necesitas guardar la contraseña aquí?
+        self.phoneNumber = phoneNumber
+        self.selectedAreaId = areaId
+        self.userType = userType
+        // self.verificationCode = verificationCode
+
+        // 1. Llama al backend
+        try await registerUserInBackendAsync(
+            name: name, email: email, phoneNumber: phoneNumber,
+            areaId: areaId, userType: userType, verificationCode: verificationCode
+        )
+        print("✅ Service: Backend registration successful.")
+
+        // 2. Llama a Firebase Auth
+        try await registerUserInFirebaseAsync(email: email, password: password)
+        print("✅ Service: Firebase registration successful.")
+        // Retorna Void en éxito
+    }
+
+    /// Envía código SMS, RECIBIENDO el número.
+    func sendVerificationCodeAsync(phoneNumber: String) async throws {
+        guard !phoneNumber.isEmpty else { throw ServiceError.missingPhoneNumber }
+        print("👤 Service: Sending verification code async to \(phoneNumber)...")
+
+        // Guarda el número formateado en el servicio para referencia futura si es necesario
+        self.phoneNumber = phoneNumber
+
+        let verificationID: String = try await withCheckedThrowingContinuation { continuation in
+            PhoneAuthProvider.provider().verifyPhoneNumber(phoneNumber, uiDelegate: nil) { verificationID, error in
+                if let error = error {
+                    print("❌ Service: Firebase Error sending code: \(error.localizedDescription)")
+                    continuation.resume(throwing: ServiceError.authenticationError(error))
+                } else if let verificationID = verificationID {
+                    print("✅ Service: Verification ID obtained: \(verificationID)")
+                    continuation.resume(returning: verificationID)
+                } else {
+                    print("❌ Service: Unknown error obtaining verification ID.")
+                    continuation.resume(throwing: ServiceError.authenticationError(NSError(domain: "Auth", code: -1, userInfo: [NSLocalizedDescriptionKey: "Unknown error sending verification code."])))
+                }
+            }
         }
 
-        // ✅ First, Send Data to Backend
-        let userPayload: [String: Any] = [
-            "name": self.name,
-            "user_email": self.email,
-            "mobile_number": self.phoneNumber,
-            "area_id": areaId, // ✅ Use `areaId` from `guard let`
-            "verification_code": self.verificationCode,
-            "user_type": self.userType,
-        ]
+        // Guarda el ID de verificación para usarlo después
+        UserDefaults.standard.set(verificationID, forKey: "verificationID_async")
+        print("✅ Service: Verification ID saved to UserDefaults.")
+    }
 
-        guard let url = URL(string: "\(self.baseURL)/users") else {
-            completion(.failure(NSError(domain: "Invalid URL", code: 0, userInfo: nil)))
-            return
+    /// Verifica código SMS, RECIBIENDO el código.
+    func verifyCodeAsync(code: String) async throws {
+        guard let verificationID = UserDefaults.standard.string(forKey: "verificationID_async") else {
+             print("❌ Service: Verification ID not found in UserDefaults.")
+            throw ServiceError.missingVerificationId
+        }
+        guard !code.isEmpty else {
+            print("❌ Service: Verification code is empty.")
+            throw ServiceError.missingCredentials
         }
 
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
+        print("👤 Service: Verifying code \(code) with ID \(verificationID)...")
+        // Guarda el código verificado en el servicio si es necesario
+        self.verificationCode = code
+
+        let credential = PhoneAuthProvider.provider().credential(
+            withVerificationID: verificationID,
+            verificationCode: code // Usa el parámetro code
+        )
         do {
-            request.httpBody = try JSONSerialization.data(withJSONObject: userPayload, options: [])
-        } catch {
-            completion(.failure(error))
-            return
-        }
-
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                completion(.failure(error))
-                return
-            }
-
-            guard let httpResponse = response as? HTTPURLResponse else {
-                completion(.failure(NSError(domain: "HTTP Error", code: 500, userInfo: [NSLocalizedDescriptionKey: "No response from server"])))
-                return
-            }
-
-            switch httpResponse.statusCode {
-            case 200...299:
-                print("✅ Backend registration successful! Proceeding to Firebase signup...")
-                
-                // ✅ Now, Create User in Firebase
-                self.registerUserInFirebase { firebaseResult in
-                    switch firebaseResult {
-                    case .success:
-                        completion(.success("User registered successfully in backend and Firebase!"))
-                    case .failure(let firebaseError):
-                        completion(.failure(firebaseError)) // ✅ If Firebase fails, return the error
-                    }
-                }
-
-            default:
-                completion(.failure(NSError(domain: "HTTP Error", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: "Backend error: \(httpResponse.statusCode)"])))
-            }
-        }.resume()
-    }
-
-    // ✅ Function to register user in Firebase AFTER backend registration
-    private func registerUserInFirebase(completion: @escaping (Result<Void, Error>) -> Void) {
-        Auth.auth().createUser(withEmail: email, password: password) { result, error in
-            if let error = error {
-                print("❌ Firebase signup failed:", error.localizedDescription)
-                completion(.failure(error))
-                return
-            }
-
-            print("✅ Firebase user created successfully!")
-            completion(.success(()))
+            let authResult = try await Auth.auth().signIn(with: credential)
+            print("✅ Service: Phone authentication successful! User UID: \(authResult.user.uid)")
+            UserDefaults.standard.removeObject(forKey: "verificationID_async")
+            // Aquí podrías querer autenticar al usuario en tu backend también
+            // o simplemente proceder, dependiendo de tu flujo.
+        } catch let error {
+            print("❌ Service: Phone sign in failed: \(error.localizedDescription)")
+            throw ServiceError.authenticationError(error)
         }
     }
+
+    // MARK: - Private Async Helpers
+
+    private func registerUserInBackendAsync(name: String, email: String, phoneNumber: String, areaId: Int, userType: String, verificationCode: String) async throws {
+         guard let url = URL(string: "\(self.baseURL)/users") else { throw ServiceError.invalidURL }
+         let userPayload: [String: Any] = [
+             "name": name, "user_email": email, "mobile_number": phoneNumber,
+             "area_id": areaId, "verification_code": verificationCode, // Revisa si backend necesita esto
+             "user_type": userType
+             // No envíes password aquí si Firebase es la autoridad de contraseña
+         ]
+         print("🌐 Service: Sending user data to backend \(url)...") // Cuidado con loguear datos
+
+         let request = try createJsonRequest(url: url, method: "POST", bodyJson: userPayload)
+         let (data, httpResponse) = try await performRequest(request: request) // Usa helpers
+
+         guard (200...299).contains(httpResponse.statusCode) else {
+              let responseBody = String(data: data, encoding: .utf8)
+             print("❌ Service: Backend registration failed. Status: \(httpResponse.statusCode), Body: \(responseBody ?? "N/A")")
+            throw ServiceError.backendRegistrationFailed(statusCode: httpResponse.statusCode, message: responseBody)
+         }
+         print("✅ Service: Backend user registration successful (Status: \(httpResponse.statusCode)).")
+    }
+
+    private func registerUserInFirebaseAsync(email: String, password: String) async throws {
+        guard !email.isEmpty, !password.isEmpty else { throw ServiceError.missingCredentials }
+         print("🔥 Service: Creating user in Firebase for \(email)...")
+        do {
+            let authResult = try await Auth.auth().createUser(withEmail: email, password: password) // Usa parámetros
+            print("✅ Service: Firebase user created successfully! UID: \(authResult.user.uid)")
+        } catch let error {
+            print("❌ Service: Firebase signup failed: \(error.localizedDescription)")
+            throw ServiceError.authenticationError(error)
+        }
+    }
+
+    // MARK: - Helpers (Asegúrate de tenerlos definidos o copia de otros servicios)
+
+    private func createJsonRequest(url: URL, method: String, bodyJson: [String: Any]? = nil) throws -> URLRequest {
+        // ... (Implementación como en servicios anteriores) ...
+         var request = URLRequest(url: url)
+         request.httpMethod = method
+         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+         if let body = bodyJson {
+             do { request.httpBody = try JSONSerialization.data(withJSONObject: body, options: []) }
+             catch { throw ServiceError.serializationError(error) }
+         }
+         return request
+    }
+
+    private func performRequest(request: URLRequest) async throws -> (Data, HTTPURLResponse) {
+        // ... (Implementación como en servicios anteriores) ...
+         do {
+             let (data, response) = try await URLSession.shared.data(for: request)
+             guard let httpResponse = response as? HTTPURLResponse else { throw ServiceError.badServerResponse(statusCode: -1) }
+             print("📬 [\(request.httpMethod ?? "")] \(request.url?.absoluteString ?? "") -> Status: \(httpResponse.statusCode)")
+             return (data, httpResponse)
+         } catch {
+             print("❌ Network Error for \(request.url?.absoluteString ?? ""): \(error)")
+             throw ServiceError.requestFailed(error)
+         }
+    }
+
+    // MARK: - Original Methods (Adaptados/Opcionales)
+
+    func registerUser(completion: @escaping (Result<String, Error>) -> Void) {
+        // Obtén los datos de las propiedades @Published actuales
+        guard let areaId = selectedAreaId else {
+            completion(.failure(ServiceError.missingAreaId)); return
+        }
+        // Asegúrate que los otros campos necesarios no estén vacíos
+        guard !name.isEmpty, !email.isEmpty, !password.isEmpty, !phoneNumber.isEmpty else {
+             completion(.failure(ServiceError.missingCredentials)) // O error más específico
+             return
+         }
+
+        Task {
+            do {
+                try await registerUserAsync(name: name, email: email, password: password, phoneNumber: phoneNumber, areaId: areaId, userType: userType, verificationCode: verificationCode)
+                completion(.success("User registered successfully!")) // Mensaje genérico
+            } catch {
+                completion(.failure(error))
+            }
+        }
+    }
+
     func sendVerificationCode(completion: @escaping (Result<Void, Error>) -> Void) {
-        guard !phoneNumber.isEmpty else {
-            completion(.failure(NSError(domain: "Auth", code: 400, userInfo: [NSLocalizedDescriptionKey: "Phone number is missing"])))
-            return
-        }
+         guard !phoneNumber.isEmpty else { completion(.failure(ServiceError.missingPhoneNumber)); return }
+         Task {
+             do {
+                 try await sendVerificationCodeAsync(phoneNumber: phoneNumber)
+                 completion(.success(()))
+             } catch {
+                 completion(.failure(error))
+             }
+         }
+     }
 
-        PhoneAuthProvider.provider().verifyPhoneNumber(phoneNumber, uiDelegate: nil) { verificationID, error in
-            if let error = error as NSError? {
-                print("❌ Firebase Error:", error.localizedDescription)
-                print("❌ Firebase Error Code:", error.code)
-                print("❌ Firebase Error UserInfo:", error.userInfo)
-                completion(.failure(error))
-                return
-            }
-
-            guard let verificationID = verificationID else {
-                completion(.failure(NSError(domain: "Auth", code: 500, userInfo: [NSLocalizedDescriptionKey: "Failed to obtain verification ID"])))
-                return
-            }
-
-            UserDefaults.standard.set(verificationID, forKey: "verificationID")
-            print("✅ Código enviado correctamente a \(self.phoneNumber)")
-            completion(.success(()))
-        }
-    }
-    
-    // Function to verify the SMS code using Firebase
-    func verifyCode(completion: @escaping (Result<Void, Error>) -> Void) {
-        guard let verificationID = UserDefaults.standard.string(forKey: "verificationID") else {
-            completion(.failure(NSError(domain: "Auth", code: 400, userInfo: [NSLocalizedDescriptionKey: "Verification ID not found"])))
-            return
-        }
-        
-        let credential = PhoneAuthProvider.provider().credential(withVerificationID: verificationID, verificationCode: verificationCode)
-        
-        Auth.auth().signIn(with: credential) { authResult, error in
-            if let error = error {
-                completion(.failure(error))
-                return
-            }
-            
-            print("✅ Phone authentication successful!")
-            
-            // Optionally, fetch the Firebase ID token
-            Auth.auth().currentUser?.getIDToken { token, error in
-                if let token = token {
-                    print("Firebase ID Token: \(token)")
-                } else if let error = error {
-                    print("Error fetching token: \(error.localizedDescription)")
-                }
-            }
-            
-            completion(.success(()))
-        }
-    }
+     func verifyCode(completion: @escaping (Result<Void, Error>) -> Void) {
+         guard !verificationCode.isEmpty else { completion(.failure(ServiceError.missingCredentials)); return }
+          Task {
+              do {
+                  try await verifyCodeAsync(code: verificationCode)
+                  completion(.success(()))
+              } catch {
+                  completion(.failure(error))
+              }
+          }
+      }
 }

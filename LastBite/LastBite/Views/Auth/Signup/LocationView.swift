@@ -15,13 +15,26 @@ struct LocationView: View {
 
     // 3. Inicializador (asume que userService es singleton o inyectado antes)
     init(showLocationView: Binding<Bool>, showSignInView: Binding<Bool>, isLoggedIn: Binding<Bool>) {
-        self._showLocationView = showLocationView
-        self._showSignInView = showSignInView
-        self._isLoggedIn = isLoggedIn
-        // Crea el controller, pasándole las dependencias necesarias si no usa singletons
-        self._controller = StateObject(wrappedValue: LocationController(userService: SignupUserService.shared))
-         print("📍 LocationView initialized.")
-    }
+            self._showLocationView = showLocationView
+            self._showSignInView = showSignInView
+            self._isLoggedIn = isLoggedIn
+
+            // 1. Crear instancia del Repositorio
+            let zoneRepository = APIZoneRepository() // <- Crear Repo
+
+            // 2. (Opcional) Obtener otras dependencias si no son singletons
+            let userService = SignupUserService.shared
+
+            // 3. Crear el Controller inyectando el Repositorio
+            let locationController = LocationController(
+                userService: userService,
+                zoneRepository: zoneRepository // <- Inyectar Repo
+            )
+
+            // 4. Asignar al StateObject
+            self._controller = StateObject(wrappedValue: locationController)
+            print("📍 LocationView initialized and injected ZoneRepository into Controller.")
+        }
 
     var body: some View {
         GeometryReader { geometry in

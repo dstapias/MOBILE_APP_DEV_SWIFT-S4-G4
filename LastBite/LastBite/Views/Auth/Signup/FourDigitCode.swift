@@ -22,9 +22,19 @@ struct FourDigitCodeView: View {
         self._showFourDigitCodeView = showFourDigitCodeView
         self._showSignInView = showSignInView
         self._isLoggedIn = isLoggedIn
-        // Crea el controller (asume que usa el singleton del servicio)
-        self._controller = StateObject(wrappedValue: FourDigitCodeController())
-         print("🔢 FourDigitCodeView initialized.")
+
+        // 1. Crear instancia del Repositorio
+        let authRepository = APIAuthRepository(
+            signInService: .shared, // Asume que APIAuthRepository los necesita
+            signupService: .shared
+        )
+
+        // 2. Crear el Controller inyectando el Repositorio
+        let codeController = FourDigitCodeController(authRepository: authRepository)
+
+        // 3. Asignar al StateObject wrapper
+        self._controller = StateObject(wrappedValue: codeController)
+        print("🔢 FourDigitCodeView initialized and injected AuthRepository into Controller.")
     }
 
     var body: some View {

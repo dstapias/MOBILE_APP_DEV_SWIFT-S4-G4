@@ -9,51 +9,52 @@ import SwiftUI
 import SDWebImageSwiftUI // Si la usas
 
 struct ProductDetailView: View {
-    // 1. Controller como StateObject
+    // 1. Controller como StateObject (Correcto)
     @StateObject private var controller: ProductDetailController
 
-    // 2. El estado de cantidad se elimina, se usa el del controller
-    // @State private var quantity: Int = 1 // ELIMINADO
+    // 2. Inicializador ACTUALIZADO que recibe Producto y crea Controller con REPOSITORIO (Correcto)
+    init(product: Product) {
+        // 1. Crea la instancia del Repositorio CONCRETO necesario
+        let cartRepository = APICartRepository() // <- Crear Cart Repo
 
-    // 3. Los datos harcodeados se eliminan
+        // 2. (Opcional) Obtener otras dependencias (como el servicio de usuario)
+        let signInService = SignInUserService.shared // Asume singleton
 
-    // 4. Inicializador que recibe el Producto y crea el Controller
-    //    Necesitará acceso a los servicios compartidos o que se los pasen.
-    init(product: Product /*, signInService: SignInUserService - si se pasa explícitamente */) {
-        // Crea el controller aquí, pasándole el producto y los servicios necesarios
-        // Asume que los servicios usan singletons o son accesibles
-        self._controller = StateObject(wrappedValue: ProductDetailController(product: product))
-        print("📦 ProductDetailView initialized for product: \(product.name)")
+        // 3. Crea el Controller pasándole el producto y el repositorio
+        let detailController = ProductDetailController(
+            product: product,
+            signInService: signInService,
+            cartRepository: cartRepository // <- Inyectar Cart Repo
+        )
+
+        // 4. Asigna al StateObject wrapper
+        self._controller = StateObject(wrappedValue: detailController)
+        print("📦 ProductDetailView initialized and injected CartRepository into Controller for product: \(product.name)")
     }
+
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
 
-                // 5. Imagen del producto (usa datos del controller.product y WebImage)
+                // Imagen (Correcto, usa controller.product)
                 WebImage(url: URL(string: controller.product.image))
                     .resizable()
                     .indicator(.activity)
                     .transition(.fade)
                     .scaledToFit()
                     .frame(maxWidth: .infinity)
-                    .frame(height: 250) // Ajusta según necesites
-                    .clipped() // Evita que se desborde si la imagen es muy alta
+                    .frame(height: 250)
+                    .clipped()
 
-                // 6. Título e info (usa datos del controller.product)
+                // Título e Info (Correcto, usa controller.product)
                 VStack(alignment: .leading, spacing: 4) {
                     Text(controller.product.name)
                         .font(.title2)
                         .fontWeight(.bold)
-
                     HStack {
-                        // Asume que tienes una propiedad 'weight' o similar en Product
                         // Text(controller.product.weight ?? "") // Ejemplo
-                        // .font(.subheadline)
-                        // .foregroundColor(.secondary)
-
                         Spacer()
-
                         Text(String(format: "$%.2f", controller.product.unit_price))
                             .font(.title3)
                             .fontWeight(.semibold)
@@ -61,78 +62,36 @@ struct ProductDetailView: View {
                 }
                 .padding(.horizontal)
 
-                // 7. Sección Cantidad (bindeado al controller)
+                // Cantidad (Correcto, usa $controller.quantity)
                 HStack(spacing: 16) {
-                    Text("Quantity") // Etiqueta explícita
-                        .font(.headline)
-
-                    Spacer() // Empuja el Stepper a la derecha
-
-                    Stepper("Quantity", value: $controller.quantity, in: 1...10) // Rango de ejemplo
-                        // Mostrar la cantidad seleccionada
-                        .overlay(Text("\(controller.quantity)").padding(.horizontal, 20)) // Muestra el número
-                        .labelsHidden() // Oculta la etiqueta por defecto del Stepper
+                    Text("Quantity").font(.headline)
+                    Spacer()
+                    Stepper("Quantity", value: $controller.quantity, in: 1...10) // Rango ejemplo
+                        .overlay(Text("\(controller.quantity)").padding(.horizontal, 20))
+                        .labelsHidden()
                 }
                 .padding(.horizontal)
 
-                // 8. Detalles del Producto (usa datos del controller.product)
+                // Detalles (Correcto, usa controller.product)
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Product Detail")
-                        .font(.headline)
-
-                    // Asume que tienes 'description' en tu modelo Product
+                    Text("Product Detail").font(.headline)
                     Text(controller.product.detail ?? "No description available.")
-                        .font(.body)
-                        .foregroundColor(.secondary)
+                        .font(.body).foregroundColor(.secondary)
                 }
                 .padding(.horizontal)
 
-                // 9. Tags (si existen en tu modelo Product)
-                // if let tags = controller.product.tags, !tags.isEmpty {
-                //     VStack(alignment: .leading, spacing: 8) {
-                //         Text("Tags").font(.headline)
-                //         ScrollView(.horizontal, showsIndicators: false) {
-                //             HStack(spacing: 8) {
-                //                 ForEach(tags) { tag in // Asume Tag: Identifiable
-                //                     TagView(text: tag.value)
-                //                 }
-                //             }
-                //         }
-                //     }
-                //     .padding(.horizontal)
-                // }
-
-                // 10. Rating (si existe en tu modelo Product)
-                // VStack(alignment: .leading, spacing: 8) {
-                //     Text("Reviews").font(.headline)
-                //     HStack {
-                //         ForEach(0..<Int(controller.product.score.rounded())) { _ in
-                //             Image(systemName: "star.fill").foregroundColor(.yellow)
-                //         }
-                //          ForEach(Int(controller.product.score.rounded())..<5) { _ in
-                //              Image(systemName: "star").foregroundColor(.yellow)
-                //          }
-                //         Text(String(format:"%.1f/5", controller.product.score))
-                //             .font(.subheadline).foregroundColor(.secondary)
-                //     }
-                // }
-                // .padding(.horizontal)
-
-
-                // --- Feedback de la Acción ---
+                // --- Feedback de la Acción (Correcto, usa controller) ---
                  VStack {
                      if let message = controller.successMessage {
                          Text(message)
-                             .font(.footnote)
-                             .foregroundColor(.green)
-                             .padding(.vertical, 5)
-                             .transition(.opacity.combined(with: .move(edge: .bottom)))
+                            .font(.footnote).foregroundColor(.green)
+                            .padding(.vertical, 5)
+                            .transition(.opacity.combined(with: .move(edge: .bottom)))
                      }
                      if let message = controller.errorMessage {
                          Text(message)
-                             .font(.footnote)
-                             .foregroundColor(.red)
-                             .padding(.vertical, 5)
+                            .font(.footnote).foregroundColor(.red)
+                            .padding(.vertical, 5)
                      }
                  }
                  .frame(maxWidth: .infinity, alignment: .center)
@@ -140,39 +99,35 @@ struct ProductDetailView: View {
                  .animation(.default, value: controller.errorMessage)
 
 
-                // 11. Botón "Add To Basket" (llama al controller)
+                // --- Botón "Add To Basket" ACTUALIZADO (Correcto) ---
                 Button(action: {
-                    controller.addToCart()
+                    // Llama al método async DENTRO de una Task
+                    Task {
+                       await controller.addToCart()
+                    }
                 }) {
-                    ZStack {
-                        // Muestra ProgressView si está cargando
+                    ZStack { // Contenido del botón (Correcto)
                         if controller.isLoading {
-                             ProgressView()
-                                 .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                             ProgressView().progressViewStyle(CircularProgressViewStyle(tint: .white))
                         } else {
-                            Text("Add To Basket")
-                                .fontWeight(.bold)
-                                .foregroundColor(.white)
+                            Text("Add To Basket").fontWeight(.bold).foregroundColor(.white)
                         }
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(controller.isLoading ? Color.gray : Color.green) // Color cambia si carga
-                    .cornerRadius(8)
+                    .frame(maxWidth: .infinity).padding()
+                    .background(controller.isLoading ? Color.gray : Color.green).cornerRadius(8)
                 }
-                .padding(.horizontal)
-                .padding(.top, 8)
-                .disabled(controller.isLoading) // Deshabilita si está cargando
+                .padding(.horizontal).padding(.top, 8)
+                .disabled(controller.isLoading) // Estado disabled (Correcto)
 
             } // Fin VStack principal
-            .padding(.vertical) // Padding para todo el contenido del ScrollView
+            .padding(.vertical)
         } // Fin ScrollView
         .navigationTitle("Product Detail") // Título
         .navigationBarTitleDisplayMode(.inline) // Modo del título
     } // Fin body
 } // Fin struct ProductDetailView
 
-// --- Vista TagView (Sin cambios) ---
+// --- Vista TagView (Si la usas, debería estar definida) ---
 struct TagView: View {
     let text: String
     var body: some View {
@@ -185,27 +140,34 @@ struct TagView: View {
     }
 }
 
-// --- Preview ---
+// --- Preview (Correcta) ---
 struct ProductDetailView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
             // Crea un producto de ejemplo para la preview
-            ProductDetailView(product: Product(
-                product_id: 1,
-                name: "Fresh Red Apple",
-                detail: "A very fresh and crunchy red apple, perfect for a healthy snack.",
-                unit_price: 4.99,
-                image: "https://via.placeholder.com/300.png/FF0000/FFFFFF?text=Apple", // Placeholder URL
-                score: 4.5,
-                store_id: 10,
-                product_type: "Fruit"
-                // ,tags: [Tag(tag_id: 1, value: "Fresh"), Tag(tag_id: 2, value: "Organic")] // Ejemplo si tienes tags
-            ))
+             ProductDetailView(product: Product(
+                 product_id: 1, name: "Preview Apple", detail: "Preview Description",
+                 unit_price: 1.99, image: "https://via.placeholder.com/300", score: 4.0, store_id: 1, product_type: "Fruit"
+             ))
         }
-        // Necesita el servicio si el controller lo usa implícitamente
-       .environmentObject(SignInUserService.shared)
-       // Podrías necesitar mockear otros servicios si el controller los usa directamente en init
-       // .environmentObject(CartService.shared)
-       // .environmentObject(CartProductService.shared)
+       .environmentObject(SignInUserService.shared) // Necesario si el controller lo usa
     }
 }
+
+// --- Modelos necesarios (Asegúrate que estén definidos y sean correctos) ---
+// struct Product: Codable, Identifiable, Equatable { ... }
+// struct Tag: Codable, Identifiable, Equatable { ... }
+// struct Store: Codable, Identifiable, Equatable { ... }
+// struct Cart: Codable, Identifiable, Equatable { ... }
+// struct CartItem: Identifiable, Equatable { ... }
+// struct DetailedCartProduct: Codable, Identifiable, Equatable { ... }
+
+// --- Controller (Asegúrate que esté definido como en el paso anterior) ---
+// @MainActor class ProductDetailController: ObservableObject { ... }
+
+// --- Repositorio (Asegúrate que esté definido y sea accesible) ---
+// protocol CartRepository { ... }
+// class APICartRepository: CartRepository { ... }
+
+// --- Servicio (Asegúrate que esté definido y sea accesible) ---
+// class SignInUserService: ObservableObject { ... }

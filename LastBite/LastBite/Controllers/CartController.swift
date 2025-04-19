@@ -6,223 +6,203 @@
 //
 
 import Foundation
-import Combine // ¡Importante para ObservableObject!
+import Combine
 
-// Asumiendo que estos servicios existen y funcionan como en tu código original
-// class CartService { static let shared = CartService(); /* ... */ }
-// class CartProductService { static let shared = CartProductService(); /* ... */ }
-// class SignInUserService: ObservableObject { @Published var userId: Int? = 123 } // Ejemplo
-// struct CartItem: Identifiable { /* ... productId: Int ... quantity: var Int ... */ }
-
-// 1. Hacerlo ObservableObject
+@MainActor // Asegura updates en hilo principal
 class CartController: ObservableObject {
 
-    // 2. Publicar el estado para que la vista reaccione
+    // MARK: - Published State
     @Published var activeCartId: Int? = nil
-    @Published var cartItems: [CartItem] = []
-    @Published var isLoading: Bool = false // Para indicadores de carga
-    @Published var errorMessage: String? = nil // Para mostrar errores
+    @Published var cartItems: [CartItem] = [] // Mantiene el mapeo a CartItem para la UI
+    @Published var isLoading: Bool = false
+    @Published var errorMessage: String? = nil
+    // @Published var totalCartPrice: Double = 0.0 // Podrías añadir y calcular esto
 
-    // 3. Dependencias (Inyectadas para mejor testabilidad y flexibilidad)
+    // MARK: - Dependencies (Repositorios)
     private let signInService: SignInUserService
-    private let cartService: CartService
-    private let cartProductService: CartProductService
+    private let cartRepository: CartRepository
+    private let orderRepository: OrderRepository // Necesario para prepareCheckoutController
+    private var cancellables = Set<AnyCancellable>()
 
-    // 4. Inicializador para recibir dependencias
+    // MARK: - Initialization (Recibe Repositorios)
     init(
         signInService: SignInUserService,
-        cartService: CartService = CartService.shared, // Puedes seguir usando singletons aquí si prefieres
-        cartProductService: CartProductService = CartProductService.shared
+        cartRepository: CartRepository,
+        orderRepository: OrderRepository
     ) {
         self.signInService = signInService
-        self.cartService = cartService
-        self.cartProductService = cartProductService
-        print("🛒 CartController initialized.")
+        self.cartRepository = cartRepository
+        self.orderRepository = orderRepository
+        print("🛒 CartController initialized with Repositories.")
+        // Podrías llamar a loadCartData aquí si la vista siempre debe cargar al inicio
     }
 
-    // MARK: - Data Loading Logic
+    // MARK: - Data Loading Logic (Async con Repositorio)
 
-    /// Método principal para cargar datos cuando la vista aparece.
+    /// Método público para iniciar la carga de datos.
     func loadCartData() {
+        Task { // Lanza la tarea asíncrona
+            await fetchActiveCartAndProducts()
+        }
+    }
+
+    /// Función privada async que realiza la carga real.
+    private func fetchActiveCartAndProducts() async {
         guard let userId = signInService.userId else {
             print("❌ CartController: Cannot load cart, user not logged in.")
+            // Actualiza estado en MainActor (ya estamos aquí)
             self.errorMessage = "Please sign in to view your cart."
-            // Asegurarse que el estado refleje "vacío" si no hay usuario
             self.cartItems = []
             self.activeCartId = nil
-            self.isLoading = false // No estamos cargando si no hay usuario
+            self.isLoading = false
             return
         }
 
-        print("⏳ CartController: Loading cart data for user \(userId)...")
-        DispatchQueue.main.async { // Asegurar que los cambios iniciales de UI estén en main thread
-            self.isLoading = true
-            self.errorMessage = nil
-        }
+        // Evita cargas concurrentes si ya está cargando
+        // Aunque al ser llamado por Task, podrías necesitar un control más robusto
+        // si loadCartData puede llamarse múltiples veces rápidamente.
+        guard !isLoading else { return }
+        print("⏳ CartController: Loading cart data via Repository for user \(userId)...")
+        self.isLoading = true
+        self.errorMessage = nil
 
-        // Llama a la función interna que busca el ID del carrito
-        fetchActiveCartInternal(for: userId)
+        do {
+            // 1. Obtiene carrito activo usando repositorio
+            let cart = try await cartRepository.fetchActiveCart(for: userId)
+            self.activeCartId = cart.id // Actualiza ID
+
+            // 2. Obtiene productos detallados usando repositorio
+            let detailedProducts = try await cartRepository.fetchDetailedCartProducts(for: cart.id)
+            print("✅ CartController: Fetched \(detailedProducts.count) detailed products via Repo.")
+
+            // 3. Mapea a CartItem
+            self.cartItems = detailedProducts.map { mapDetailedProductToCartItem($0) }
+            // self.calculateTotalPrice() // Llama si tienes cálculo de total
+
+        } catch let error as ServiceError { // Captura errores específicos definidos
+            print("❌ CartController: Failed to load cart data via Repo: \(error.localizedDescription)")
+            self.errorMessage = error.localizedDescription
+            self.cartItems = []
+            self.activeCartId = nil
+        } catch { // Captura cualquier otro error inesperado
+             print("❌ CartController: Unexpected error loading cart data via Repo: \(error.localizedDescription)")
+             self.errorMessage = "An unexpected error occurred while loading the cart."
+             self.cartItems = []
+             self.activeCartId = nil
+        }
+        // Termina la carga independientemente del resultado
+        self.isLoading = false
     }
 
-    /// Paso 1 (Interno): Obtiene el ID del carrito activo.
-    private func fetchActiveCartInternal(for userId: Int) {
-        cartService.fetchActiveCart(for: userId) { [weak self] result in
-            guard let self = self else { return }
-
-            switch result {
-            case .success(let cart): // Asumiendo que 'cart' tiene 'cart_id'
-                // No necesitas DispatchQueue.main.async aquí porque el siguiente paso lo hará
-                print("✅ CartController: Found active cart ID:", cart.cart_id)
-                self.activeCartId = cart.cart_id // Actualiza el ID publicado
-                // Paso 2: Cargar productos usando el ID obtenido
-                self.fetchCartProductsInternal(cartId: cart.cart_id)
-
-            case .failure(let error):
-                print("❌ CartController: Failed to find active cart:", error.localizedDescription)
-                DispatchQueue.main.async {
-                    self.activeCartId = nil
-                    self.cartItems = [] // Limpiar items si falla encontrar carrito
-                    self.isLoading = false
-                    self.errorMessage = "Could not find your active cart." // Mensaje para el usuario
-                }
-            }
-        }
-    }
-
-    /// Paso 2 (Interno): Carga los productos detallados del carrito activo.
-    /// Se llama después de obtener `activeCartId`.
-    private func fetchCartProductsInternal(cartId: Int) {
-        print("⏳ CartController: Fetching products for cart ID \(cartId)...")
-        // isLoading ya debería ser true
-
-        cartProductService.fetchDetailedCartProducts(for: cartId) { [weak self] result in
-            guard let self = self else { return }
-
-            // Siempre actualiza la UI en el hilo principal
-            DispatchQueue.main.async {
-                 self.isLoading = false // Termina la carga aquí
-
-                switch result {
-                case .success(let cartProducts): // 'cartProducts' es tu array de datos crudos
-                    // Mapea tus datos crudos al modelo `CartItem` que usa la UI
-                    self.cartItems = cartProducts.map { cartProductData in
-                        CartItem(
-                            // Asumiendo que CartItem tiene un 'id' único para Identifiable
-                            // Si no, puedes necesitar generar uno o ajustar el ForEach en la vista.
-                            // id: UUID().uuidString, // Ejemplo si necesitas un ID y no viene del backend
-                            productId: cartProductData.product_id,
-                            name: cartProductData.name,
-                            detail: cartProductData.detail,
-                            quantity: cartProductData.quantity, // Asegúrate que CartItem.quantity sea 'var'
-                            price: cartProductData.unit_price,
-                            imageUrl: cartProductData.image
-                        )
-                    }
-                    print("✅ CartController: Fetched \(self.cartItems.count) products.")
-                    self.errorMessage = nil // Limpiar errores previos si la carga fue exitosa
-
-                case .failure(let error):
-                    print("❌ CartController: Failed to fetch cart products:", error.localizedDescription)
-                    self.cartItems = [] // Limpiar items en caso de error
-                    self.errorMessage = "Failed to load cart items."
-                }
-            }
-        }
-    }
-
-    // MARK: - Cart Modification Logic
-
-    /// Elimina un producto del carrito. Ya no necesita `completion`.
-    func removeItemFromCart(productId: Int) {
-        guard let cartId = activeCartId else {
-            print("❌ CartController: Cannot remove item, no active cart ID.")
-            self.errorMessage = "Cannot modify cart (no active cart found)."
-            return
-        }
-
-        print("⏳ CartController: Attempting to remove product \(productId) from cart \(cartId)...")
-        DispatchQueue.main.async { // Asegurar cambios de UI en main thread
-             self.isLoading = true // Podrías tener un estado de carga más granular
-             self.errorMessage = nil
-        }
-
-
-        cartProductService.removeProductFromCart(cartID: cartId, productID: productId) { [weak self] result in
-            guard let self = self else { return }
-
-            switch result {
-            case .success:
-                 print("✅ CartController: Product \(productId) removed successfully via service. Refreshing cart...")
-                 // Refresca los datos para asegurar consistencia después de la eliminación
-                 // Llama a la función interna que recarga los productos
-                 // Asegurarse que las actualizaciones de UI (isLoading=false) se hagan dentro de fetchCartProductsInternal
-                 self.fetchCartProductsInternal(cartId: cartId)
-
-            case .failure(let error):
-                 print("❌ CartController: Failed to remove product \(productId):", error.localizedDescription)
-                 DispatchQueue.main.async {
-                     self.isLoading = false // Terminar carga en caso de error
-                     self.errorMessage = "Failed to remove item."
-                 }
-            }
-        }
-    }
-
-    /// Actualiza la cantidad. Ya no necesita `completion`.
-    func updateCartQuantity(productId: Int, newQuantity: Int) {
-        guard let cartId = activeCartId else {
-            print("❌ CartController: Cannot update quantity, no active cart ID.")
-            self.errorMessage = "Cannot modify cart (no active cart found)."
-            return
-        }
-        guard newQuantity > 0 else { return } // O llama a remove si es 0
-
-        print("⏳ CartController: Attempting to update product \(productId) quantity to \(newQuantity)...")
-         DispatchQueue.main.async {
-             self.isLoading = true
-             self.errorMessage = nil
-         }
-
-
-        cartProductService.updateProductQuantity(cartID: cartId, productID: productId, quantity: newQuantity) { [weak self] result in
-            guard let self = self else { return }
-
-            switch result {
-            case .success:
-                 print("✅ CartController: Quantity for product \(productId) updated successfully via service. Refreshing cart...")
-                 // Refresca los datos para asegurar consistencia
-                 // Las actualizaciones de UI (isLoading=false) se harán dentro de fetchCartProductsInternal
-                 self.fetchCartProductsInternal(cartId: cartId)
-
-            case .failure(let error):
-                 print("❌ CartController: Failed to update quantity for product \(productId):", error.localizedDescription)
-                 DispatchQueue.main.async {
-                    self.isLoading = false
-                    self.errorMessage = "Failed to update quantity."
-                 }
-            }
-        }
-    }
-
-    // MARK: - Navigation Helper
-
-    /// Prepara y devuelve un controlador para la pantalla de Checkout.
-    func prepareCheckoutController() -> CheckoutController? {
-        // Usa las propiedades @Published directamente
-        guard let cartId = self.activeCartId, !self.cartItems.isEmpty else {
-             print("❌ CartController: Cannot proceed to checkout. Cart is empty or inactive.")
-             DispatchQueue.main.async { // Asegúrate que el mensaje de error se muestre
-                 self.errorMessage = "Your cart is empty or unavailable for checkout."
-             }
-            return nil
-        }
-
-        // Crea la instancia de CheckoutController inyectando lo necesario
-        return CheckoutController(
-            cartItems: self.cartItems, // Pasa los items actuales
-            cartId: cartId,            // Pasa el ID activo
-            signInService: self.signInService // Pasa la dependencia
-            // Si CheckoutController necesita otros servicios, considéralo aquí
+    // Helper de mapeo (Asegúrate que coincida con tus modelos)
+    private func mapDetailedProductToCartItem(_ detailedProduct: DetailedCartProduct) -> CartItem {
+        return CartItem(
+            productId: detailedProduct.product_id,
+            name: detailedProduct.name,
+            detail: detailedProduct.detail, // Añade ?? "" si es opcional en DetailedCartProduct
+            quantity: detailedProduct.quantity,
+            price: detailedProduct.unit_price,
+            imageUrl: detailedProduct.image
         )
+    }
+
+    // MARK: - Cart Modification Logic (Async con Repositorio)
+
+    /// Método público (síncrono) que lanza la tarea para eliminar item.
+    func removeItemFromCart(productId: Int) {
+        Task {
+            await performRemoveItem(productId: productId)
+        }
+    }
+
+    /// Helper async privado que realiza la eliminación.
+    private func performRemoveItem(productId: Int) async {
+        guard let cartId = activeCartId else {
+            errorMessage = "Cannot modify cart (no active cart found)."
+            return
+        }
+        guard !isLoading else { return } // Evita operaciones si ya está cargando algo general
+
+        print("⏳ CartController: Attempting to remove product \(productId) via Repository...")
+        self.isLoading = true // O un flag específico para modificación
+        self.errorMessage = nil
+
+        do {
+            // Llama al REPOSITORIO
+            try await cartRepository.removeProductFromCart(cartId: cartId, productId: productId)
+            print("✅ CartController: Product \(productId) removed via Repo. Refreshing cart...")
+            // Refresca los datos después de la modificación exitosa
+            await fetchActiveCartAndProducts() // Vuelve a cargar todo
+
+        } catch let error as ServiceError {
+            print("❌ CartController: Failed to remove product \(productId) via Repo: \(error.localizedDescription)")
+            self.errorMessage = error.localizedDescription
+            self.isLoading = false // Detiene carga en error
+        } catch {
+             print("❌ CartController: Unexpected error removing product \(productId) via Repo: \(error.localizedDescription)")
+             self.errorMessage = "Failed to remove item."
+             self.isLoading = false
+        }
+        // isLoading se pone en false dentro de fetchActiveCartAndProducts si el refresh tiene éxito
+    }
+
+     /// Método público (síncrono) que lanza la tarea para actualizar cantidad.
+    func updateCartQuantity(productId: Int, newQuantity: Int) {
+         Task {
+             await performUpdateQuantity(productId: productId, newQuantity: newQuantity)
+         }
+     }
+
+    /// Helper async privado que realiza la actualización de cantidad.
+    private func performUpdateQuantity(productId: Int, newQuantity: Int) async {
+        guard let cartId = activeCartId else {
+             errorMessage = "Cannot modify cart (no active cart found)."
+             return
+        }
+        // Llama a eliminar si la cantidad es 0 o menos
+        guard newQuantity > 0 else {
+             print("ℹ️ Quantity is zero or less, removing item instead.")
+             await performRemoveItem(productId: productId)
+             return
+         }
+        guard !isLoading else { return }
+
+        print("⏳ CartController: Attempting to update product \(productId) to quantity \(newQuantity) via Repository...")
+        self.isLoading = true
+        self.errorMessage = nil
+
+         do {
+             // Llama al REPOSITORIO
+             try await cartRepository.updateProductQuantity(cartId: cartId, productId: productId, quantity: newQuantity)
+             print("✅ CartController: Quantity for product \(productId) updated via Repo. Refreshing cart...")
+             // Refresca los datos
+             await fetchActiveCartAndProducts()
+         } catch let error as ServiceError {
+             print("❌ CartController: Failed to update quantity for product \(productId) via Repo: \(error.localizedDescription)")
+             self.errorMessage = error.localizedDescription
+             self.isLoading = false
+         } catch {
+             print("❌ CartController: Unexpected error updating quantity for product \(productId) via Repo: \(error.localizedDescription)")
+             self.errorMessage = "Failed to update quantity."
+             self.isLoading = false
+         }
+          // isLoading se pone en false dentro de fetchActiveCartAndProducts si el refresh tiene éxito
+    }
+
+    // MARK: - Navigation Helper (Correcto)
+    func prepareCheckoutController() -> CheckoutController? {
+         guard let cartId = self.activeCartId, !self.cartItems.isEmpty else {
+             print("❌ CartController: Cannot proceed to checkout. Cart is empty or inactive.")
+             self.errorMessage = "Your cart is empty or unavailable for checkout."
+             return nil
+         }
+         // Crea CheckoutController inyectándole los repositorios que necesita
+         return CheckoutController(
+             cartItems: self.cartItems,
+             cartId: cartId,
+             signInService: self.signInService, // Pasa servicio de usuario
+             orderRepository: self.orderRepository, // Pasa repo de órdenes
+             cartRepository: self.cartRepository // Pasa repo de carrito
+         )
     }
 }

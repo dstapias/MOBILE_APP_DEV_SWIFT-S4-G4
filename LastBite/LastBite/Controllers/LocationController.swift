@@ -8,157 +8,137 @@
 import Foundation
 import Combine
 
+@MainActor // Asegura updates en hilo principal
 class LocationController: ObservableObject {
 
     // MARK: - Published State
     @Published var zones: [Zone] = []
-    @Published var areas: [Area] = [] // Usamos el struct Area
-    @Published var selectedZoneId: Int? = nil // ID de la zona seleccionada
-    // selectedAreaId se manejará directamente en SignupUserService para este ejemplo
-
+    @Published var areas: [Area] = []
+    @Published var selectedZoneId: Int? = nil
     @Published var isLoadingZones: Bool = false
     @Published var isLoadingAreas: Bool = false
     @Published var errorMessage: String? = nil
-    @Published var showFinalSignUpView: Bool = false // Para controlar la navegación
+    @Published var showFinalSignUpView: Bool = false
 
-    // MARK: - Dependencies
-    private let userService: SignupUserService // Para actualizar el areaId seleccionado
-    private let zoneService: ZoneService
+    // MARK: - Dependencies (Ahora con Repositorio)
+    private let userService: SignupUserService
+    private let zoneRepository: ZoneRepository // <- Usa ZoneRepository
     private var cancellables = Set<AnyCancellable>()
 
-    // MARK: - Computed Properties (Helper para la Vista)
+    // MARK: - Computed Properties (Sin Cambios)
     var selectedZoneName: String {
-        print("Calculating selectedZoneName. Current selectedZoneId: \(selectedZoneId ?? -1)")
-        var nameToReturn: String = "Select a zone" // Valor por defecto
-
-        // Recorre el array manualmente
-        for zone in zones {
-            if zone.zone_id == selectedZoneId { // Compara con el ID seleccionado
-                nameToReturn = zone.zone_name // Encontrado, guarda el nombre
-                break // Sal del bucle, ya lo encontramos
-            }
-        }
-
-        print("Final name selectedZoneName will return: \(nameToReturn)")
+        var nameToReturn: String = "Select a zone"
+        for zone in zones { if zone.id == selectedZoneId { nameToReturn = zone.zone_name; break } }
         return nameToReturn
     }
 
     var selectedAreaName: String {
-        // Lee el ID del área seleccionada desde el servicio compartido
-        let targetAreaId = userService.selectedAreaId
-        print("Calculating selectedAreaName. Current selectedAreaId from userService: \(targetAreaId ?? -1)")
-
-        // Si no hay ningún área seleccionada en el servicio, devuelve el texto por defecto
-        guard let idToFind = targetAreaId else {
-            print("No area selected in userService, returning default name.")
-            return "Select an area"
-        }
-
-        // Valor por defecto si no encontramos el área en nuestra lista local 'areas'
+        let targetId = userService.selectedAreaId
+        guard let idToFind = targetId else { return "Select an area" }
         var nameToReturn: String = "Select an area"
-
-        // Busca el área correspondiente en el array 'areas' del controlador
-        for area in areas {
-            if area.area_id == idToFind {
-                nameToReturn = area.area_name // Área encontrada, guarda su nombre
-                break // Sal del bucle, ya no necesitamos buscar más
-            }
-        }
-
-        print("Final name selectedAreaName will return: \(nameToReturn)")
+        for area in areas { if area.id == idToFind { nameToReturn = area.area_name; break } }
         return nameToReturn
     }
 
     var canProceed: Bool {
-        userService.selectedAreaId != nil // La lógica para habilitar "Next"
+        userService.selectedAreaId != nil
     }
 
-
-    // MARK: - Initialization
+    // MARK: - Initialization (Recibe Repositorio)
     init(
         userService: SignupUserService = SignupUserService.shared,
-        zoneService: ZoneService = ZoneService.shared
+        zoneRepository: ZoneRepository // <- Recibe ZoneRepository
     ) {
         self.userService = userService
-        self.zoneService = zoneService
-        print("📍 LocationController initialized.")
-        // Carga inicial de zonas
-        loadZones()
+        self.zoneRepository = zoneRepository // <- Guarda ZoneRepository
+        print("📍 LocationController initialized with Repository.")
+        loadZones() // Llama al método de carga inicial
     }
 
-    // MARK: - Data Loading
+    // MARK: - Data Loading (Async con Repositorio)
+
     func loadZones() {
         guard !isLoadingZones else { return }
-        print("⏳ Loading zones...")
-        DispatchQueue.main.async {
-            self.isLoadingZones = true
-            self.errorMessage = nil
-            self.areas = [] // Limpia áreas al cargar zonas
-            self.userService.selectedAreaId = nil // Deselecciona área
-        }
+        print("⏳ Loading zones via Repository...")
+        isLoadingZones = true // Ya estamos en @MainActor
+        errorMessage = nil
+        areas = [] // Limpia áreas
+        userService.selectedAreaId = nil // Deselecciona
 
-        zoneService.fetchZones { [weak self] result in
-            guard let self = self else { return }
-            DispatchQueue.main.async {
-                self.isLoadingZones = false
-                switch result {
-                case .success(let fetchedZones):
-                    print("✅ Fetched \(fetchedZones.count) zones.")
-                    self.zones = fetchedZones
-                    // Selecciona automáticamente la primera zona y carga sus áreas
-                    if let firstZone = fetchedZones.first {
-                        self.selectZone(zone: firstZone) // Llama a la función de selección
-                    }
-                case .failure(let error):
-                    print("❌ Failed to fetch zones:", error.localizedDescription)
-                    self.errorMessage = "Could not load locations."
+        Task { // Lanza la tarea asíncrona
+            var fetchedZones: [Zone] = [] // Variable local para zonas
+            do {
+                // Llama al REPOSITORIO
+                fetchedZones = try await zoneRepository.fetchZones()
+                print("✅ Fetched \(fetchedZones.count) zones via Repo.")
+                self.zones = fetchedZones // Actualiza estado
+
+                // Selecciona la primera zona y carga sus áreas
+                if let firstZone = fetchedZones.first {
+                    // selectZone llama internamente a fetchAreas async
+                    // No necesitamos 'await' aquí porque selectZone lanza su propia Task
+                    self.selectZone(zone: firstZone)
+                    // isLoadingZones se pondrá en false cuando fetchAreas termine
+                } else {
+                     print("ℹ️ No zones fetched or list is empty.")
+                     self.isLoadingZones = false // Termina carga si no hay zonas
                 }
+
+            } catch { // Error al buscar zonas
+                print("❌ Failed to fetch zones via Repo:", error.localizedDescription)
+                self.errorMessage = "Could not load locations."
+                self.isLoadingZones = false // Termina la carga en error
             }
         }
     }
 
-    func fetchAreas(for zoneId: Int) {
+    // Ahora es async y usa el repositorio
+    func fetchAreas(for zoneId: Int) async {
+        // Evita cargas concurrentes para la misma zona si ya está en proceso
         guard !isLoadingAreas else { return }
-        print("⏳ Loading areas for zone ID: \(zoneId)...")
-         DispatchQueue.main.async {
-             self.isLoadingAreas = true
-             self.errorMessage = nil // Limpia errores al buscar áreas
-             self.areas = [] // Limpia áreas anteriores
-             self.userService.selectedAreaId = nil // Deselecciona área al cambiar zona
-         }
+        print("⏳ Loading areas via Repository for zone ID: \(zoneId)...")
+        isLoadingAreas = true
+        errorMessage = nil // Limpia errores específicos de áreas
+        areas = [] // Limpia áreas anteriores
+        userService.selectedAreaId = nil // Deselecciona área
 
-        zoneService.fetchAreas(forZoneId: zoneId) { [weak self] result in
-            guard let self = self else { return }
-             DispatchQueue.main.async {
-                 self.isLoadingAreas = false
-                 switch result {
-                 case .success(let fetchedAreas):
-                    print("✅ Fetched \(fetchedAreas.count) areas.")
-                    self.areas = fetchedAreas // Almacena los objetos Area completos
-                 case .failure(let error):
-                     print("❌ Failed to fetch areas:", error.localizedDescription)
-                     self.errorMessage = "Could not load areas for the selected zone."
-                 }
-             }
+        do {
+            // Llama al REPOSITORIO
+            let fetchedAreas = try await zoneRepository.fetchAreas(zoneId: zoneId)
+            print("✅ Fetched \(fetchedAreas.count) areas via Repo for zone \(zoneId).")
+            self.areas = fetchedAreas // Actualiza estado
+
+        } catch { // Error al buscar áreas
+            print("❌ Failed to fetch areas via Repo for zone \(zoneId):", error.localizedDescription)
+            self.errorMessage = "Could not load areas for the selected zone."
+        }
+        // Termina la carga de áreas
+        isLoadingAreas = false
+        // Si loadZones inició esta carga, termina la carga general de zonas también
+        if isLoadingZones { isLoadingZones = false }
+    }
+
+    // MARK: - User Selections (Llama a fetchAreas async)
+
+    func selectZone(zone: Zone) {
+        print("👉 Zone selected: \(zone.zone_name) (ID: \(zone.id))")
+        // Solo actualiza si es diferente para evitar recargas innecesarias
+        guard zone.id != self.selectedZoneId else { return }
+
+        self.selectedZoneId = zone.id
+        // Lanza una Task para llamar a la función async fetchAreas
+        Task {
+            await fetchAreas(for: zone.id)
         }
     }
 
-    // MARK: - User Selections
-    func selectZone(zone: Zone) {
-        print("👉 Zone selected: \(zone.zone_name) (ID: \(zone.zone_id))")
-        self.selectedZoneId = zone.zone_id // Actualiza el ID seleccionado
-        // Inicia la carga de áreas para la nueva zona
-        fetchAreas(for: zone.zone_id)
-    }
-
+    // selectArea (sin cambios, solo actualiza userService)
     func selectArea(area: Area) {
-        print("👉 Area selected: \(area.area_name) (ID: \(area.area_id))")
-        // Actualiza directamente el ID en el servicio compartido
-        self.userService.selectedAreaId = area.area_id
-        // canProceed se actualizará automáticamente porque depende de userService.selectedAreaId
+        print("👉 Area selected: \(area.area_name) (ID: \(area.id))")
+        self.userService.selectedAreaId = area.id
     }
 
-    // MARK: - Navigation
+    // MARK: - Navigation (Sin cambios)
     func proceedToNextStep() {
         if canProceed {
             print("🚀 Proceeding to final sign up...")
@@ -168,3 +148,12 @@ class LocationController: ObservableObject {
         }
     }
 }
+
+// --- Dependencias necesarias ---
+// Asegúrate de tener definidos:
+// protocol ZoneRepository { ... }
+// class APIZoneRepository: ZoneRepository { ... }
+// class ZoneService { func fetchZonesAsync... func fetchAreasAsync... }
+// struct Zone: Codable, Identifiable, Equatable { ... }
+// struct Area: Codable, Identifiable, Equatable { ... }
+// class SignupUserService: ObservableObject { @Published var selectedAreaId: Int? ... }

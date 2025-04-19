@@ -1,23 +1,28 @@
 import SwiftUI
-import SDWebImageSwiftUI // Asegúrate de tener esta dependencia si usas WebImage
+import SDWebImageSwiftUI
 
 struct CartView: View {
     // 1. El controlador gestiona el estado. @StateObject lo mantiene vivo.
     @StateObject private var controller: CartController
 
-    // 2. El servicio de usuario se usa SOLO para inicializar el controller.
-    //    (Asegúrate que esté en el environment de la vista que crea CartView)
-    //    @EnvironmentObject var signInService: SignInUserService // No se necesita aquí directamente
+    // 2. El servicio de usuario SOLO se necesita para el init del controller
+    //    (O se accede vía singleton dentro del init).
+    // @EnvironmentObject var signInService: SignInUserService
 
     // 3. Estado local SOLO para controlar si se muestra el sheet de checkout.
     @State private var showCheckout = false
 
-    // 4. Inicializador que recibe las dependencias para el Controller.
-    //    Este se usa donde creas CartView (ej. en tu TabView).
+    // 4. Inicializador CORRECTO que crea Controller e inyecta Repositorios
     init(signInService: SignInUserService) {
-        // Crea la instancia del controller aquí, inyectando las dependencias.
-        // Si necesitas inyectar servicios específicos (no singletons), hazlo aquí.
-        _controller = StateObject(wrappedValue: CartController(signInService: signInService))
+        let cartRepository = APICartRepository()
+        let orderRepository = APIOrderRepository() // Necesario para prepareCheckoutController
+        let cartController = CartController(
+            signInService: signInService,
+            cartRepository: cartRepository,
+            orderRepository: orderRepository // Pasa el repo de órdenes
+        )
+        self._controller = StateObject(wrappedValue: cartController)
+        print("🛒 CartView initialized and injected Repositories into CartController.")
     }
 
 
@@ -26,156 +31,198 @@ struct CartView: View {
             VStack(spacing: 0) {
                 // --- Encabezado ---
                 HStack {
-                    Text("My Cart")
-                        .font(.headline)
+                    Text("My Cart").font(.headline)
                     Spacer()
-                    // Indicador de carga global (lee del controller)
-                    if controller.isLoading {
-                        ProgressView()
-                            .padding(.trailing)
-                    }
+                    if controller.isLoading { ProgressView().padding(.trailing) }
                 }
                 .padding()
 
                 Divider()
 
-                // --- Mensaje de Error Global (lee del controller) ---
+                // --- Mensaje de Error Global ---
                 if let errorMessage = controller.errorMessage {
                     Text(errorMessage)
-                        .foregroundColor(.red)
-                        .font(.footnote)
-                        .padding(.horizontal)
-                        .padding(.bottom, 5)
-                        .transition(.opacity) // Animación opcional
+                        .foregroundColor(.red).font(.footnote)
+                        .padding(.horizontal).padding(.bottom, 5)
+                        .transition(.opacity)
                 }
-
 
                 // --- Lista de Productos ---
                 ScrollView {
                     VStack(spacing: 0) {
-                        // Mensaje de carrito vacío (condiciones leídas del controller)
+                        // Mensaje de carrito vacío
                         if !controller.isLoading && controller.cartItems.isEmpty && controller.errorMessage == nil {
                             Text("Your cart is empty.")
-                                .foregroundColor(.gray)
-                                .padding(.top, 50) // Un poco de espacio
+                                .foregroundColor(.gray).padding(.top, 50)
                         } else {
-                            // Itera sobre los items publicados por el controller
-                            // Asegúrate que CartItem sea Identifiable (por 'id' o 'productId')
-                            // y que 'quantity' sea 'var' si usas $item
-                            ForEach($controller.cartItems) { $item in // Usando binding
+                            // --- ForEach CORREGIDO ---
+                            ForEach($controller.cartItems) { $item in // $item es Binding<CartItem>
                                 CartRowView(
-                                    item: $item, // Pasa el binding
+                                    item: $item, // OK pasar Binding a CartRowView
                                     removeAction: {
-                                        // Llama directamente al controller
-                                        controller.removeItemFromCart(productId: item.productId)
+                                        // Usa .wrappedValue para acceder al CartItem real
+                                        controller.removeItemFromCart(productId: $item.wrappedValue.productId)
                                     },
                                     updateQuantity: { newQuantity in
-                                        // Llama directamente al controller
-                                        controller.updateCartQuantity(productId: item.productId, newQuantity: newQuantity)
+                                        // Usa .wrappedValue para acceder al CartItem real
+                                        controller.updateCartQuantity(productId: $item.wrappedValue.productId, newQuantity: newQuantity)
                                     }
                                 )
                                 Divider().padding(.leading)
                             }
+                            // --- FIN ForEach CORREGIDO ---
                         }
                     }
                 } // Fin ScrollView
 
                 // --- Botón de Checkout ---
-                // Estado deshabilitado basado en el controller
                 let isCheckoutDisabled = controller.cartItems.isEmpty || controller.activeCartId == nil || controller.isLoading
 
-                Button(action: {
-                    // Solo activa el estado local para mostrar el sheet
-                    showCheckout = true
-                }) {
-                    // El texto podría cambiar si está deshabilitado, o solo el color/opacidad
+                Button(action: { showCheckout = true }) {
                     Text("Go to Checkout")
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                        .padding()
+                        .fontWeight(.bold).foregroundColor(.white).padding()
                         .frame(maxWidth: .infinity)
-                        // Color basado en si está habilitado (lee del controller indirectamente)
-                        .background(isCheckoutDisabled ? Color.gray : Color.green)
-                        .cornerRadius(8)
+                        .background(isCheckoutDisabled ? Color.gray : Color.green).cornerRadius(8)
                 }
                 .padding()
-                // Deshabilitar basado en el estado del controller
                 .disabled(isCheckoutDisabled)
-                // --- Presentación del Sheet de Checkout ---
+                 // Presenta CheckoutView como sheet
                 .sheet(isPresented: $showCheckout) {
-                    // Prepara y presenta CheckoutView
+                    // Llama a la función helper que prepara y presenta
                     prepareAndPresentCheckoutView()
                 }
 
             } // Fin VStack principal
-            .navigationBarHidden(true) // Opcional: decide si realmente necesitas ocultarla
-            .animation(.default, value: controller.cartItems) // Anima cambios en la lista
-            .animation(.default, value: controller.isLoading) // Anima aparición/desaparición del loader
-            .animation(.default, value: controller.errorMessage) // Anima aparición/desaparición del error
-            // --- Carga inicial de datos ---
+            .navigationBarHidden(true) // Oculta barra de navegación si usas NavigationStack interno
+            // Animaciones (requieren que CartItem sea Equatable)
+            .animation(.default, value: controller.cartItems)
+            .animation(.default, value: controller.isLoading)
+            .animation(.default, value: controller.errorMessage)
+            // Carga inicial de datos
             .onAppear {
-                // Llama al método del controller para cargar todo
                 controller.loadCartData()
             }
         } // Fin NavigationStack
     } // Fin body
 
-    /// Función helper para mantener limpio el cuerpo del sheet
-    @ViewBuilder
-    private func prepareAndPresentCheckoutView() -> some View {
-        // 1. Intenta preparar el CheckoutController usando el CartController
-        if let checkoutController = controller.prepareCheckoutController() {
-            // 2. Si tiene éxito, presenta CheckoutView con el controller preparado
-            NavigationStack { // Opcional: Para tener barra de navegación dentro del sheet
-                CheckoutView(controller: checkoutController)
-                // Si CheckoutView necesita otros @EnvironmentObject, asegúrate que estén disponibles aquí.
-                // .environmentObject(someOtherService)
-            }
-        } else {
-            // 3. Si falla (ej. carrito vacío), muestra un mensaje dentro del sheet.
-            //    El errorMessage ya debería estar puesto por prepareCheckoutController.
-            VStack {
-                Spacer()
-                Text(controller.errorMessage ?? "Cannot proceed to checkout.")
-                    .foregroundColor(.red)
-                    .padding()
-                Button("Dismiss") {
-                    showCheckout = false // Cierra el sheet
+    /// Función helper para preparar y mostrar CheckoutView (CORREGIDA)
+        @ViewBuilder
+        private func prepareAndPresentCheckoutView() -> some View {
+            // 1. Obtén los datos necesarios directamente del CartController
+            //    Asegúrate de que el carrito esté activo y no esté vacío.
+            if let cartId = controller.activeCartId, !controller.cartItems.isEmpty {
+                // 2. Llama al inicializador correcto de CheckoutView, pasando los datos
+                NavigationStack { // Opcional: Mantenlo si quieres una barra dentro del sheet
+                    CheckoutView(
+                        cartItems: controller.cartItems, // <- Pasa los items
+                        cartId: cartId                  // <- Pasa el ID del carrito
+                    )
+                    // Si CheckoutView o su controller dependen de SignInUserService vía Environment,
+                    // asegúrate de que esté disponible. Puedes añadirlo aquí o asegurar que
+                    // esté en el environment de CartView.
+                    // .environmentObject(SignInUserService.shared)
                 }
-                .buttonStyle(.bordered)
-                Spacer()
+            } else {
+                // 3. Si no se puede ir al checkout, muestra un error
+                //    El controller.errorMessage puede que ya tenga un mensaje útil.
+                VStack {
+                    Spacer()
+                    Text(controller.errorMessage ?? "Cannot proceed to checkout. Cart is empty or inactive.")
+                        .foregroundColor(.red)
+                        .padding()
+                    Button("Dismiss") {
+                        showCheckout = false // Cierra el sheet
+                    }
+                    .buttonStyle(.bordered)
+                    Spacer()
+                }
             }
         }
-    }
-
 } // Fin struct CartView
 
-// --- Vista de Fila (CartRowView) ---
-// Asegúrate que sea compatible con cómo iteras (con o sin Binding)
-// Este ejemplo asume que sigue usando @Binding
+// MARK: - Vista de Fila (CartRowView)
+
 struct CartRowView: View {
-    @Binding var item: CartItem
+    @Binding var item: CartItem // Recibe el Binding
     var removeAction: () -> Void
     var updateQuantity: (Int) -> Void
 
-    // El cuerpo de CartRowView no necesita cambios respecto a tu versión anterior
-    // ... (tu implementación de HStack con WebImage, Text, Stepper/Buttons, etc.) ...
     var body: some View {
        HStack(alignment: .center, spacing: 8) {
-           WebImage(url: URL(string: item.imageUrl)) // Ejemplo
+           // Usa la URL de la imagen del item
+           WebImage(url: URL(string: item.imageUrl))
                .resizable().scaledToFill().frame(width: 50, height: 50).cornerRadius(8).padding(.leading)
-           VStack(alignment: .leading) { Text(item.name); Text(item.detail).font(.caption).foregroundColor(.gray) }
-           Spacer()
-           HStack {
-               Button { if item.quantity > 1 { updateQuantity(item.quantity - 1) } else { /* Opcional: llamar removeAction si baja a 0 */ } } label: { Image(systemName: "minus.circle").foregroundColor(.green) }
-               Text("\(item.quantity)").frame(minWidth: 20)
-               Button { updateQuantity(item.quantity + 1) } label: { Image(systemName: "plus.circle").foregroundColor(.green) }
+
+           VStack(alignment: .leading) {
+               Text(item.name) // Usa nombre del item
+                   .font(.subheadline).fontWeight(.medium) // Ajusta fuente si es necesario
+               Text(item.detail) // Usa detalle del item
+                   .font(.caption).foregroundColor(.gray)
            }
-           Text(String(format: "$%.2f", item.price * Double(item.quantity))).frame(width: 80, alignment: .trailing)
-           Button(action: removeAction) { Image(systemName: "xmark").foregroundColor(.gray) }.padding(.trailing)
-       }
-       .padding(.vertical, 8)
+           Spacer()
+
+           // Stepper o botones +/- para cantidad
+           HStack(spacing: 5) { // Menos espacio entre botones +/-
+               Button {
+                   // Llama a updateQuantity solo si es mayor a 1
+                   if item.quantity > 1 { updateQuantity(item.quantity - 1) }
+                   // Opcional: Si quieres que al llegar a 1 y presionar menos se elimine:
+                   // else { removeAction() }
+               } label: {
+                   Image(systemName: "minus.circle.fill") // Relleno para mejor click
+                       .foregroundColor(.green.opacity(item.quantity > 1 ? 1.0 : 0.5)) // Atenúa si es 1
+               }
+               .disabled(item.quantity <= 1) // Deshabilita si es 1
+
+               Text("\(item.quantity)") // Muestra cantidad del item
+                   .font(.body).frame(minWidth: 25, alignment: .center) // Ancho mínimo
+
+               Button { updateQuantity(item.quantity + 1) } label: { // Llama a updateQuantity
+                   Image(systemName: "plus.circle.fill") // Relleno
+                       .foregroundColor(.green)
+               }
+           }
+           .padding(.horizontal, 5) // Padding ligero alrededor de +/-/num
+
+           // Precio total del item (precio unitario * cantidad)
+           Text(String(format: "$%.2f", item.price * Double(item.quantity)))
+               .font(.subheadline).fontWeight(.semibold) // Ajusta fuente
+               .frame(width: 80, alignment: .trailing)
+
+           // Botón para eliminar
+           Button(action: removeAction) { // Llama a removeAction
+               Image(systemName: "xmark.circle.fill") // Relleno y más grande
+                   .foregroundColor(.gray.opacity(0.7)) // Color más suave
+                   .font(.title3) // Un poco más grande
+           }
+           .padding(.trailing)
+
+       } // Fin HStack principal
+       .padding(.vertical, 8) // Padding vertical para cada fila
+       // Añade un ID explícito si ForEach tiene problemas (aunque id derivado debería funcionar)
+       // .id(item.id)
    }
 }
 
 
+// MARK: - Preview Provider
+
+struct CartView_Previews: PreviewProvider {
+    static var previews: some View {
+        // Necesita el servicio en el entorno para el init
+        CartView(signInService: SignInUserService.shared) // Pasa el servicio real o un mock
+            .environmentObject(SignInUserService.shared) // Asegura que esté en el entorno
+    }
+}
+
+// --- Asegúrate que existan ---
+// class CartController: ObservableObject { ... }
+// class CheckoutController: ObservableObject { ... } // El que se presenta en el sheet
+// struct CartItem: Identifiable, Equatable { ... }
+// struct DetailedCartProduct: Codable, Identifiable, Equatable { ... } // Usado en el mapeo del controller
+// protocol CartRepository { ... }
+// class APICartRepository: CartRepository { ... }
+// protocol OrderRepository { ... }
+// class APIOrderRepository: OrderRepository { ... }
+// class SignInUserService: ObservableObject { ... }
+// struct CheckoutView: View { init(controller: CheckoutController) ... } // Asegúrate que CheckoutView tenga este init

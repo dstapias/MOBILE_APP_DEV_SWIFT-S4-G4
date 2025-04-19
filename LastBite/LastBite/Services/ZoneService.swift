@@ -4,71 +4,85 @@
 //
 //  Created by David Santiago on 11/03/25.
 //
+
 import Foundation
 
 class ZoneService {
-    static let shared = ZoneService() // ✅ Singleton instance
+    static let shared = ZoneService()
+    private init() {}
 
-    private init() {} // Prevents accidental initialization
-
-    // Fetch Zones from Backend
-    func fetchZones(completion: @escaping (Result<[Zone], Error>) -> Void) {
-        guard let url = URL(string: "\(Constants.baseURL)/zones") else {
-            completion(.failure(NSError(domain: "Invalid URL", code: 0, userInfo: nil)))
-            return
-        }
-
-        URLSession.shared.dataTask(with: url) { data, response, error in
-            if let error = error {
-                print("Error fetching zones:", error.localizedDescription)
-                completion(.failure(error))
-                return
+    // --- Helper (Opcional, reutilizado) ---
+    private func fetchData<T: Decodable>(from url: URL) async throws -> T {
+        do {
+            let (data, response) = try await URLSession.shared.data(from: url)
+            guard let httpResponse = response as? HTTPURLResponse else {
+                throw ServiceError.badServerResponse(statusCode: -1)
             }
+            print("📬 [GET] \(url.absoluteString) -> Status: \(httpResponse.statusCode)")
 
-            guard let data = data else {
-                print("Error: No Data Received")
-                completion(.failure(NSError(domain: "No Data", code: 0, userInfo: nil)))
-                return
+            guard httpResponse.statusCode == 200 else {
+                 print("❌ Response Body on Error (\(httpResponse.statusCode)): \(String(data: data, encoding: .utf8) ?? "No body")")
+                 throw ServiceError.badServerResponse(statusCode: httpResponse.statusCode)
             }
-
             do {
-                let decodedResponse = try JSONDecoder().decode([Zone].self, from: data)
-                completion(.success(decodedResponse))
+                let decoder = JSONDecoder()
+                // decoder.keyDecodingStrategy = .convertFromSnakeCase // Si aplica
+                return try decoder.decode(T.self, from: data)
             } catch {
-                print("JSON Decoding Error:", error.localizedDescription)
-                completion(.failure(error))
+                 print("❌ Decoding error for \(url.absoluteString): \(error)")
+                 print("   Response Data: \(String(data: data, encoding: .utf8) ?? "Non UTF8 data")")
+                throw ServiceError.decodingError(error)
             }
-        }.resume()
+        } catch let error where !(error is ServiceError) {
+             print("❌ Network Error for \(url.absoluteString): \(error)")
+            throw ServiceError.requestFailed(error)
+        }
+    }
+    // --- Fin Helper ---
+
+
+    // MARK: - Async Methods
+
+    /// Fetches all zones asynchronously.
+    func fetchZonesAsync() async throws -> [Zone] {
+        guard let url = URL(string: "\(Constants.baseURL)/zones") else {
+            throw ServiceError.invalidURL
+        }
+        print("📍 ZoneService: Fetching zones from \(url)")
+        return try await fetchData(from: url) // Usa el helper
     }
 
-    // fetch zone areas
-    func fetchAreas(forZoneId zoneId: Int, completion: @escaping (Result<[Area], Error>) -> Void) {
-            guard let url = URL(string: "\(Constants.baseURL)/zones/\(zoneId)/areas") else {
-                completion(.failure(NSError(domain: "Invalid URL", code: 0, userInfo: nil)))
-                return
-            }
-
-            URLSession.shared.dataTask(with: url) { data, response, error in
-                if let error = error {
-                    print("Error fetching areas:", error.localizedDescription)
-                    completion(.failure(error))
-                    return
-                }
-
-                guard let data = data else {
-                    print("Error: No Data Received")
-                    completion(.failure(NSError(domain: "No Data", code: 0, userInfo: nil)))
-                    return
-                }
-
-                do {
-                    let decodedResponse = try JSONDecoder().decode([Area].self, from: data)
-                    completion(.success(decodedResponse)) // ✅ Returns `[Area]` (id + name)
-                } catch {
-                    print("JSON Decoding Error:", error.localizedDescription)
-                    completion(.failure(error))
-                }
-            }.resume()
+    /// Fetches areas for a specific zone asynchronously.
+    func fetchAreasAsync(forZoneId zoneId: Int) async throws -> [Area] {
+        guard let url = URL(string: "\(Constants.baseURL)/zones/\(zoneId)/areas") else {
+            throw ServiceError.invalidURL
         }
-}
+        print("📍 ZoneService: Fetching areas from \(url)")
+        return try await fetchData(from: url) // Usa el helper
+    }
 
+
+    // MARK: - Original Methods (Completion Handlers - Opcional)
+
+    func fetchZones(completion: @escaping (Result<[Zone], Error>) -> Void) {
+        Task {
+            do {
+                let zones = try await fetchZonesAsync()
+                completion(.success(zones))
+            } catch {
+                completion(.failure(error))
+            }
+        }
+    }
+
+    func fetchAreas(forZoneId zoneId: Int, completion: @escaping (Result<[Area], Error>) -> Void) {
+        Task {
+            do {
+                let areas = try await fetchAreasAsync(forZoneId: zoneId)
+                completion(.success(areas))
+            } catch {
+                completion(.failure(error))
+            }
+        }
+    }
+}

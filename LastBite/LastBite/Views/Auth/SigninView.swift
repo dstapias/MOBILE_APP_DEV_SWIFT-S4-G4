@@ -14,13 +14,24 @@ struct SignInView: View {
     // 2. Inicializador (opcional, si necesitas inyectar algo al controller)
     //    Si SignInController usa SignInUserService.shared, no necesitas un init especial.
     init(showSignInView: Binding<Bool>, isLoggedIn: Binding<Bool>) {
-        self._showSignInView = showSignInView
-        self._isLoggedIn = isLoggedIn
-        // Crea el StateObject aquí. Asume que SignInController usa el singleton
-        // o que puedes pasarlo si modificas su init.
-        _controller = StateObject(wrappedValue: SignInController())
-        print("🔑 SignInView initialized.")
-    }
+            // Asigna bindings
+            self._showSignInView = showSignInView
+            self._isLoggedIn = isLoggedIn
+
+            // 1. Crea la instancia del Repositorio
+            //    (APIAuthRepository necesita ambos servicios en su init)
+            let authRepository = APIAuthRepository(
+                signInService: SignInUserService.shared,
+                signupService: SignupUserService.shared
+            )
+
+            // 2. Crea el Controller inyectando el Repositorio
+            let signInController = SignInController(authRepository: authRepository)
+
+            // 3. Asigna al StateObject wrapper
+            self._controller = StateObject(wrappedValue: signInController)
+            print("🔑 SignInView initialized and injected AuthRepository into Controller.")
+        }
 
     var body: some View {
         GeometryReader { geometry in
