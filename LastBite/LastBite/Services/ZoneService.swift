@@ -60,29 +60,4 @@ class ZoneService {
         print("📍 ZoneService: Fetching areas from \(url)")
         return try await fetchData(from: url) // Usa el helper
     }
-
-
-    // MARK: - Original Methods (Completion Handlers - Opcional)
-
-    func fetchZones(completion: @escaping (Result<[Zone], Error>) -> Void) {
-        Task {
-            do {
-                let zones = try await fetchZonesAsync()
-                completion(.success(zones))
-            } catch {
-                completion(.failure(error))
-            }
-        }
-    }
-
-    func fetchAreas(forZoneId zoneId: Int, completion: @escaping (Result<[Area], Error>) -> Void) {
-        Task {
-            do {
-                let areas = try await fetchAreasAsync(forZoneId: zoneId)
-                completion(.success(areas))
-            } catch {
-                completion(.failure(error))
-            }
-        }
-    }
 }

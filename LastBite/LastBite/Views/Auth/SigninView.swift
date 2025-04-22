@@ -127,9 +127,6 @@ struct SignInView: View {
                     .padding(.top, 20)
                     // Deshabilitar si está cargando
                     .disabled(controller.isLoading)
-
-                    // --- Mostrar mensajes de error o éxito del controller ---
-                    // 6. Lee errorMessage y successMessage del controller
                     if let errorMessage = controller.errorMessage {
                         Text(errorMessage)
                             .font(.footnote)
@@ -159,17 +156,13 @@ struct SignInView: View {
                      showSignInView = false
                  }
             }
-            // 8. Ya no necesitas los métodos privados signInUser / resetPassword aquí
-        } // Fin GeometryReader
-    } // Fin body
-} // Fin struct SignInView
+        }
+    }
+}
 
-// --- Preview ---
 struct SignInView_Previews: PreviewProvider {
     static var previews: some View {
-        // La preview necesita los bindings
         SignInView(showSignInView: .constant(true), isLoggedIn: .constant(false))
-            // La preview también necesita el servicio en el entorno si el controller lo usa implicitamente
              .environmentObject(SignInUserService.shared)
     }
 }

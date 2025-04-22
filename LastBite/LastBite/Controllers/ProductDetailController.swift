@@ -8,7 +8,7 @@
 import Foundation
 import Combine
 
-@MainActor // Asegura updates en hilo principal
+@MainActor
 class ProductDetailController: ObservableObject {
 
     @Published var quantity: Int = 1
@@ -16,32 +16,27 @@ class ProductDetailController: ObservableObject {
     @Published var successMessage: String? = nil
     @Published var errorMessage: String? = nil
 
-    let product: Product // El producto que estamos mostrando
+    let product: Product
 
-    // --- CAMBIO 1: Dependencias -> Usa CartRepository ---
     private let signInService: SignInUserService
-    private let cartRepository: CartRepository // <- USA CartRepository
-    // Ya no necesita CartService ni CartProductService
+    private let cartRepository: CartRepository
     private var cancellables = Set<AnyCancellable>()
 
-    // --- CAMBIO 2: Init -> Recibe CartRepository ---
     init(
         product: Product,
         signInService: SignInUserService = SignInUserService.shared,
-        cartRepository: CartRepository // <- Recibe CartRepository
+        cartRepository: CartRepository
     ) {
         self.product = product
         self.signInService = signInService
-        self.cartRepository = cartRepository // <- Guarda el repositorio
+        self.cartRepository = cartRepository
         print("📦 ProductDetailController initialized with Repository for product: \(product.name)")
 
-        // Pipeline para cantidad (sin cambios)
         $quantity
             .map { max(1, $0) }
             .assign(to: &$quantity)
     }
 
-    // --- CAMBIO 3: Acción AddToCart (Ahora Async usando Repo) ---
     func addToCart() async { // Marcado como async
         guard let userId = signInService.userId else {
             errorMessage = "Please sign in to add items to your cart."
@@ -58,20 +53,15 @@ class ProductDetailController: ObservableObject {
         successMessage = nil
 
         do {
-            // 1. Obtener Carrito Activo (usando repo)
-            // Nota: fetchActiveCart lanzará error si no se encuentra o falla la red
             let cart = try await cartRepository.fetchActiveCart(for: userId)
 
-            // 2. Añadir Producto al Carrito (usando repo)
-            // Asume que addProductToCart en el repo/servicio maneja la lógica
-            // de añadir nuevo o actualizar cantidad si ya existe.
             try await cartRepository.addProductToCart(cartId: cart.id, productId: product.id, quantity: quantity)
 
             // Éxito
             print("✅ Product \(product.id) added/updated in cart \(cart.id) via Repo. Quantity: \(quantity)")
             successMessage = "\(quantity) x \(product.name) added!"
              // Limpia el mensaje después de un tiempo
-             Task { // Tarea corta para el delay sin bloquear
+             Task {
                  try? await Task.sleep(nanoseconds: 2_500_000_000) // Espera 2.5 segundos
                  // Verifica si el mensaje sigue siendo el mismo antes de limpiarlo
                  if self.successMessage == "\(quantity) x \(self.product.name) added!" {
@@ -92,5 +82,4 @@ class ProductDetailController: ObservableObject {
         isLoading = false
     }
 
-    // 4. El método privado addProductToSpecificCart ya no es necesario aquí
 }

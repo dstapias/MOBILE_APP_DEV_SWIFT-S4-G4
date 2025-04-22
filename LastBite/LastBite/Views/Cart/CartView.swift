@@ -5,10 +5,6 @@ struct CartView: View {
     // 1. El controlador gestiona el estado. @StateObject lo mantiene vivo.
     @StateObject private var controller: CartController
 
-    // 2. El servicio de usuario SOLO se necesita para el init del controller
-    //    (O se accede vía singleton dentro del init).
-    // @EnvironmentObject var signInService: SignInUserService
-
     // 3. Estado local SOLO para controlar si se muestra el sheet de checkout.
     @State private var showCheckout = false
 
@@ -109,18 +105,13 @@ struct CartView: View {
         @ViewBuilder
         private func prepareAndPresentCheckoutView() -> some View {
             // 1. Obtén los datos necesarios directamente del CartController
-            //    Asegúrate de que el carrito esté activo y no esté vacío.
             if let cartId = controller.activeCartId, !controller.cartItems.isEmpty {
                 // 2. Llama al inicializador correcto de CheckoutView, pasando los datos
-                NavigationStack { // Opcional: Mantenlo si quieres una barra dentro del sheet
+                NavigationStack {
                     CheckoutView(
                         cartItems: controller.cartItems, // <- Pasa los items
                         cartId: cartId                  // <- Pasa el ID del carrito
                     )
-                    // Si CheckoutView o su controller dependen de SignInUserService vía Environment,
-                    // asegúrate de que esté disponible. Puedes añadirlo aquí o asegurar que
-                    // esté en el environment de CartView.
-                    // .environmentObject(SignInUserService.shared)
                 }
             } else {
                 // 3. Si no se puede ir al checkout, muestra un error
@@ -138,12 +129,12 @@ struct CartView: View {
                 }
             }
         }
-} // Fin struct CartView
+}
 
 // MARK: - Vista de Fila (CartRowView)
 
 struct CartRowView: View {
-    @Binding var item: CartItem // Recibe el Binding
+    @Binding var item: CartItem
     var removeAction: () -> Void
     var updateQuantity: (Int) -> Void
 
@@ -162,12 +153,10 @@ struct CartRowView: View {
            Spacer()
 
            // Stepper o botones +/- para cantidad
-           HStack(spacing: 5) { // Menos espacio entre botones +/-
+           HStack(spacing: 5) {
                Button {
                    // Llama a updateQuantity solo si es mayor a 1
                    if item.quantity > 1 { updateQuantity(item.quantity - 1) }
-                   // Opcional: Si quieres que al llegar a 1 y presionar menos se elimine:
-                   // else { removeAction() }
                } label: {
                    Image(systemName: "minus.circle.fill") // Relleno para mejor click
                        .foregroundColor(.green.opacity(item.quantity > 1 ? 1.0 : 0.5)) // Atenúa si es 1
@@ -197,10 +186,8 @@ struct CartRowView: View {
            }
            .padding(.trailing)
 
-       } // Fin HStack principal
+       }
        .padding(.vertical, 8) // Padding vertical para cada fila
-       // Añade un ID explícito si ForEach tiene problemas (aunque id derivado debería funcionar)
-       // .id(item.id)
    }
 }
 
@@ -214,15 +201,3 @@ struct CartView_Previews: PreviewProvider {
             .environmentObject(SignInUserService.shared) // Asegura que esté en el entorno
     }
 }
-
-// --- Asegúrate que existan ---
-// class CartController: ObservableObject { ... }
-// class CheckoutController: ObservableObject { ... } // El que se presenta en el sheet
-// struct CartItem: Identifiable, Equatable { ... }
-// struct DetailedCartProduct: Codable, Identifiable, Equatable { ... } // Usado en el mapeo del controller
-// protocol CartRepository { ... }
-// class APICartRepository: CartRepository { ... }
-// protocol OrderRepository { ... }
-// class APIOrderRepository: OrderRepository { ... }
-// class SignInUserService: ObservableObject { ... }
-// struct CheckoutView: View { init(controller: CheckoutController) ... } // Asegúrate que CheckoutView tenga este init

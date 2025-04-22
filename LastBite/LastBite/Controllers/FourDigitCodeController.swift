@@ -34,7 +34,6 @@ class FourDigitCodeController: ObservableObject {
     init(authRepository: AuthRepository) { // Recibe el repositorio
         self.authRepository = authRepository // Guarda el repositorio
         print("🔢 FourDigitCodeController initialized with Repository.")
-        // No necesita pipeline de Combine si el didSet ya hace la validación simple
     }
 
     // MARK: - Public Actions (Usa Async/Await y Repositorio)
@@ -47,7 +46,6 @@ class FourDigitCodeController: ObservableObject {
         }
         print("🔢 Controller attempting to verify code via Repository: \(verificationCode)...")
 
-        // Ya no necesitamos asignar a userService.verificationCode
 
         isLoading = true
         errorMessage = nil
@@ -59,23 +57,15 @@ class FourDigitCodeController: ObservableObject {
                 print("✅ Controller: Code verified successfully via Repo!")
                 self.showLocationView = true // Navega en éxito
 
-            } catch let error as ServiceError { // Captura errores específicos
+            } catch let error as ServiceError {
                  print("❌ Controller: Code verification failed via Repo: \(error.localizedDescription)")
-                 self.errorMessage = error.localizedDescription // Muestra error específico
-                 // Considera limpiar el código ingresado en caso de error
-                 // self.verificationCode = ""
-            } catch { // Otros errores
+                 self.errorMessage = error.localizedDescription
+            } catch {
                  print("❌ Controller: Unexpected code verification error via Repo: \(error.localizedDescription)")
                  self.errorMessage = "Verification failed. Please check the code or request a new one."
-                 // self.verificationCode = ""
             }
              // Termina la carga
             self.isLoading = false
         }
     }
 }
-
-// --- Asegúrate que existan ---
-// protocol AuthRepository { func verifyPhoneCode(code: String) async throws ... }
-// class APIAuthRepository: AuthRepository { ... }
-// enum ServiceError: Error, LocalizedError { ... }

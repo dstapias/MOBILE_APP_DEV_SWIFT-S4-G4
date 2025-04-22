@@ -73,40 +73,4 @@ class StoreService {
         }
         return try await fetchData(from: url)
     }
-
-
-    // MARK: - Original Methods (Completion Handlers - Opcional)
-
-    func fetchStores(completion: @escaping (Result<[Store], Error>) -> Void) {
-        Task { // Llama a la nueva versión async desde la vieja (si necesitas mantenerla)
-            do {
-                let stores = try await fetchStoresAsync()
-                completion(.success(stores))
-            } catch {
-                completion(.failure(error))
-            }
-        }
-    }
-
-    func fetchNearbyStores(latitude: Double, longitude: Double, completion: @escaping (Result<[Store], Error>) -> Void) {
-         Task {
-             do {
-                 let stores = try await fetchNearbyStoresAsync(latitude: latitude, longitude: longitude)
-                 completion(.success(stores))
-             } catch {
-                 completion(.failure(error))
-             }
-         }
-    }
-
-    func fetchTopStores(completion: @escaping (Result<[Store], Error>) -> Void) {
-         Task {
-             do {
-                 let stores = try await fetchTopStoresAsync()
-                 completion(.success(stores))
-             } catch {
-                 completion(.failure(error))
-             }
-         }
-    }
 }

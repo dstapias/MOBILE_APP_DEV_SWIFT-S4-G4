@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import SDWebImageSwiftUI // Si la usas
+import SDWebImageSwiftUI
 
 struct ProductDetailView: View {
     // 1. Controller como StateObject (Correcto)
@@ -24,7 +24,7 @@ struct ProductDetailView: View {
         let detailController = ProductDetailController(
             product: product,
             signInService: signInService,
-            cartRepository: cartRepository // <- Inyectar Cart Repo
+            cartRepository: cartRepository
         )
 
         // 4. Asigna al StateObject wrapper
@@ -37,7 +37,6 @@ struct ProductDetailView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
 
-                // Imagen (Correcto, usa controller.product)
                 WebImage(url: URL(string: controller.product.image))
                     .resizable()
                     .indicator(.activity)
@@ -47,13 +46,11 @@ struct ProductDetailView: View {
                     .frame(height: 250)
                     .clipped()
 
-                // Título e Info (Correcto, usa controller.product)
                 VStack(alignment: .leading, spacing: 4) {
                     Text(controller.product.name)
                         .font(.title2)
                         .fontWeight(.bold)
                     HStack {
-                        // Text(controller.product.weight ?? "") // Ejemplo
                         Spacer()
                         Text(String(format: "$%.2f", controller.product.unit_price))
                             .font(.title3)
@@ -62,7 +59,6 @@ struct ProductDetailView: View {
                 }
                 .padding(.horizontal)
 
-                // Cantidad (Correcto, usa $controller.quantity)
                 HStack(spacing: 16) {
                     Text("Quantity").font(.headline)
                     Spacer()
@@ -72,7 +68,6 @@ struct ProductDetailView: View {
                 }
                 .padding(.horizontal)
 
-                // Detalles (Correcto, usa controller.product)
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Product Detail").font(.headline)
                     Text(controller.product.detail ?? "No description available.")
@@ -80,7 +75,6 @@ struct ProductDetailView: View {
                 }
                 .padding(.horizontal)
 
-                // --- Feedback de la Acción (Correcto, usa controller) ---
                  VStack {
                      if let message = controller.successMessage {
                          Text(message)
@@ -99,14 +93,12 @@ struct ProductDetailView: View {
                  .animation(.default, value: controller.errorMessage)
 
 
-                // --- Botón "Add To Basket" ACTUALIZADO (Correcto) ---
                 Button(action: {
-                    // Llama al método async DENTRO de una Task
                     Task {
                        await controller.addToCart()
                     }
                 }) {
-                    ZStack { // Contenido del botón (Correcto)
+                    ZStack {
                         if controller.isLoading {
                              ProgressView().progressViewStyle(CircularProgressViewStyle(tint: .white))
                         } else {
@@ -117,17 +109,16 @@ struct ProductDetailView: View {
                     .background(controller.isLoading ? Color.gray : Color.green).cornerRadius(8)
                 }
                 .padding(.horizontal).padding(.top, 8)
-                .disabled(controller.isLoading) // Estado disabled (Correcto)
+                .disabled(controller.isLoading)
 
-            } // Fin VStack principal
+            }
             .padding(.vertical)
-        } // Fin ScrollView
+        }
         .navigationTitle("Product Detail") // Título
         .navigationBarTitleDisplayMode(.inline) // Modo del título
-    } // Fin body
-} // Fin struct ProductDetailView
+    }
+}
 
-// --- Vista TagView (Si la usas, debería estar definida) ---
 struct TagView: View {
     let text: String
     var body: some View {
@@ -144,30 +135,11 @@ struct TagView: View {
 struct ProductDetailView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
-            // Crea un producto de ejemplo para la preview
              ProductDetailView(product: Product(
                  product_id: 1, name: "Preview Apple", detail: "Preview Description",
                  unit_price: 1.99, image: "https://via.placeholder.com/300", score: 4.0, store_id: 1, product_type: "Fruit"
              ))
         }
-       .environmentObject(SignInUserService.shared) // Necesario si el controller lo usa
+       .environmentObject(SignInUserService.shared)
     }
 }
-
-// --- Modelos necesarios (Asegúrate que estén definidos y sean correctos) ---
-// struct Product: Codable, Identifiable, Equatable { ... }
-// struct Tag: Codable, Identifiable, Equatable { ... }
-// struct Store: Codable, Identifiable, Equatable { ... }
-// struct Cart: Codable, Identifiable, Equatable { ... }
-// struct CartItem: Identifiable, Equatable { ... }
-// struct DetailedCartProduct: Codable, Identifiable, Equatable { ... }
-
-// --- Controller (Asegúrate que esté definido como en el paso anterior) ---
-// @MainActor class ProductDetailController: ObservableObject { ... }
-
-// --- Repositorio (Asegúrate que esté definido y sea accesible) ---
-// protocol CartRepository { ... }
-// class APICartRepository: CartRepository { ... }
-
-// --- Servicio (Asegúrate que esté definido y sea accesible) ---
-// class SignInUserService: ObservableObject { ... }

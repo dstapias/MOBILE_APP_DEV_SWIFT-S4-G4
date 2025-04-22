@@ -11,12 +11,7 @@ struct FinalSignUpView: View {
 
     // 2. Estado local solo para UI (visibilidad contraseña)
     @State private var isPasswordVisible: Bool = false
-
-    // 3. El servicio ya no se observa directamente aquí
-    // @ObservedObject var userService = SignupUserService.shared // ELIMINADO
-
-    // 4. Estados locales de carga/error/navegación ELIMINADOS
-
+    
     // 5. Inicializador
     init(showFinalSignUpView: Binding<Bool>, isLoggedIn: Binding<Bool>) { // Mantiene sus bindings
         self._showFinalSignUpView = showFinalSignUpView
@@ -24,12 +19,11 @@ struct FinalSignUpView: View {
 
         // 1. Crear instancia del Repositorio
         let authRepository = APIAuthRepository(
-            signInService: .shared, // APIAuthRepository necesita ambos servicios
+            signInService: .shared, 
             signupService: .shared
         )
 
         // 2. Crear el Controller inyectando el Repositorio
-        //    (No necesita pasar signupStateService explícitamente si el controller usa el singleton)
         let finalController = FinalSignupController(authRepository: authRepository)
 
         // 3. Asignar al StateObject wrapper
@@ -112,13 +106,10 @@ struct FinalSignUpView: View {
                 Text("By continuing you agree to our **Terms of Service** and **Privacy Policy**.")
                     .font(.footnote).foregroundColor(.gray).padding(.top, 5)
 
-                // --- Submit Button ---
                 Button(action: {
-                    // 8. Llama a la acción del controller
                     controller.registerUser()
                 }) {
                     ZStack {
-                        // 9. Muestra ProgressView basado en controller.isLoading
                         if controller.isLoading {
                             ProgressView()
                                 .progressViewStyle(CircularProgressViewStyle(tint: .white))
@@ -127,30 +118,24 @@ struct FinalSignUpView: View {
                         }
                     }
                     .frame(maxWidth: .infinity, minHeight: 50)
-                    // 10. Estado disabled/color basado en controller
                     .background(!controller.isFormValid || controller.isLoading ? Color.gray : Color.green)
                     .cornerRadius(10)
-                     // Opcional: Opacidad para feedback visual
                      .opacity(!controller.isFormValid || controller.isLoading ? 0.6 : 1.0)
                 }
                 .padding(.top, 10)
-                 // 10. Estado disabled basado en controller
                 .disabled(!controller.isFormValid || controller.isLoading)
 
-                // --- Mensaje de Error General del Controller ---
                 if let error = controller.errorMessage {
                     Text(error)
                         .font(.footnote).foregroundColor(.red).padding(.top, 5)
                 }
 
-                Spacer() // Empuja link de Sign-in hacia abajo
+                Spacer()
 
-                // --- Sign-in Redirect ---
                 HStack {
                     Text("Already have an account?")
                         .font(.footnote).foregroundColor(.gray)
                     Button(action: {
-                        // 11. Llama a la acción del controller para navegar
                         controller.goToSignIn()
                     }) {
                         Text("Sign-in")
@@ -159,60 +144,37 @@ struct FinalSignUpView: View {
                 }
                 .padding(.bottom, 20)
 
-            } // Fin VStack principal
+            }
             .padding(.horizontal, 30)
-             // Quitado frame maxWidth para permitir centrado natural
-             // .frame(maxWidth: geometry.size.width * 0.9) // Esto podría no ser necesario
 
-        } // Fin GeometryReader
-        // 12. Alert de éxito bindeado al controller
+
+        }
         .alert("Success", isPresented: $controller.showSuccessMessage) {
              Button("OK") {
-                 // Llama al método del controller al cerrar el alert
                  controller.goToSignIn()
              }
         } message: {
              Text("User created successfully!")
         }
-         // 13. fullScreenCover para navegar a SignIn bindeado al controller
-         //    Nota: Necesita el binding $isLoggedIn que viene de la vista padre
         .fullScreenCover(isPresented: $controller.navigateToSignIn) {
-            // Cierra esta vista primero ANTES de mostrar SignIn
-            // Esto se maneja cambiando el estado que presentó esta vista
-            // La forma más limpia es que el Coordinator/VistaPadre observe el cambio
-            // en isLoggedIn o un estado similar y cambie la vista principal.
-            // Presentar SignInView directamente aquí puede llevar a jerarquías complejas.
-
-            // Solución Simple (puede dar warnings de jerarquía):
+            
              SignInView(showSignInView: $controller.navigateToSignIn, isLoggedIn: $isLoggedIn)
                 .onAppear {
-                     // Cierra esta vista (FinalSignUpView) una vez que SignInView aparece
-                     // Esto asume que showFinalSignUpView es el binding correcto que controla ESTA vista
                      showFinalSignUpView = false
                  }
         }
          .onAppear {
-             // 14. Lógica de onAppear (setear userType) movida al Controller si fuera necesario,
-             //     o se puede quedar aquí si es específico de la inicialización de la vista.
-             //     Pero como modifica userService, mejor en el controller o al inicio del flujo.
-             // userService.userType = Constants.USER_TYPE_CUSTOMER // Ya no se accede directamente
-             // Si necesitas esto, haz que el controller lo haga en su init o en una función.
          }
-         // 15. Funciones isValidEmail, validateFields ELIMINADAS de la vista
-         // 16. Propiedad computada isSubmitDisabled ELIMINADA de la vista
 
-    } // Fin body
-} // Fin struct FinalSignUpView
+    }
+}
 
-// --- Preview ---
 struct FinalSignUpView_Previews: PreviewProvider {
     static var previews: some View {
         FinalSignUpView(
             showFinalSignUpView: .constant(true),
-            // showSignInView: .constant(false), // Este binding no parece usarse aquí
             isLoggedIn: .constant(false)
         )
-        // Necesita el servicio si el controller lo usa implícitamente
        .environmentObject(SignupUserService.shared)
     }
 }

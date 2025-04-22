@@ -9,6 +9,7 @@ import SwiftUI
 
 struct OrderAcceptedView: View {
     @State private var navigateToHome = false
+    @AppStorage("isLoggedIn") private var isLoggedIn = true
 
     var body: some View {
         NavigationStack {

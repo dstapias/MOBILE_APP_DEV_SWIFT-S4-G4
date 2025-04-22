@@ -15,35 +15,31 @@ class HomeController: ObservableObject {
     @Published var storeItems: [CategoryItemData] = []
     @Published var nearbyStores: [CategoryItemData] = []
     @Published var forYouItems: [CategoryItemData] = []
-    @Published var activeOrders: [Order] = [] // <- Los datos vienen del OrderRepository
+    @Published var activeOrders: [Order] = []
     @Published var isLoading: Bool = false
     @Published var errorMessage: String? = nil
 
-    // --- CAMBIO 1: Dependencias (Ahora ambos Repos) ---
     private let signInService: SignInUserService
     private let locationManager: LocationManager
     private let storeRepository: StoreRepository
-    private let orderRepository: OrderRepository // <- USA OrderRepository
+    private let orderRepository: OrderRepository
     private var cancellables = Set<AnyCancellable>()
 
-    // --- CAMBIO 2: Init (Recibe ambos Repos) ---
     init(
         signInService: SignInUserService,
         locationManager: LocationManager,
         storeRepository: StoreRepository,
-        orderRepository: OrderRepository // <- Recibe OrderRepository
+        orderRepository: OrderRepository
     ) {
         self.signInService = signInService
         self.locationManager = locationManager
         self.storeRepository = storeRepository
-        self.orderRepository = orderRepository // <- Guarda OrderRepository
+        self.orderRepository = orderRepository
         print("🏠 HomeController initialized with ALL Repositories.")
         subscribeToLocationUpdates()
     }
 
-    // --- Observation Setup (Sin Cambios) ---
     private func subscribeToLocationUpdates() {
-        // ... (código igual que antes, llama a fetchNearbyStores async) ...
         print("🏠 Setting up location observation...")
         locationManager.$latitude.combineLatest(locationManager.$longitude)
             .debounce(for: .seconds(1), scheduler: RunLoop.main)
@@ -95,8 +91,7 @@ class HomeController: ObservableObject {
         }
     }
 
-    // Métodos de Store (ya usan storeRepository, sin cambios aquí)
-    func fetchNearbyStores(location: CLLocation) async { /* ... usa storeRepository ... */
+    func fetchNearbyStores(location: CLLocation) async {
         print("⏳ Fetching nearby stores via Repository...")
         do {
             let stores = try await storeRepository.fetchNearbyStores(location: location)
@@ -110,13 +105,11 @@ class HomeController: ObservableObject {
     private func fetchTopStores() async throws -> [Store] { try await storeRepository.fetchTopStores() }
 
 
-    // --- CAMBIO 3: Métodos de Order usan OrderRepository ---
-    // Marcado con throws para que loadInitialData maneje el error
     func fetchNotReceivedOrders() async throws {
         guard let userId = signInService.userId else {
             self.activeOrders = [] // Limpia si no hay usuario
             print("ℹ️ Cannot fetch orders, user not logged in.")
-            return // No es un error lanzable si no hay usuario
+            return
         }
         print("⏳ Fetching active orders via Repository for user \(userId)...")
         // Llama al repositorio directamente
@@ -125,7 +118,6 @@ class HomeController: ObservableObject {
         print("✅ Active orders fetched via Repository: \(self.activeOrders.count)")
     }
 
-    // --- CAMBIO 4: Acción de Order usa OrderRepository ---
     func receiveOrder(orderId: Int) async {
         print("📦 Marking order \(orderId) as received via Repository...")
         self.errorMessage = nil // Limpia errores antes de intentar

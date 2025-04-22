@@ -1,9 +1,8 @@
 import SwiftUI
 
 struct FourDigitCodeView: View {
-    // Bindings para control parental (sin cambios)
     @Binding var showFourDigitCodeView: Bool
-    @Binding var showSignInView: Bool // Sigue siendo necesario para pasarlo a LocationView
+    @Binding var showSignInView: Bool
     @Binding var isLoggedIn: Bool
 
     // 1. Usa StateObject para el nuevo Controller
@@ -11,11 +10,6 @@ struct FourDigitCodeView: View {
 
     // 2. FocusState se mantiene en la Vista
     @FocusState private var isCodeFocused: Bool
-
-    // 3. El servicio ya no se observa directamente aquí
-    // @ObservedObject var userService = SignupUserService.shared // ELIMINADO
-
-    // 4. Estado local de UI (isLoading, errorMessage, showLocationView) ELIMINADO
 
     // 5. Inicializador
     init(showFourDigitCodeView: Binding<Bool>, showSignInView: Binding<Bool>, isLoggedIn: Binding<Bool>) {
@@ -25,7 +19,7 @@ struct FourDigitCodeView: View {
 
         // 1. Crear instancia del Repositorio
         let authRepository = APIAuthRepository(
-            signInService: .shared, // Asume que APIAuthRepository los necesita
+            signInService: .shared,
             signupService: .shared
         )
 
@@ -50,14 +44,12 @@ struct FourDigitCodeView: View {
                  }
                 .frame(maxWidth: .infinity)
 
-                // Título (sin cambios)
                 Text("Enter your 6-digit code")
                     .font(.title).bold()
                     .padding(.horizontal, 20).padding(.top, 20)
 
                 // --- Input de Código ---
                 VStack {
-                    // 6. Display del código (lee del controller)
                     HStack(spacing: 15) {
                         ForEach(0..<6, id: \.self) { index in
                             Text(controller.verificationCode.count > index ? "•" : "_")
@@ -72,13 +64,12 @@ struct FourDigitCodeView: View {
                     // 7. TextField oculto bindeado al controller
                     TextField("", text: $controller.verificationCode)
                         .keyboardType(.numberPad)
-                        .focused($isCodeFocused) // Control de foco (sin cambios)
-                        .textContentType(.oneTimeCode) // Ayuda al autocompletado (sin cambios)
-                        .frame(width: 1, height: 1).opacity(0.01) // Oculto (sin cambios)
-                        // 8. El .onChange para limitar longitud ya no es necesario aquí (lo hace el controller)
-                        .onAppear { isCodeFocused = true } // Abre teclado (sin cambios)
+                        .focused($isCodeFocused)
+                        .textContentType(.oneTimeCode)
+                        .frame(width: 1, height: 1).opacity(0.01)
+                        .onAppear { isCodeFocused = true }
 
-                } // Fin VStack Input
+                }
                 .frame(maxWidth: .infinity, alignment: .center)
 
                 // Muestra errores del controller
@@ -91,18 +82,15 @@ struct FourDigitCodeView: View {
                 }
 
 
-                Spacer() // Empuja el botón hacia abajo
+                Spacer()
 
-                // --- Botón Siguiente/Verificar ---
                 Button(action: {
-                    // 9. Llama a la acción del controller
                     controller.verifyCode()
                 }) {
-                    // 10. Muestra ProgressView basado en controller.isLoading
                     if controller.isLoading {
                         ProgressView()
-                            .frame(width: 44, height: 44) // Tamaño similar al círculo
-                            .background(Color.gray) // Fondo mientras carga
+                            .frame(width: 44, height: 44)
+                            .background(Color.gray)
                             .clipShape(Circle())
                     } else {
                         Image(systemName: "arrow.right")
@@ -118,28 +106,23 @@ struct FourDigitCodeView: View {
                  // 12. Estado disabled basado en controller
                 .disabled(!controller.isCodeComplete || controller.isLoading)
 
-            } // Fin VStack principal
-            .navigationBarBackButtonHidden(false) // ¿Seguro que quieres esto si tienes botón custom?
-            .navigationTitle("6 Digit Code") // Título de navegación
-            // 13. fullScreenCover usa el estado del controller
+            }
+            .navigationBarBackButtonHidden(false)
+            .navigationTitle("6 Digit Code")
             .fullScreenCover(isPresented: $controller.showLocationView) {
-                 // Pasa los bindings necesarios a la siguiente vista
                  LocationView(showLocationView: $controller.showLocationView, showSignInView: $showSignInView, isLoggedIn: $isLoggedIn)
             }
-        } // Fin GeometryReader
-    } // Fin body
-} // Fin struct FourDigitCodeView
+        }
+    }
+}
 
-// --- Preview ---
 struct FourDigitCodeView_Previews: PreviewProvider {
     static var previews: some View {
-        // Necesita los bindings para la preview
         FourDigitCodeView(
             showFourDigitCodeView: .constant(true),
             showSignInView: .constant(false),
             isLoggedIn: .constant(false)
         )
-         // Necesita el servicio si el controller lo usa implícitamente
         .environmentObject(SignupUserService.shared)
     }
 }

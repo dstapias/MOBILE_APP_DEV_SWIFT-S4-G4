@@ -1,16 +1,13 @@
 import SwiftUI
 
 struct SignupView: View {
-    // Bindings para control parental (sin cambios)
     @Binding var showSignupView: Bool
     @Binding var showSignInView: Bool
     @Binding var isLoggedIn: Bool
 
     @StateObject private var controller: SignupController
 
-        // --- INICIALIZADOR CORREGIDO ---
         init(showSignupView: Binding<Bool>, showSignInView: Binding<Bool>, isLoggedIn: Binding<Bool>) {
-            // Asigna los bindings (sin cambios)
             self._showSignupView = showSignupView
             self._showSignInView = showSignInView
             self._isLoggedIn = isLoggedIn
@@ -22,7 +19,6 @@ struct SignupView: View {
             )
 
             // 2. Crea el Controller CORRECTO (SignupController) inyectando el Repositorio
-            //    Asegúrate que SignupController tenga init(authRepository: AuthRepository)
             let signupController = SignupController(authRepository: authRepository)
 
             // 3. Asigna al StateObject wrapper
@@ -33,7 +29,6 @@ struct SignupView: View {
     var body: some View {
         GeometryReader { geometry in
             VStack {
-                // Botón Volver (sin cambios)
                 HStack {
                     Button(action: { showSignupView = false }) {
                         Image(systemName: "chevron.left").foregroundColor(.black).font(.title2)
@@ -45,7 +40,6 @@ struct SignupView: View {
 
                 Spacer(minLength: geometry.size.height * 0.05)
 
-                // Imagen y Textos (sin cambios)
                 Image("bag_of_fruits")
                     .resizable().scaledToFit()
                     .frame(width: min(219, geometry.size.width * 0.5), height: min(384, geometry.size.height * 0.35))
@@ -65,7 +59,6 @@ struct SignupView: View {
                     // 3. Llama a la acción del controller
                     controller.startPhoneNumberSignup()
                 }) {
-                    // Estilo del botón (sin cambios)
                     HStack {
                          Image("colombia_flag")
                             .resizable().scaledToFit().frame(width: 20, height: 14)
@@ -81,7 +74,6 @@ struct SignupView: View {
 
                 Divider().padding(.horizontal, 40)
 
-                // Texto "Or connect..." (sin cambios)
                 Text("Or connect with social media")
                     .font(.footnote).foregroundColor(.gray)
                     .padding(.top, 20)
@@ -89,7 +81,6 @@ struct SignupView: View {
 
                 // Botones Sociales
                 VStack(spacing: 15) {
-                    // 4. Llama a las acciones correspondientes del controller
                     socialButton(image: "google_login", text: "Continue with Google", color: Color.blue) {
                         controller.signInWithGoogle()
                     }
@@ -101,19 +92,15 @@ struct SignupView: View {
                 .padding(.top, 20)
 
                 Spacer()
-            } // Fin VStack Principal
+            }
             .frame(width: geometry.size.width, height: geometry.size.height)
-            .padding() // Considera si este padding general es necesario o causa doble padding
-            // 5. fullScreenCover usa la propiedad publicada del controller
+            .padding()
             .fullScreenCover(isPresented: $controller.showPhoneNumberView) {
-                 // Pasa los bindings necesarios a la siguiente vista
-                 // Nota: PhoneNumberView ya debería estar refactorizada
                  PhoneNumberView(showPhoneNumberView: $controller.showPhoneNumberView, showSignInView: $showSignInView, isLoggedIn: $isLoggedIn)
             }
-        } // Fin GeometryReader
-    } // Fin body
+        }
+    }
 
-    // Componente botón social ahora acepta una acción
     private func socialButton(image: String, text: String, color: Color, action: @escaping () -> Void) -> some View {
         Button(action: action) { // <--- Usa la acción pasada
             HStack {
@@ -130,6 +117,6 @@ struct SignupView: View {
             .cornerRadius(10)
         }
     }
-} // Fin struct SignupView
+}
 
 

@@ -29,11 +29,6 @@ struct MainTabView: View {
                     Label("Logout", systemImage: "arrow.backward.circle")
                 }
         }
-        // 3. ¡Importante! Asegúrate de que donde USAS MainTabView,
-        //    hayas puesto signInService en el entorno. Ejemplo:
-        //    En tu archivo App.swift o ContentView:
-        //    MainTabView()
-        //        .environmentObject(SignInUserService.shared) // o la instancia que uses
     }
 }
 

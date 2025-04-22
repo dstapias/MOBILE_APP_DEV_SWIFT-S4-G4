@@ -1,34 +1,30 @@
 import SwiftUI
 
 struct LocationView: View {
-    // Bindings para control parental (sin cambios)
     @Binding var showLocationView: Bool
-    @Binding var showSignInView: Bool // Parece no usarse aquí, ¿quizás en FinalSignUpView?
+    @Binding var showSignInView: Bool
     @Binding var isLoggedIn: Bool
 
     // 1. El Controller maneja el estado y la lógica
     @StateObject private var controller: LocationController
 
     // 2. El servicio de usuario se usa indirectamente a través del controller
-    //    o directamente para leer el estado compartido (selectedAreaId)
-    @ObservedObject var userService = SignupUserService.shared // Lo mantenemos para leer selectedAreaId directamente
+    @ObservedObject var userService = SignupUserService.shared
 
-    // 3. Inicializador (asume que userService es singleton o inyectado antes)
     init(showLocationView: Binding<Bool>, showSignInView: Binding<Bool>, isLoggedIn: Binding<Bool>) {
             self._showLocationView = showLocationView
             self._showSignInView = showSignInView
             self._isLoggedIn = isLoggedIn
 
             // 1. Crear instancia del Repositorio
-            let zoneRepository = APIZoneRepository() // <- Crear Repo
+            let zoneRepository = APIZoneRepository()
 
-            // 2. (Opcional) Obtener otras dependencias si no son singletons
             let userService = SignupUserService.shared
 
             // 3. Crear el Controller inyectando el Repositorio
             let locationController = LocationController(
                 userService: userService,
-                zoneRepository: zoneRepository // <- Inyectar Repo
+                zoneRepository: zoneRepository
             )
 
             // 4. Asignar al StateObject
@@ -39,7 +35,6 @@ struct LocationView: View {
     var body: some View {
         GeometryReader { geometry in
             VStack {
-                // Botón de volver (sin cambios)
                 HStack {
                     Button(action: { showLocationView = false }) {
                         Image(systemName: "chevron.left").foregroundColor(.black).font(.title2)
@@ -48,7 +43,6 @@ struct LocationView: View {
                     Spacer()
                 }
 
-                // Icono y Títulos (sin cambios)
                 Image("location_icon").resizable().scaledToFit().frame(width: 80, height: 80).padding(.top, 20)
                 Text("Select Your Location").font(.title2).bold().padding(.top, 10)
                 Text("Switch on your location to stay in tune with what’s happening in your area")
@@ -83,7 +77,6 @@ struct LocationView: View {
                                 Spacer()
                                 Image(systemName: "chevron.down")
                             }
-                            // Estilos del label (sin cambios)
                             .frame(height: 40).padding(.horizontal, 10)
                             .background(Color.gray.opacity(0.1)).cornerRadius(10)
                         }
@@ -106,14 +99,12 @@ struct LocationView: View {
                         } label: {
                             HStack {
                                 // Muestra nombre basado en userService.selectedAreaId
-                                // (o podrías usar controller.selectedAreaName si prefieres)
                                 Text(controller.selectedAreaName)
                                     .font(.headline)
                                     .foregroundColor(userService.selectedAreaId == nil ? .gray : .black)
                                 Spacer()
                                 Image(systemName: "chevron.down")
                             }
-                             // Estilos del label (sin cambios)
                             .frame(height: 40).padding(.horizontal, 10)
                             .background(Color.gray.opacity(0.1)).cornerRadius(10)
                         }
@@ -121,9 +112,8 @@ struct LocationView: View {
                         .disabled(controller.areas.isEmpty || controller.isLoadingZones || controller.isLoadingAreas)
                     }
                     .padding(.horizontal, 40).padding(.top, 10)
-                } // Fin else (no isLoading)
+                }
 
-                // Muestra errores del controller
                 if let errorMessage = controller.errorMessage {
                     Text(errorMessage)
                         .foregroundColor(.red)
@@ -133,7 +123,7 @@ struct LocationView: View {
                 }
 
 
-                Spacer() // Empuja el botón "Next" hacia abajo
+                Spacer()
 
                 // 7. Next Button (acción y estado disabled del controller)
                 Button(action: {
@@ -153,37 +143,29 @@ struct LocationView: View {
 
             } // Fin VStack principal
             .onAppear {
-                // 8. Llama a la carga inicial del controller si es necesario
-                // (El init del controller ya llama a loadZones)
-                // controller.loadZones() // Podría no ser necesario si el init lo hace
             }
             // 9. fullScreenCover usa la propiedad publicada del controller
             .fullScreenCover(isPresented: $controller.showFinalSignUpView) {
-                 // La vista final recibe sus propios bindings
                 FinalSignUpView(showFinalSignUpView: $controller.showFinalSignUpView, isLoggedIn: $isLoggedIn)
             }
-             // 10. Animaciones (si Zone y Area son Equatable)
             .animation(.default, value: controller.zones)
             .animation(.default, value: controller.areas)
             .animation(.default, value: controller.isLoadingZones)
             .animation(.default, value: controller.isLoadingAreas)
             .animation(.default, value: controller.errorMessage)
 
-        } // Fin GeometryReader
-    } // Fin body
+        }
+    } 
 
-    // 11. Ya no necesitas las funciones fetchZones / fetchAreas aquí
-} // Fin struct LocationView
+}
 
-// --- Preview ---
 struct LocationView_Previews: PreviewProvider {
     static var previews: some View {
         LocationView(
             showLocationView: .constant(true),
-            showSignInView: .constant(false), // Pasa el binding aunque no se use activamente aquí
+            showSignInView: .constant(false),
             isLoggedIn: .constant(false)
         )
-         // La preview necesita el servicio si el controller o la vista lo usan
         .environmentObject(SignupUserService.shared)
     }
 }

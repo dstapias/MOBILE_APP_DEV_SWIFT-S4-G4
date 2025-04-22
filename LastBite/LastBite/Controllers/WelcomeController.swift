@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import Combine // Necesario para ObservableObject
+import Combine 
 
 class WelcomeController: ObservableObject {
 
@@ -17,7 +17,6 @@ class WelcomeController: ObservableObject {
     // MARK: - Initialization
     init() {
         print("👋 WelcomeController initialized.")
-        // No necesita dependencias por ahora
     }
 
     // MARK: - Public Actions (Navigation Triggers)

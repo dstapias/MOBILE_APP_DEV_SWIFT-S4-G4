@@ -8,20 +8,19 @@
 import Foundation
 import Combine
 
-@MainActor // Asegura updates en hilo principal
+@MainActor
 class CartController: ObservableObject {
 
     // MARK: - Published State
     @Published var activeCartId: Int? = nil
-    @Published var cartItems: [CartItem] = [] // Mantiene el mapeo a CartItem para la UI
+    @Published var cartItems: [CartItem] = []
     @Published var isLoading: Bool = false
     @Published var errorMessage: String? = nil
-    // @Published var totalCartPrice: Double = 0.0 // Podrías añadir y calcular esto
 
     // MARK: - Dependencies (Repositorios)
     private let signInService: SignInUserService
     private let cartRepository: CartRepository
-    private let orderRepository: OrderRepository // Necesario para prepareCheckoutController
+    private let orderRepository: OrderRepository
     private var cancellables = Set<AnyCancellable>()
 
     // MARK: - Initialization (Recibe Repositorios)
@@ -34,14 +33,13 @@ class CartController: ObservableObject {
         self.cartRepository = cartRepository
         self.orderRepository = orderRepository
         print("🛒 CartController initialized with Repositories.")
-        // Podrías llamar a loadCartData aquí si la vista siempre debe cargar al inicio
     }
 
     // MARK: - Data Loading Logic (Async con Repositorio)
 
     /// Método público para iniciar la carga de datos.
     func loadCartData() {
-        Task { // Lanza la tarea asíncrona
+        Task {
             await fetchActiveCartAndProducts()
         }
     }
@@ -50,7 +48,6 @@ class CartController: ObservableObject {
     private func fetchActiveCartAndProducts() async {
         guard let userId = signInService.userId else {
             print("❌ CartController: Cannot load cart, user not logged in.")
-            // Actualiza estado en MainActor (ya estamos aquí)
             self.errorMessage = "Please sign in to view your cart."
             self.cartItems = []
             self.activeCartId = nil
@@ -58,9 +55,6 @@ class CartController: ObservableObject {
             return
         }
 
-        // Evita cargas concurrentes si ya está cargando
-        // Aunque al ser llamado por Task, podrías necesitar un control más robusto
-        // si loadCartData puede llamarse múltiples veces rápidamente.
         guard !isLoading else { return }
         print("⏳ CartController: Loading cart data via Repository for user \(userId)...")
         self.isLoading = true
@@ -77,9 +71,8 @@ class CartController: ObservableObject {
 
             // 3. Mapea a CartItem
             self.cartItems = detailedProducts.map { mapDetailedProductToCartItem($0) }
-            // self.calculateTotalPrice() // Llama si tienes cálculo de total
 
-        } catch let error as ServiceError { // Captura errores específicos definidos
+        } catch let error as ServiceError {
             print("❌ CartController: Failed to load cart data via Repo: \(error.localizedDescription)")
             self.errorMessage = error.localizedDescription
             self.cartItems = []
@@ -94,12 +87,11 @@ class CartController: ObservableObject {
         self.isLoading = false
     }
 
-    // Helper de mapeo (Asegúrate que coincida con tus modelos)
     private func mapDetailedProductToCartItem(_ detailedProduct: DetailedCartProduct) -> CartItem {
         return CartItem(
             productId: detailedProduct.product_id,
             name: detailedProduct.name,
-            detail: detailedProduct.detail, // Añade ?? "" si es opcional en DetailedCartProduct
+            detail: detailedProduct.detail,
             quantity: detailedProduct.quantity,
             price: detailedProduct.unit_price,
             imageUrl: detailedProduct.image
@@ -121,10 +113,9 @@ class CartController: ObservableObject {
             errorMessage = "Cannot modify cart (no active cart found)."
             return
         }
-        guard !isLoading else { return } // Evita operaciones si ya está cargando algo general
+        guard !isLoading else { return }
 
         print("⏳ CartController: Attempting to remove product \(productId) via Repository...")
-        self.isLoading = true // O un flag específico para modificación
         self.errorMessage = nil
 
         do {
@@ -143,7 +134,6 @@ class CartController: ObservableObject {
              self.errorMessage = "Failed to remove item."
              self.isLoading = false
         }
-        // isLoading se pone en false dentro de fetchActiveCartAndProducts si el refresh tiene éxito
     }
 
      /// Método público (síncrono) que lanza la tarea para actualizar cantidad.
@@ -168,7 +158,6 @@ class CartController: ObservableObject {
         guard !isLoading else { return }
 
         print("⏳ CartController: Attempting to update product \(productId) to quantity \(newQuantity) via Repository...")
-        self.isLoading = true
         self.errorMessage = nil
 
          do {
@@ -186,10 +175,8 @@ class CartController: ObservableObject {
              self.errorMessage = "Failed to update quantity."
              self.isLoading = false
          }
-          // isLoading se pone en false dentro de fetchActiveCartAndProducts si el refresh tiene éxito
     }
 
-    // MARK: - Navigation Helper (Correcto)
     func prepareCheckoutController() -> CheckoutController? {
          guard let cartId = self.activeCartId, !self.cartItems.isEmpty else {
              print("❌ CartController: Cannot proceed to checkout. Cart is empty or inactive.")

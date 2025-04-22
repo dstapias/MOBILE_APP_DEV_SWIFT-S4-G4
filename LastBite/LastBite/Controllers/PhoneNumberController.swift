@@ -6,9 +6,9 @@
 //
 
 import Foundation
-import Combine // Necesario para ObservableObject y Combine
+import Combine
 
-@MainActor // Asegura updates en hilo principal
+@MainActor
 class PhoneNumberController: ObservableObject {
 
     // MARK: - Published State
@@ -18,12 +18,9 @@ class PhoneNumberController: ObservableObject {
     @Published var showFourDigitCodeView: Bool = false // Navegación
     @Published var isPhoneNumberValid: Bool = false // Habilita botón
 
-    // --- CAMBIO 1: Dependencia -> AuthRepository ---
     private let authRepository: AuthRepository
-    // Ya no necesita SignupUserService directamente para la acción
     private var cancellables = Set<AnyCancellable>()
 
-    // --- CAMBIO 2: Init -> Recibe AuthRepository ---
     init(authRepository: AuthRepository) { // Recibe el repositorio
         self.authRepository = authRepository // Guarda el repositorio
         print("📞 PhoneNumberController initialized with Repository.")
@@ -31,7 +28,6 @@ class PhoneNumberController: ObservableObject {
     }
 
     // MARK: - Input Processing Pipeline (Sin Cambios)
-    // Sigue siendo útil para formatear y validar la entrada localmente
     private func setupPhoneNumberPipeline() {
         $rawPhoneNumber
             .removeDuplicates()
@@ -85,8 +81,3 @@ class PhoneNumberController: ObservableObject {
         }
     }
 }
-
-// --- Asegúrate que existan ---
-// protocol AuthRepository { func sendPhoneVerificationCode(phoneNumber: String) async throws ... }
-// class APIAuthRepository: AuthRepository { ... }
-// enum ServiceError: Error, LocalizedError { ... }

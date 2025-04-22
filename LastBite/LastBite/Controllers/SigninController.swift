@@ -8,23 +8,20 @@
 import Foundation
 import Combine
 
-@MainActor // Asegura updates en hilo principal
+@MainActor
 class SignInController: ObservableObject {
 
-    // MARK: - Published Properties (Estado para la Vista)
+    // MARK: - Published Properties
     @Published var email: String = ""
     @Published var password: String = ""
     @Published var isLoading: Bool = false
-    @Published var errorMessage: String? = nil // Mensaje de error de las acciones
-    @Published var successMessage: String? = nil // Mensaje de éxito (ej: reset password)
-    @Published var didSignInSuccessfully: Bool = false // Para notificar a la vista
+    @Published var errorMessage: String? = nil
+    @Published var successMessage: String? = nil
+    @Published var didSignInSuccessfully: Bool = false
 
-    // --- CAMBIO: Dependencia -> AuthRepository ---
     private let authRepository: AuthRepository
 
-    // --- CAMBIO: Init -> Recibe AuthRepository ---
-    // Nota: Ya no necesitamos pasar SignInUserService si el Repo lo encapsula
-    init(authRepository: AuthRepository) { // Recibe el repositorio
+    init(authRepository: AuthRepository) {
         self.authRepository = authRepository
         // No sincronizamos email/password al inicio, la vista empieza limpia
         print("🔑 SignInController initialized with Repository.")
@@ -35,14 +32,12 @@ class SignInController: ObservableObject {
     /// Intenta iniciar sesión usando el repositorio.
     func signInUser() {
         print("🔑 Controller attempting sign in via Repository...")
-        // Ya no asignamos a authService.email/password aquí
-
         isLoading = true
         errorMessage = nil
         successMessage = nil
         didSignInSuccessfully = false
 
-        Task { // Lanza tarea asíncrona
+        Task {
             do {
                 // Llama al REPOSITORIO pasando los datos locales
                 try await authRepository.signIn(email: self.email, password: self.password)
@@ -66,20 +61,18 @@ class SignInController: ObservableObject {
 
     /// Intenta resetear la contraseña usando el repositorio.
     func resetPassword() {
-        // Validar email localmente antes de llamar al repo (opcional pero bueno)
         guard !email.isEmpty else {
             errorMessage = "Please enter your email address."
             successMessage = nil
             return
         }
         print("🔑 Controller attempting password reset via Repository...")
-        // Ya no asignamos a authService.email
 
-        isLoading = true // Indica carga para esta acción también
+        isLoading = true
         errorMessage = nil
         successMessage = nil
 
-        Task { // Lanza tarea asíncrona
+        Task {
              do {
                  // Llama al REPOSITORIO pasando el email local
                  try await authRepository.resetPassword(email: self.email)
@@ -98,8 +91,3 @@ class SignInController: ObservableObject {
          }
     }
 }
-
-// --- Asegúrate que existan ---
-// protocol AuthRepository { func signIn(...) async throws; func resetPassword(...) async throws }
-// class APIAuthRepository: AuthRepository { ... }
-// enum ServiceError: Error, LocalizedError { ... }

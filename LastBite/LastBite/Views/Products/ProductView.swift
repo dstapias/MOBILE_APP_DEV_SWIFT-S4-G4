@@ -67,7 +67,6 @@ struct ProductView: View {
     /// Construye la sección de mensajes de estado (carga, error, éxito).
     @ViewBuilder // Usa @ViewBuilder si tienes condicionales dentro
     private var infoMessages: some View {
-        // Nota: No pongas animaciones aquí si ya las aplicas al contenedor principal
         if controller.isLoading {
             ProgressView("Loading products...")
                 .padding(.vertical, 5) // Ajusta padding
@@ -85,7 +84,6 @@ struct ProductView: View {
                 .font(.footnote)
                 .padding(.horizontal)
                 .padding(.bottom, 5)
-                 // La transición es mejor aplicarla aquí si quieres que solo afecte al mensaje
                 .transition(.opacity.combined(with: .move(edge: .top)))
         }
     }
@@ -111,14 +109,12 @@ struct ProductView: View {
                 }
                 .padding(.horizontal)
             }
-            .padding(.vertical) // Padding para el contenido del ScrollView
+            .padding(.vertical)
         }
     }
 
 }
 
-// --- ProductCard (Sin cambios necesarios si ya recibía la closure) ---
-// struct ProductCard: View { ... }
 struct ProductCard: View {
     let product: Product // Recibe el producto
     let tags: [Tag]      // Recibe los tags para este producto
@@ -170,8 +166,6 @@ struct ProductCard: View {
             }
         }
         .padding() // Padding general de la tarjeta
-        // Define un tamaño fijo o flexible para la tarjeta
-        // .frame(width: 160, height: 220) // Tamaño fijo como antes
         .frame(maxWidth: .infinity) // Ocupa el ancho de la columna
         .frame(height: 230) // Altura fija para consistencia
         .background(Color.white) // Fondo blanco
@@ -184,19 +178,12 @@ struct ProductCard: View {
 // --- Preview ---
 struct ProductView_Previews: PreviewProvider {
     static var previews: some View {
-        // Crea un store de ejemplo
         let exampleStore = Store(
             store_id: 1, name: "Preview Store", address: "123 Preview St",
             latitude: 0, longitude: 0, logo: "https://via.placeholder.com/150", nit: "123"
         )
-        // Crea un mock de SignInUserService para la preview
         let mockSignInService = SignInUserService.shared // O un mock real
-
-        // Si ProductView necesita signInService en su init:
-        // ProductView(store: exampleStore, signInService: mockSignInService)
-        // Si no (como en la solución temporal):
         ProductView(store: exampleStore)
-             // La preview necesita el servicio en el entorno si alguna subvista o el controller lo usa implícitamente
             .environmentObject(mockSignInService)
     }
 }

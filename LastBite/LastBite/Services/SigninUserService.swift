@@ -10,15 +10,6 @@ import FirebaseAuth
 import SwiftUI
 import Combine
 
-// Reutilizamos el enum de Error definido antes (o asegúrate que esté accesible)
-// Asegúrate de tener ServiceError.missingCredentials, ServiceError.authenticationError, etc.
-/*
- enum ServiceError: Error, LocalizedError { ... }
- */
-
-// Asegúrate que tu modelo User sea Codable, Identifiable, Equatable
-// struct User: Codable, Identifiable, Equatable { let id: Int; let name: String; let email: String; ... }
-
 @MainActor // ✅ Asegura actualizaciones de @Published en hilo principal
 class SignInUserService: ObservableObject {
     static let shared = SignInUserService() // ✅ Singleton
@@ -147,7 +138,7 @@ class SignInUserService: ObservableObject {
         }
     }
 
-    // MARK: - Cerrar sesión (Sigue Síncrona)
+    // MARK: - Cerrar sesión
     func signOut() {
         print("🔑 Service: Signing out...")
         do {
@@ -165,56 +156,6 @@ class SignInUserService: ObservableObject {
             self.errorMessage = "Failed to sign out: \(error.localizedDescription)"
         }
     }
-
-    // MARK: - Original Methods (Adaptados para llamar a Async o eliminar)
-
-    func signInUser(completion: @escaping (Result<Void, Error>) -> Void) {
-         // Obtiene email/password de las propiedades @Published (si aún los necesitas aquí)
-         // Es MEJOR que el Controller pase los datos al método async directamente.
-         guard let email = self.email, let password = self.password else {
-             completion(.failure(ServiceError.missingCredentials)); return
-         }
-         Task {
-             do {
-                 try await signInUserAsync(email: email, password: password) // Llama al async con los datos
-                 completion(.success(()))
-             } catch {
-                 completion(.failure(error))
-             }
-         }
-     }
-
-     func resetPassword(completion: @escaping (Result<String, Error>) -> Void) {
-          guard let email = self.email else {
-              completion(.failure(ServiceError.missingEmailForPasswordReset)); return
-          }
-          Task {
-             do {
-                 try await resetPasswordAsync(email: email) // Llama al async
-                 completion(.success("Password reset link sent to your email."))
-             } catch {
-                 completion(.failure(error))
-             }
-         }
-     }
-
-     // El fetchUserInfo original era fire-and-forget, no necesita wrapper público con completion.
-     // Si alguna parte MUY vieja lo necesita, puedes hacer:
-     /*
-     func fetchUserInfoOld(completion: @escaping (Result<User, Error>) -> Void) {
-         Task {
-             do {
-                 let user = try await fetchUserInfoAsync()
-                 completion(.success(user))
-             } catch {
-                 completion(.failure(error))
-             }
-         }
-     }
-     */
 }
 
-// --- Asegúrate que ServiceError y User estén definidos ---
-// enum ServiceError: Error, LocalizedError { ... }
-// struct User: Codable, Identifiable, Equatable { ... }
-// class Constants { static let baseURL = "..." }
+

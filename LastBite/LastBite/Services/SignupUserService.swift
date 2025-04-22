@@ -7,23 +7,16 @@
 
 import Foundation
 import FirebaseAuth
-import SwiftUI // Para ObservableObject
-import Combine // Para ObservableObject
+import SwiftUI
+import Combine
 
-// Asegúrate que ServiceError y Constants estén definidos y accesibles
-// enum ServiceError: Error, LocalizedError { ... }
-// struct Constants { static let baseURL = "..." }
+
 
 @MainActor
 class SignupUserService: ObservableObject {
     static let shared = SignupUserService()
 
-    // --- Estado Publicado (se actualiza DESDE los controllers o por el flujo) ---
-    // Los controllers son responsables de mantener la información del flujo actual.
-    // El servicio puede guardar el estado FINAL si es necesario, pero no debería
-    // ser la fuente principal durante el flujo multi-paso.
-    // Mantenemos algunos para compatibilidad con el diseño anterior, pero considera
-    // si el AuthRepository o los controllers deberían manejar esto más directamente.
+
     @Published var name: String = ""
     @Published var email: String = ""
     @Published var phoneNumber: String = "" // Guardará el número usado para enviar/verificar código
@@ -162,7 +155,7 @@ class SignupUserService: ObservableObject {
         }
     }
 
-    // MARK: - Helpers (Asegúrate de tenerlos definidos o copia de otros servicios)
+    // MARK: - Helpers
 
     private func createJsonRequest(url: URL, method: String, bodyJson: [String: Any]? = nil) throws -> URLRequest {
         // ... (Implementación como en servicios anteriores) ...
@@ -188,51 +181,4 @@ class SignupUserService: ObservableObject {
              throw ServiceError.requestFailed(error)
          }
     }
-
-    // MARK: - Original Methods (Adaptados/Opcionales)
-
-    func registerUser(completion: @escaping (Result<String, Error>) -> Void) {
-        // Obtén los datos de las propiedades @Published actuales
-        guard let areaId = selectedAreaId else {
-            completion(.failure(ServiceError.missingAreaId)); return
-        }
-        // Asegúrate que los otros campos necesarios no estén vacíos
-        guard !name.isEmpty, !email.isEmpty, !password.isEmpty, !phoneNumber.isEmpty else {
-             completion(.failure(ServiceError.missingCredentials)) // O error más específico
-             return
-         }
-
-        Task {
-            do {
-                try await registerUserAsync(name: name, email: email, password: password, phoneNumber: phoneNumber, areaId: areaId, userType: userType, verificationCode: verificationCode)
-                completion(.success("User registered successfully!")) // Mensaje genérico
-            } catch {
-                completion(.failure(error))
-            }
-        }
-    }
-
-    func sendVerificationCode(completion: @escaping (Result<Void, Error>) -> Void) {
-         guard !phoneNumber.isEmpty else { completion(.failure(ServiceError.missingPhoneNumber)); return }
-         Task {
-             do {
-                 try await sendVerificationCodeAsync(phoneNumber: phoneNumber)
-                 completion(.success(()))
-             } catch {
-                 completion(.failure(error))
-             }
-         }
-     }
-
-     func verifyCode(completion: @escaping (Result<Void, Error>) -> Void) {
-         guard !verificationCode.isEmpty else { completion(.failure(ServiceError.missingCredentials)); return }
-          Task {
-              do {
-                  try await verifyCodeAsync(code: verificationCode)
-                  completion(.success(()))
-              } catch {
-                  completion(.failure(error))
-              }
-          }
-      }
 }

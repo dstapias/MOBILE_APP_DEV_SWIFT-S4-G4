@@ -23,34 +23,25 @@ class FinalSignupController: ObservableObject {
     @Published var isPasswordValid: Bool = true
     @Published var isFormValid: Bool = false // Habilita botón Submit
 
-    // --- CAMBIO 1: Dependencias -> AuthRepository y Servicio de Estado ---
     private let authRepository: AuthRepository
-    private let signupStateService: SignupUserService // Para LEER datos previos
+    private let signupStateService: SignupUserService
     private var cancellables = Set<AnyCancellable>()
 
-    // --- CAMBIO 2: Init -> Recibe Repositorio y Servicio de Estado ---
     init(
-        authRepository: AuthRepository, // Inyecta el repositorio de Auth
-        // Inyecta el servicio que tiene los datos de pasos anteriores
+        authRepository: AuthRepository,
         signupStateService: SignupUserService = SignupUserService.shared
     ) {
         self.authRepository = authRepository
         self.signupStateService = signupStateService
         print("✅ FinalSignupController initialized with Repository.")
 
-        // Opcional: Pre-llenar campos si el servicio de estado los tuviera
-        // self.name = signupStateService.name
-        // self.email = signupStateService.email
-
         setupValidationPipelines() // Configura validación local
     }
 
-    // MARK: - Validation Logic (Sin Cambios)
+    // MARK: - Validation Logic
     private func setupValidationPipelines() {
-         // ... (Tu código Combine para isEmailValid, isPasswordValid, isFormValid) ...
          Publishers.CombineLatest3($name, $isEmailValid, $isPasswordValid)
              .map { name, emailIsValid, passwordIsValid in
-                 // Podrías añadir más validaciones si es necesario
                  let isNameValid = !name.trimmingCharacters(in: .whitespaces).isEmpty
                  return isNameValid && emailIsValid && passwordIsValid
              }
@@ -88,25 +79,22 @@ class FinalSignupController: ObservableObject {
             errorMessage = "Phone number is missing. Please go back."
             return
         }
-        // Si la guarda pasa, puedes acceder a él directamente o asignarlo si quieres
         let phoneNumber = signupStateService.phoneNumber
          guard let areaId = signupStateService.selectedAreaId else {
              errorMessage = "Area selection is missing. Please go back."
              return
          }
-         // Asegúrate que estos tengan valores por defecto o se asignen antes
          let userType = signupStateService.userType
-         let verificationCode = signupStateService.verificationCode // Revisa si tu repo/backend lo necesita
+         let verificationCode = signupStateService.verificationCode
 
         print("🚀 Controller attempting final user registration via Repository...")
 
-        // Ya no asignamos a userService directamente
 
         isLoading = true
         errorMessage = nil
         showSuccessMessage = false
 
-        Task { // Lanza tarea asíncrona
+        Task {
             do {
                 // Llama al REPOSITORIO pasando TODOS los datos requeridos
                 try await authRepository.registerUser(
@@ -116,7 +104,7 @@ class FinalSignupController: ObservableObject {
                     phoneNumber: phoneNumber,
                     areaId: areaId,
                     userType: userType,
-                    verificationCode: verificationCode // Revisa si es necesario
+                    verificationCode: verificationCode
                 )
                 print("✅ Controller: User registration successful via Repo!")
                 self.showSuccessMessage = true // Muestra alert de éxito
@@ -133,15 +121,9 @@ class FinalSignupController: ObservableObject {
         }
     }
 
-    // MARK: - Navegación (Sin cambios)
+    // MARK: - Navegación
     func goToSignIn() {
         print("Navigating to Sign In screen...")
         self.navigateToSignIn = true
     }
 }
-
-// --- Asegúrate que existan ---
-// protocol AuthRepository { func registerUser(name: String...) async throws ... }
-// class APIAuthRepository: AuthRepository { ... }
-// class SignupUserService: ObservableObject { var phoneNumber... var selectedAreaId... }
-// enum ServiceError: Error, LocalizedError { ... }

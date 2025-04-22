@@ -8,7 +8,7 @@
 import Foundation
 import Combine
 
-@MainActor // Asegura updates en hilo principal
+@MainActor
 class LocationController: ObservableObject {
 
     // MARK: - Published State
@@ -20,12 +20,12 @@ class LocationController: ObservableObject {
     @Published var errorMessage: String? = nil
     @Published var showFinalSignUpView: Bool = false
 
-    // MARK: - Dependencies (Ahora con Repositorio)
+    // MARK: - Dependencies
     private let userService: SignupUserService
-    private let zoneRepository: ZoneRepository // <- Usa ZoneRepository
+    private let zoneRepository: ZoneRepository
     private var cancellables = Set<AnyCancellable>()
 
-    // MARK: - Computed Properties (Sin Cambios)
+    // MARK: - Computed Properties
     var selectedZoneName: String {
         var nameToReturn: String = "Select a zone"
         for zone in zones { if zone.id == selectedZoneId { nameToReturn = zone.zone_name; break } }
@@ -47,12 +47,12 @@ class LocationController: ObservableObject {
     // MARK: - Initialization (Recibe Repositorio)
     init(
         userService: SignupUserService = SignupUserService.shared,
-        zoneRepository: ZoneRepository // <- Recibe ZoneRepository
+        zoneRepository: ZoneRepository
     ) {
         self.userService = userService
-        self.zoneRepository = zoneRepository // <- Guarda ZoneRepository
+        self.zoneRepository = zoneRepository
         print("📍 LocationController initialized with Repository.")
-        loadZones() // Llama al método de carga inicial
+        loadZones()
     }
 
     // MARK: - Data Loading (Async con Repositorio)
@@ -60,7 +60,7 @@ class LocationController: ObservableObject {
     func loadZones() {
         guard !isLoadingZones else { return }
         print("⏳ Loading zones via Repository...")
-        isLoadingZones = true // Ya estamos en @MainActor
+        isLoadingZones = true
         errorMessage = nil
         areas = [] // Limpia áreas
         userService.selectedAreaId = nil // Deselecciona
@@ -76,9 +76,7 @@ class LocationController: ObservableObject {
                 // Selecciona la primera zona y carga sus áreas
                 if let firstZone = fetchedZones.first {
                     // selectZone llama internamente a fetchAreas async
-                    // No necesitamos 'await' aquí porque selectZone lanza su propia Task
                     self.selectZone(zone: firstZone)
-                    // isLoadingZones se pondrá en false cuando fetchAreas termine
                 } else {
                      print("ℹ️ No zones fetched or list is empty.")
                      self.isLoadingZones = false // Termina carga si no hay zonas
@@ -148,12 +146,3 @@ class LocationController: ObservableObject {
         }
     }
 }
-
-// --- Dependencias necesarias ---
-// Asegúrate de tener definidos:
-// protocol ZoneRepository { ... }
-// class APIZoneRepository: ZoneRepository { ... }
-// class ZoneService { func fetchZonesAsync... func fetchAreasAsync... }
-// struct Zone: Codable, Identifiable, Equatable { ... }
-// struct Area: Codable, Identifiable, Equatable { ... }
-// class SignupUserService: ObservableObject { @Published var selectedAreaId: Int? ... }

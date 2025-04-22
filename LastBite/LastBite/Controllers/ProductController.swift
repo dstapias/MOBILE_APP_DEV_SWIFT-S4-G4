@@ -8,34 +8,34 @@
 import Foundation
 import Combine
 
-@MainActor // Asegura updates en hilo principal
+@MainActor 
 class ProductController: ObservableObject {
 
     // MARK: - Published State
-    @Published var products: [Product] = [] // Lista original (fuente para el filtro)
-    @Published var tags: [Int: [Tag]] = [:] // Diccionario de tags por product.id
-    @Published var filteredProducts: [Product] = [] // Lista que muestra la UI
-    @Published var searchText: String = "" // Para el TextField
+    @Published var products: [Product] = []
+    @Published var tags: [Int: [Tag]] = [:]
+    @Published var filteredProducts: [Product] = []
+    @Published var searchText: String = ""
 
     @Published var isLoading: Bool = false
     @Published var errorMessage: String? = nil
-    @Published var successMessage: String? = nil // Para "Added to cart!"
+    @Published var successMessage: String? = nil
 
     // MARK: - Dependencies (Ahora Repositorios)
-    let store: Store // La tienda actual
+    let store: Store
     private let signInService: SignInUserService
-    private let productRepository: ProductRepository // <- Usa Repo
-    private let tagRepository: TagRepository       // <- Usa Repo
-    private let cartRepository: CartRepository     // <- Usa Repo
+    private let productRepository: ProductRepository
+    private let tagRepository: TagRepository
+    private let cartRepository: CartRepository
     private var cancellables = Set<AnyCancellable>()
 
     // MARK: - Initialization (Recibe Repositorios)
     init(
         store: Store,
         signInService: SignInUserService,
-        productRepository: ProductRepository, // <- Inyecta Repo
-        tagRepository: TagRepository,       // <- Inyecta Repo
-        cartRepository: CartRepository      // <- Inyecta Repo
+        productRepository: ProductRepository,
+        tagRepository: TagRepository,
+        cartRepository: CartRepository
     ) {
         self.store = store
         self.signInService = signInService
@@ -43,11 +43,10 @@ class ProductController: ObservableObject {
         self.tagRepository = tagRepository
         self.cartRepository = cartRepository
         print("📦 ProductController initialized with Repositories for store: \(store.name)")
-        setupFiltering() // Configura el filtro reactivo
+        setupFiltering()
     }
 
-    // MARK: - Filtering Logic (Sin Cambios Internos)
-    // Sigue funcionando con las propiedades @Published locales
+    // MARK: - Filtering Logic
     private func setupFiltering() {
         Publishers.CombineLatest($searchText, $products)
             .debounce(for: .milliseconds(300), scheduler: RunLoop.main)
@@ -72,7 +71,7 @@ class ProductController: ObservableObject {
         errorMessage = nil
         successMessage = nil
 
-        Task { // Lanza la tarea principal async
+        Task {
             do {
                 // 1. Obtener Productos
                 print("   Fetching products...")
@@ -125,7 +124,6 @@ class ProductController: ObservableObject {
         }
     }
 
-    // Ya no necesitamos fetchAllTags como función separada gracias a TaskGroup
 
     // MARK: - Actions (Async con Repositorio)
 
@@ -136,12 +134,9 @@ class ProductController: ObservableObject {
             successMessage = nil
             return
         }
-        // Puedes añadir un estado isLoading específico para esta acción si quieres
-        // pero por simplicidad usaremos el general por ahora.
         guard !isLoading else { return } // Evita si ya hay otra carga en curso
 
         print("🛒 Adding product \(product.id) to cart via Repository...")
-        // isLoading = true // Podrías activar aquí si no usaras el flag general
         errorMessage = nil
         successMessage = nil
 
@@ -150,7 +145,6 @@ class ProductController: ObservableObject {
             let cart = try await cartRepository.fetchActiveCart(for: userId)
 
             // 2. Añadir producto con cantidad 1 (usando repo)
-            //    (Asume que tu repo/servicio maneja la lógica de añadir/actualizar)
             try await cartRepository.addProductToCart(cartId: cart.id, productId: product.id, quantity: 1)
 
             // Éxito
@@ -168,19 +162,6 @@ class ProductController: ObservableObject {
             print("❌ Unexpected error adding product \(product.id) to cart: \(error.localizedDescription)")
             errorMessage = "Could not add item to cart."
         }
-        // isLoading = false // Desactiva si usaste un flag específico
     }
 
-    // addProductToSpecificCart ya no es necesario, la lógica está en addToCart
 }
-
-// --- Asegúrate que existan ---
-// protocol ProductRepository { ... }
-// class APIProductRepository: ProductRepository { ... }
-// protocol TagRepository { ... }
-// class APITagRepository: TagRepository { ... }
-// protocol CartRepository { func fetchActiveCart... func addProductToCart... }
-// class APICartRepository: CartRepository { ... }
-// struct Product, Tag, Cart, CartItem, CategoryItemData, Store (Identifiable, Equatable, Codable)
-// class SignInUserService: ObservableObject { ... }
-// enum ServiceError: Error, LocalizedError { ... }

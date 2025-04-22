@@ -15,11 +15,10 @@ struct OrderStatusView: View {
     
     var body: some View {
         HStack(alignment: .center, spacing: 16) {
-            // Imagen de ejemplo (puede ser un ícono o ilustración)
             Image(imageName)
                 .resizable()
                 .scaledToFit()
-                .frame(width: 50, height: 50) // Ajusta a tu gusto
+                .frame(width: 50, height: 50) 
             
             VStack(alignment: .leading, spacing: 4) {
                 Text(statusMessage)

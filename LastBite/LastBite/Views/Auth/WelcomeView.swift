@@ -5,20 +5,16 @@ struct WelcomeView: View {
     @Binding var isLoggedIn: Bool
 
     var body: some View {
-        GeometryReader { geometry in // GeometryReader calcula el tamaño disponible
-            ZStack { // ZStack para apilar imagen y contenido
+        GeometryReader { geometry in 
+            ZStack {
                 // Fondo
                 Image("WelcomeImage")
                     .resizable()
                     .aspectRatio(contentMode: .fill)
                     // Hacemos que la imagen intente llenar el espacio dado por GeometryReader
                     .frame(width: geometry.size.width, height: geometry.size.height)
-                    // Nota: Ya no es estrictamente necesario .edgesIgnoringSafeArea aquí en la imagen
-                    // si el contenedor superior (GeometryReader) lo ignora.
 
-                // Contenido Principal (VStack con textos y botones)
                 VStack {
-                   // ... (Spacer, Text, Button, HStack - Sin cambios) ...
                     Spacer(minLength: geometry.size.height * 0.1)
                     Text("Welcome to our store")
                         .font(.system(size: min(geometry.size.width * 0.08, 36)))
@@ -34,7 +30,7 @@ struct WelcomeView: View {
                         Text("Go to Signup")
                             .font(.headline).foregroundColor(.white).padding()
                             .frame(width: min(geometry.size.width * 0.7, 300))
-                            .background(Color.primaryGreen).cornerRadius(10) // Asume que Color.primaryGreen existe
+                            .background(Color.primaryGreen).cornerRadius(10)
                     }
                     .padding(.bottom, 20)
 
@@ -46,21 +42,16 @@ struct WelcomeView: View {
                                 .font(.subheadline).foregroundColor(.green).bold()
                         }
                     }
-                     // Usa el inset inferior del GeometryReader para el padding
                     .padding(.bottom, max(geometry.safeAreaInsets.bottom, 20))
 
-                } // Fin VStack Contenido
-                // Puedes mantener o quitar este frame y padding del VStack según el diseño deseado
-                // .frame(width: geometry.size.width * 0.9)
+                }
                 .padding()
 
-            } // Fin ZStack
-            // No es necesario aplicar frame al ZStack si GeometryReader lo contiene
+            }
 
-        } // Fin GeometryReader
-        .ignoresSafeArea() // <--- ¡APLICA EL MODIFICADOR AQUÍ! (O .edgesIgnoringSafeArea(.all))
+        }
+        .ignoresSafeArea()
 
-        // Los fullScreenCover se aplican después de ignoresSafeArea
        .fullScreenCover(isPresented: $controller.showSignupView) {
             SignupView(
                 showSignupView: $controller.showSignupView,
@@ -74,9 +65,5 @@ struct WelcomeView: View {
                isLoggedIn: $isLoggedIn
            )
         }
-    } // Fin body
-} // Fin struct WelcomeView
-
-// --- Preview y Controller (sin cambios) ---
-// struct WelcomeView_Previews: PreviewProvider { ... }
-// class WelcomeController: ObservableObject { ... }
+    }
+}

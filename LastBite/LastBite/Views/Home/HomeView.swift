@@ -40,15 +40,9 @@ struct HomeView: View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 16) {
-                    // 3. Header sigue leyendo directamente del servicio global
                     headerSection
 
-                    // 4. SearchField sigue usando el @State local
                     searchField
-                        // Podrías conectar la búsqueda al controller:
-                        // .onChange(of: searchText) { controller.search($0) }
-
-                    // 5. Muestra indicador de carga y errores del controller
                     if controller.isLoading {
                         ProgressView("Loading...")
                     }
@@ -58,11 +52,8 @@ struct HomeView: View {
                             .padding(.horizontal)
                     }
 
-                    // 6. Sección de órdenes lee del controller
                     ordersSection
 
-                    // 7. Secciones de categorías leen del controller
-                    //    Asegúrate que CategoryItemData sea Equatable para la animación
                     if !controller.forYouItems.isEmpty {
                         CategorySectionView(title: "For you", items: controller.forYouItems)
                     }
@@ -79,17 +70,10 @@ struct HomeView: View {
             }
             .navigationTitle("Shop")
             .onAppear {
-                // 8. Llama al método de carga del controller
                 print("🏠 HomeView Appeared. Triggering loadInitialData.")
                 controller.loadInitialData()
-                // Si necesitas pedir permiso de ubicación al aparecer:
-                // locationManager.requestPermission()
-            }
-            // 9. .onChange ya no es necesario aquí si el controller observa al locationManager internamente
-            //    (como hicimos en el HomeController refactorizado)
-            // .onChange(of: locationManager.lastLocation) { ... }
 
-            // 10. Animaciones (asegúrate que los modelos sean Equatable)
+            }
             .animation(.default, value: controller.storeItems)
             .animation(.default, value: controller.nearbyStores)
             .animation(.default, value: controller.forYouItems)
@@ -120,7 +104,6 @@ struct HomeView: View {
     }
 
     private var searchField: some View {
-         // Sin cambios, usa @State local
         TextField("Search store", text: $searchText)
             .padding(10)
             .background(Color(.systemGray6))
@@ -130,28 +113,21 @@ struct HomeView: View {
 
     private var ordersSection: some View {
         Group {
-            // Lee activeOrders del controller
             if !controller.activeOrders.isEmpty {
-                 // Asegúrate que Order sea Identifiable y Equatable
                 ForEach(controller.activeOrders) { order in
                     OrderStatusView(
                         statusMessage: "Pedido #\(order.order_id) en progreso...",
                         buttonTitle: "Ya lo recibí",
                         imageName: "orderClock"
-                    ) { // Inicio del closure de acción del botón
-                        // Crea una Task para ejecutar la llamada async
+                    ) {
                         Task {
-                            // Ahora puedes usar 'await' para llamar a la función async
                             await controller.receiveOrder(orderId: order.order_id)
-                            // El manejo de errores y la actualización de activeOrders
-                            // ya ocurren DENTRO del método receiveOrder del controller.
                         }
                     }
                     .cornerRadius(8)
                     .padding(.horizontal)
                 }
             } else {
-                 // Muestra banner si no hay órdenes y no está cargando
                 if !controller.isLoading {
                     Image("fresh_vegetables_banner")
                         .resizable()
@@ -162,26 +138,14 @@ struct HomeView: View {
             }
         }
     }
-
-    // 12. Elimina las funciones fetchStores, fetchNearbyStores, etc. de aquí
 }
 
 // --- Preview ---
 struct HomeView_Previews: PreviewProvider {
     static var previews: some View {
-        // Crea mocks o usa singletons para la preview
-        let mockSignInService = SignInUserService.shared // O un mock
-        // let mockLocationManager = LocationManager() // Si HomeController lo necesita
+        let mockSignInService = SignInUserService.shared
 
-        HomeView() // El init ahora no necesita params si HomeController usa Singletons
-            // Si HomeView.init requiere params, provéelos aquí:
-            // HomeView(signInService: mockSignInService)
-            .environmentObject(mockSignInService) // Asegúrate que esté en el environment
-            // .environmentObject(mockLocationManager) // Si es necesario
+        HomeView()
+            .environmentObject(mockSignInService)
     }
 }
-
-// --- Vistas y Modelos Auxiliares ---
-// Asegúrate que CategorySectionView, OrderStatusView, LocationManager,
-// y los modelos (Order, Store, CategoryItemData) estén definidos y sean
-// Identifiable/Equatable según sea necesario.

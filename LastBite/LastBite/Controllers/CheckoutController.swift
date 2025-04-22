@@ -24,37 +24,33 @@ class CheckoutController: ObservableObject {
     private let cartItems: [CartItem]
     private let cartId: Int
 
-    // --- CAMBIO 1: Dependencias -> Repositorios ---
     private let signInService: SignInUserService
-    private let orderRepository: OrderRepository // <- USA OrderRepository
-    private let cartRepository: CartRepository  // <- USA CartRepository
-    // Ya no necesita OrderService ni CartService directamente
+    private let orderRepository: OrderRepository
+    private let cartRepository: CartRepository
 
-    // --- CAMBIO 2: Init -> Recibe Repositorios ---
     init(
         cartItems: [CartItem],
         cartId: Int,
         signInService: SignInUserService,
-        orderRepository: OrderRepository, // <- Recibe OrderRepository
-        cartRepository: CartRepository   // <- Recibe CartRepository
+        orderRepository: OrderRepository,
+        cartRepository: CartRepository
     ) {
         self.cartItems = cartItems
         self.cartId = cartId
         self.signInService = signInService
-        self.orderRepository = orderRepository // <- Guarda OrderRepository
-        self.cartRepository = cartRepository   // <- Guarda CartRepository
+        self.orderRepository = orderRepository
+        self.cartRepository = cartRepository
         print("🛒 CheckoutController initialized with Repositories for cart ID: \(cartId)")
         // Calcula costo total al inicio
         self.calculateTotalCost()
     }
 
-    // MARK: - Private Methods (Cálculo - Sin cambios)
     private func calculateTotalCost() {
         self.totalCost = cartItems.reduce(0) { $0 + ($1.price * Double($1.quantity)) }
         print("💰 Total cost calculated: \(self.totalCost)")
     }
 
-    // MARK: - Public Actions (Refactorizado a Async)
+    // MARK: - Public Actions
 
     /// Inicia y ejecuta todo el proceso de checkout de forma asíncrona.
     func confirmCheckout() async { // Marcado como async
@@ -91,7 +87,6 @@ class CheckoutController: ObservableObject {
 
             // 3. Actualizar Estado del Carrito a "BILLED"
             print("   Attempting to update cart status...")
-            // Asegúrate que updateCartStatus en CartRepository/Service no necesite userId si no es parte de la URL/body
             try await cartRepository.updateCartStatus(
                 cartId: cartId, status: "BILLED", userId: userId
             )
@@ -104,8 +99,7 @@ class CheckoutController: ObservableObject {
         } catch let error as ServiceError { // Captura errores específicos
             print("❌ Controller: Checkout failed: \(error.localizedDescription)")
             errorMessage = "Checkout failed: \(error.localizedDescription)"
-            // Considera si necesitas lógica de rollback aquí si un paso falla después de otro exitoso
-        } catch { // Otros errores
+        } catch {
             print("❌ Controller: Unexpected checkout error: \(error.localizedDescription)")
             errorMessage = "An unexpected error occurred during checkout."
         }
@@ -113,7 +107,4 @@ class CheckoutController: ObservableObject {
         // Termina la carga independientemente del resultado
         isLoading = false
     }
-
-    // 4. Los métodos privados updateOrder y updateCartStatus ya no son necesarios
-    //    porque su lógica está ahora dentro de confirmCheckout.
 }
