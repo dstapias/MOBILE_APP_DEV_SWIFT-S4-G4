@@ -82,6 +82,7 @@
 		DE4F751E2D794F4800F20D45 /* SignupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE4F751D2D794F4800F20D45 /* SignupView.swift */; };
 		DE4F751F2D794F4800F20D45 /* SignupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE4F751D2D794F4800F20D45 /* SignupView.swift */; };
 		DE4F75202D794F4800F20D45 /* SignupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE4F751D2D794F4800F20D45 /* SignupView.swift */; };
+		DE6292192DB880D8005B81A0 /* KFImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE6292182DB880BB005B81A0 /* KFImageView.swift */; };
 		DE678C972D8BA070004485D2 /* StoreService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE678C962D8BA06B004485D2 /* StoreService.swift */; };
 		DE678C982D8BA070004485D2 /* StoreService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE678C962D8BA06B004485D2 /* StoreService.swift */; };
 		DE678C992D8BA070004485D2 /* StoreService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE678C962D8BA06B004485D2 /* StoreService.swift */; };
@@ -213,6 +214,7 @@
 		DE2ACE0D2D7BD28C00A7D749 /* FourDigitCode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FourDigitCode.swift; sourceTree = "<group>"; };
 		DE2ACE0F2D7BD74800A7D749 /* LocationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationView.swift; sourceTree = "<group>"; };
 		DE4F751D2D794F4800F20D45 /* SignupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignupView.swift; sourceTree = "<group>"; };
+		DE6292182DB880BB005B81A0 /* KFImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KFImageView.swift; sourceTree = "<group>"; };
 		DE678C962D8BA06B004485D2 /* StoreService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreService.swift; sourceTree = "<group>"; };
 		DE678C9A2D8BA92B004485D2 /* ProductView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductView.swift; sourceTree = "<group>"; };
 		DE678C9C2D8BAB47004485D2 /* ProductService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductService.swift; sourceTree = "<group>"; };
@@ -448,6 +450,7 @@
 		DE11E70A2D793C1000EB9862 /* LastBite */ = {
 			isa = PBXGroup;
 			children = (
+				DE6292172DB880A7005B81A0 /* Caching */,
 				410991E42DAEDE82002B6270 /* Repositories */,
 				41A2F1D72D86B96D006C467C /* Models */,
 				DEC0D36A2D80F84B0006D9B4 /* Services */,
@@ -512,6 +515,14 @@
 				DE2ACE0F2D7BD74800A7D749 /* LocationView.swift */,
 			);
 			path = Signup;
+			sourceTree = "<group>";
+		};
+		DE6292172DB880A7005B81A0 /* Caching */ = {
+			isa = PBXGroup;
+			children = (
+				DE6292182DB880BB005B81A0 /* KFImageView.swift */,
+			);
+			path = Caching;
 			sourceTree = "<group>";
 		};
 		DEC0D36A2D80F84B0006D9B4 /* Services */ = {
@@ -714,13 +725,9 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-LastBite-LastBiteUITests/Pods-LastBite-LastBiteUITests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			inputPaths = (
-			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-LastBite-LastBiteUITests/Pods-LastBite-LastBiteUITests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -735,13 +742,9 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-LastBite/Pods-LastBite-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			inputPaths = (
-			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-LastBite/Pods-LastBite-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -814,6 +817,7 @@
 				41A4C2ED2DB0B42200190216 /* APIZoneRepository.swift in Sources */,
 				410991EE2DAF31E1002B6270 /* APIOrderRepository.swift in Sources */,
 				410991EA2DAF2F3B002B6270 /* APIStoreRepository.swift in Sources */,
+				DE6292192DB880D8005B81A0 /* KFImageView.swift in Sources */,
 				41A4D5212D8C69B1006EDEBA /* OrderAcceptedView.swift in Sources */,
 				416BFA3A2D8E6EC5006C77E1 /* LogoutView.swift in Sources */,
 				DE678CB12D8CE376004485D2 /* CartProductService.swift in Sources */,
@@ -1052,7 +1056,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"LastBite/Preview Content\"";
-				DEVELOPMENT_TEAM = W3QFYRJQQN;
+				DEVELOPMENT_TEAM = 585XBRU6ZG;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Info.plist;
@@ -1066,7 +1070,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = co.uniandes.LastBite;
+				PRODUCT_BUNDLE_IDENTIFIER = co.uniandes.LastBiteV3;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -1083,7 +1087,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"LastBite/Preview Content\"";
-				DEVELOPMENT_TEAM = W3QFYRJQQN;
+				DEVELOPMENT_TEAM = 585XBRU6ZG;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Info.plist;
@@ -1097,7 +1101,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = co.uniandes.LastBite;
+				PRODUCT_BUNDLE_IDENTIFIER = co.uniandes.LastBiteV3;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;

@@ -122,15 +122,13 @@ struct ProductCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            WebImage(url: URL(string: product.image)) // Usa la imagen del producto
-                .resizable()
-                .indicator(.activity) // Muestra un indicador mientras carga
-                .transition(.fade(duration: 0.5)) // Animación de aparición
-                .scaledToFit()
-                .frame(height: 100) // Ajusta la altura según necesites
-                .frame(maxWidth: .infinity) // Ocupa el ancho disponible
-                .clipped() // Recorta si la imagen es más grande
-                .cornerRadius(8)
+            KFImageView(
+                urlString: product.image,
+                width: UIScreen.main.bounds.width / 2 - 32, // Ajusta según tu grid
+                height: 100,
+                cornerRadius: 8
+            )
+            .frame(maxWidth: .infinity)
 
             Text(product.name) // Muestra el nombre del producto
                 .font(.headline)

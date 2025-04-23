@@ -141,8 +141,13 @@ struct CartRowView: View {
     var body: some View {
        HStack(alignment: .center, spacing: 8) {
            // Usa la URL de la imagen del item
-           WebImage(url: URL(string: item.imageUrl))
-               .resizable().scaledToFill().frame(width: 50, height: 50).cornerRadius(8).padding(.leading)
+           KFImageView(
+               urlString: item.imageUrl,
+               width: 50,
+               height: 50,
+               cornerRadius: 8
+           )
+           .padding(.leading)
 
            VStack(alignment: .leading) {
                Text(item.name) // Usa nombre del item
