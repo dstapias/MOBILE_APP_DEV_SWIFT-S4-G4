@@ -8,6 +8,8 @@ target 'LastBite' do
   pod 'SDWebImageSwiftUI'
   # Firebase Authentication
   pod 'Firebase/Auth'
+  #King fisher for caching images
+  pod 'Kingfisher'
 
   # Pods for LastBite
 
