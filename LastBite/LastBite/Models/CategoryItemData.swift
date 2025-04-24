@@ -37,6 +37,7 @@ struct CategoryItemData: Identifiable, Equatable { // Mantiene conformancia
     let title: String
     let imageName: String
     var store: Store? = nil // La tienda asociada (opcional)
+    let isOwned: Bool
 
     // 2. Implementa '==' manualmente para Equatable
     static func == (lhs: CategoryItemData, rhs: CategoryItemData) -> Bool {

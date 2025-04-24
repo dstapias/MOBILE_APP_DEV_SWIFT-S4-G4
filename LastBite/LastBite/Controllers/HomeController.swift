@@ -14,6 +14,7 @@ class HomeController: ObservableObject {
 
     @Published var storeItems: [CategoryItemData] = []
     @Published var nearbyStores: [CategoryItemData] = []
+    @Published var ownedStores: [CategoryItemData] = []
     @Published var forYouItems: [CategoryItemData] = []
     @Published var activeOrders: [Order] = []
     @Published var isLoading: Bool = false
@@ -64,6 +65,12 @@ class HomeController: ObservableObject {
         print("🏠 Loading initial data via Repositories...")
         isLoading = true
         errorMessage = nil
+        guard let userId = signInService.userId else {
+            print("❌ CartController: Cannot load cart, user not logged in.")
+            self.errorMessage = "Please sign in to view your cart."
+            self.isLoading = false
+            return
+        }
 
         Task {
             do {
@@ -71,15 +78,19 @@ class HomeController: ObservableObject {
                 async let storesTaskResult = storeRepository.fetchStores()
                 async let topStoresTaskResult = storeRepository.fetchTopStores()
                 async let ordersTaskResult = fetchNotReceivedOrders() // Llama al método del controller
+                async let ownedStoresResult = storeRepository.fetchOwnedStores(for: userId)
 
                 // Espera resultados
                 let fetchedStores = try await storesTaskResult
                 let fetchedTopStores = try await topStoresTaskResult
+                let fetchedOwnedStores = try await ownedStoresResult
+                
                 try await ordersTaskResult // Espera a que termine
 
                 // Actualiza estado (ya estamos en @MainActor)
-                self.storeItems = fetchedStores.map { CategoryItemData(title: $0.name, imageName: $0.logo, store: $0) }
-                self.forYouItems = fetchedTopStores.map { CategoryItemData(title: $0.name, imageName: $0.logo, store: $0) }
+                self.storeItems = fetchedStores.map { CategoryItemData(title: $0.name, imageName: $0.logo, store: $0, isOwned: false) }
+                self.forYouItems = fetchedTopStores.map { CategoryItemData(title: $0.name, imageName: $0.logo, store: $0, isOwned: false) }
+                self.ownedStores = fetchedOwnedStores.map { CategoryItemData(title: $0.name, imageName: $0.logo, store: $0, isOwned: true) }
 
                 print("✅ Initial data loaded successfully.")
 
@@ -95,14 +106,14 @@ class HomeController: ObservableObject {
         print("⏳ Fetching nearby stores via Repository...")
         do {
             let stores = try await storeRepository.fetchNearbyStores(location: location)
-            self.nearbyStores = stores.map { CategoryItemData(title: $0.name, imageName: $0.logo, store: $0) }
+            self.nearbyStores = stores.map { CategoryItemData(title: $0.name, imageName: $0.logo, store: $0, isOwned: false) }
             print("✅ Nearby stores fetched: \(self.nearbyStores.count)")
         } catch {
              print("❌ Failed to fetch nearby stores via Repository: \(error.localizedDescription)")
         }
     }
-    private func fetchStores() async throws -> [Store] { try await storeRepository.fetchStores() }
-    private func fetchTopStores() async throws -> [Store] { try await storeRepository.fetchTopStores() }
+    //private func fetchStores() async throws -> [Store] { try await storeRepository.fetchStores() }
+    //private func fetchTopStores() async throws -> [Store] { try await storeRepository.fetchTopStores() }
 
 
     func fetchNotReceivedOrders() async throws {

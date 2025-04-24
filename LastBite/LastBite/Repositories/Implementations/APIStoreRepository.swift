@@ -40,4 +40,9 @@ class APIStoreRepository: StoreRepository { // 1. Conforma al protocolo
         // Llama al método async del servicio directamente
         try await storeService.fetchTopStoresAsync()
     }
+    
+    func fetchOwnedStores(for userId: Int) async throws -> [Store] {
+        // Llama al método async del servicio directamente
+        try await storeService.fetchOwnedStoresAsync(for: userId)
+    }
 }
