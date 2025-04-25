@@ -68,6 +68,9 @@ struct HomeView: View {
                     if !controller.nearbyStores.isEmpty {
                         CategorySectionView(title: "Nearby Stores", items: controller.nearbyStores)
                     }
+                    if !controller.ownedStores.isEmpty {
+                        CategorySectionView(title: "Owned Stores", items: controller.ownedStores)
+                    }
                 }
                 .padding(.vertical)
             }
@@ -84,6 +87,7 @@ struct HomeView: View {
             }
             .animation(.default, value: controller.storeItems)
             .animation(.default, value: controller.nearbyStores)
+            .animation(.default, value: controller.ownedStores)
             .animation(.default, value: controller.forYouItems)
             .animation(.default, value: controller.activeOrders)
             .animation(.default, value: controller.isLoading)

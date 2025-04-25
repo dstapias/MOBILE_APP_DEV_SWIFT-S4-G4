@@ -26,4 +26,9 @@ protocol StoreRepository {
     /// - Throws: Un error si la obtención falla.
     /// - Returns: Un array de objetos Store destacados.
     func fetchTopStores() async throws -> [Store]
+    
+    /// Obtiene las tiendas de asociadas a un usuario en especifico.
+    /// - Throws: Un error si la obtención falla.
+    /// - Returns: Un array de objetos Store
+    func fetchOwnedStores(for userId: Int) async throws -> [Store]
 }

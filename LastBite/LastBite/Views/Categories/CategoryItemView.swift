@@ -6,7 +6,7 @@ struct CategoryItemView: View {
     var body: some View {
         VStack {
             if let store = item.store {
-                NavigationLink(destination: ProductView(store: store)) {
+                NavigationLink(destination: ProductView(store: store, owned: item.isOwned)) {
                     content
                 }
             } else {

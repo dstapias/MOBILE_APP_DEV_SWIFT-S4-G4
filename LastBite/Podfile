@@ -6,8 +6,9 @@ target 'LastBite' do
   use_frameworks!
 
   pod 'SDWebImageSwiftUI'
-  # Firebase Authentication
+  # Firebase
   pod 'Firebase/Auth'
+  pod 'Firebase/Storage'
   #King fisher for caching images
   pod 'Kingfisher'
   #Realm for local storage
