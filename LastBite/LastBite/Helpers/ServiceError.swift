@@ -23,6 +23,9 @@ enum ServiceError: Error, LocalizedError {
      case missingVerificationId        // Para verificar código SMS
      case missingAreaId                // Para registro final
      case backendRegistrationFailed(statusCode: Int, message: String?)
+    case notFound
+    case syncFailed
+    case emptyOffline
 
     var errorDescription: String? {
         switch self {
@@ -40,6 +43,24 @@ enum ServiceError: Error, LocalizedError {
                 case .missingVerificationId: return "Verification ID is missing. Please request a new code."
                 case .missingAreaId: return "User area selection is missing."
                 case .backendRegistrationFailed(let code, let msg): return "Backend registration failed (Status: \(code)). \(msg ?? "")"
+        case .notFound: return "You are offline and we have no cart info. You may have a cart saved online Check connection and try again."
+        case .emptyOffline: return "You are offline and can't add items to your cart. Check connection and try again."
+        case .syncFailed: return "There was an error trying to sync your cart. Please veirfy your internet connection and try again."
         }
     }
+    
+    var isNetworkConnectionError: Bool {
+            if case .requestFailed(let underlyingError) = self {
+                let nsError = underlyingError as NSError
+                // Códigos comunes de error de red en URLSession/NSURLErrorDomain
+                return [
+                    NSURLErrorNotConnectedToInternet,
+                    NSURLErrorNetworkConnectionLost,
+                    NSURLErrorCannotConnectToHost,
+                    NSURLErrorTimedOut
+                    // Añade otros códigos relevantes si los identificas
+                ].contains(nsError.code)
+            }
+            return false
+        }
 }

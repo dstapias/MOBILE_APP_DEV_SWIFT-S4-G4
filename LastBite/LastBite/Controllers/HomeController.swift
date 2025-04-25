@@ -96,7 +96,7 @@ class HomeController: ObservableObject {
 
             } catch {
                 print("❌ Failed to load initial data: \(error.localizedDescription)")
-                self.errorMessage = "Failed to load data. Please try again."
+                self.errorMessage = "Failed to load new data. Please check your internet connection and try again."
             }
             self.isLoading = false
         }

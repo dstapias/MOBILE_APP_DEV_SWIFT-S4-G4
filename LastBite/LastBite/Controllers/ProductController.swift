@@ -146,7 +146,7 @@ class ProductController: ObservableObject {
             let cart = try await cartRepository.fetchActiveCart(for: userId)
 
             // 2. Añadir producto con cantidad 1 (usando repo)
-            try await cartRepository.addProductToCart(cartId: cart.id, productId: product.id, quantity: 1)
+            try await cartRepository.addProductToCart(cartId: cart.id, product: product, quantity: 1)
 
             // Éxito
             print("✅ Product \(product.id) added to cart \(cart.id) via Repo.")
