@@ -44,8 +44,8 @@ struct CategorySectionView_Previews: PreviewProvider {
         CategorySectionView(
             title: "Bakery",
             items: [
-                CategoryItemData(title: "Hornitos", imageName: "hornitos"),
-                CategoryItemData(title: "Cascabel", imageName: "cascabel")
+                CategoryItemData(title: "Hornitos", imageName: "hornitos", isOwned: false),
+                CategoryItemData(title: "Cascabel", imageName: "cascabel", isOwned: false)
             ]
         )
     }

@@ -19,4 +19,9 @@ class APIProductRepository: ProductRepository {
         // Llama directamente al método async del servicio
         try await productService.fetchProductsAsync(for: storeId)
     }
+    
+    func createProduct(_ product: ProductCreateRequest) async throws {
+            try await productService.createProduct(product)
+    }
+
 }

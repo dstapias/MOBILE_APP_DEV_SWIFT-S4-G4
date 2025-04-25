@@ -5,9 +5,11 @@ struct ProductView: View {
     // Dependencias (sin cambios)
     @EnvironmentObject var signInService: SignInUserService
     @StateObject private var controller: ProductController
+    @State private var navigateToCreateProduct = false
+    let owned: Bool // <- New flag to control owner access
 
     // Inicializador (sin cambios, asume que funciona como lo configuraste)
-    init(store: Store) {
+    init(store: Store, owned: Bool = false) {
             // 1. Crear instancias de TODOS los repositorios necesarios
             let productRepository = APIProductRepository()
             let tagRepository = APITagRepository()
@@ -25,12 +27,13 @@ struct ProductView: View {
 
             // 3. Asignar al StateObject wrapper
             self._controller = StateObject(wrappedValue: productController)
+            self.owned = owned
             print("🛒 ProductView initialized and injected Repositories into ProductController for store: \(store.name)")
         }
 
     // --- Cuerpo Principal (Simplificado) ---
     var body: some View {
-        VStack { // VStack principal
+        VStack {
             // 1. Barra de búsqueda extraída
             searchBar
 
@@ -40,17 +43,28 @@ struct ProductView: View {
             // 3. Grid de productos extraído
             productsGrid
         }
-        // Modificadores aplicados al VStack principal
         .navigationTitle(controller.store.name)
         .onAppear {
             controller.loadProductsAndTags()
         }
-        // Animaciones aplicadas al VStack principal (afectarán a sus sub-vistas)
         .animation(.default, value: controller.filteredProducts)
         .animation(.default, value: controller.isLoading)
         .animation(.default, value: controller.errorMessage)
         .animation(.default, value: controller.successMessage)
-    } // Fin body
+        .toolbar {
+            if owned {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Add Product") {
+                        navigateToCreateProduct = true
+                    }
+                }
+            }
+        }
+        .navigationDestination(isPresented: $navigateToCreateProduct) {
+            CreateProductView(store: controller.store, controller: controller)
+        }
+    }
+
 
     // --- Propiedades Computadas para las Secciones ---
 
