@@ -12,22 +12,24 @@ struct MainTabView: View {
     @EnvironmentObject var signInService: SignInUserService
 
     var body: some View {
-        TabView {
-            HomeView()
-                .tabItem {
-                    Label("Shop", systemImage: "house")
-                }
-
-            // 2. Pasa el servicio obtenido del entorno a CartView
-            CartView(signInService: signInService)
-                .tabItem {
-                    Label("Cart", systemImage: "cart")
-                }
-
-            LogoutView()
-                .tabItem {
-                    Label("Logout", systemImage: "arrow.backward.circle")
-                }
+        NavigationStack {
+            TabView {
+                HomeView()
+                    .tabItem {
+                        Label("Shop", systemImage: "house")
+                    }
+                
+                // 2. Pasa el servicio obtenido del entorno a CartView
+                CartView(signInService: signInService)
+                    .tabItem {
+                        Label("Cart", systemImage: "cart")
+                    }
+                
+                LogoutView()
+                    .tabItem {
+                        Label("Logout", systemImage: "arrow.backward.circle")
+                    }
+            }
         }
     }
 }

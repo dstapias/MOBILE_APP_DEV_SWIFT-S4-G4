@@ -7,6 +7,7 @@
 
 import Foundation
 import Combine
+import FirebaseStorage
 
 @MainActor 
 class ProductController: ObservableObject {
@@ -161,6 +162,52 @@ class ProductController: ObservableObject {
         } catch {
             print("❌ Unexpected error adding product \(product.id) to cart: \(error.localizedDescription)")
             errorMessage = "Could not add item to cart."
+        }
+    }
+    func createProduct(
+        name: String,
+        detail: String,
+        imageBase64: String,
+        productType: String,
+        score: Double,
+        unitPrice: Double
+    ) async throws {
+        print("🚀 Starting product creation...")
+
+        do {
+            // 1. Subir imagen a Firebase y obtener URL
+            let fileName = UUID().uuidString
+            let imageURL = try await FirebaseService.shared.uploadImageToFirebase(base64: imageBase64, fileName: fileName)
+            print("📸 Image uploaded. URL: \(imageURL)")
+
+            // 2. Crear solicitud con la URL obtenida
+            let productRequest = ProductCreateRequest(
+                name: name,
+                detail: detail,
+                image: imageURL,
+                product_type: productType,
+                score: score,
+                store_id: store.store_id,
+                unit_price: unitPrice
+            )
+
+            // 3. Enviar al backend
+            try await productRepository.createProduct(productRequest)
+            print("✅ Product created successfully.")
+            self.successMessage = "Product created successfully."
+            self.errorMessage = nil
+
+        } catch let error as ServiceError {
+            print("❌ Service error creating product: \(error.localizedDescription)")
+            self.errorMessage = error.localizedDescription
+            self.successMessage = nil
+            throw error
+
+        } catch {
+            print("❌ Unexpected error: \(error.localizedDescription)")
+            self.errorMessage = "Unexpected error occurred."
+            self.successMessage = nil
+            throw error
         }
     }
 

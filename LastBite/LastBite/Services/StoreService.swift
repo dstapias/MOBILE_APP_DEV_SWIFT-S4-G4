@@ -73,4 +73,11 @@ class StoreService {
         }
         return try await fetchData(from: url)
     }
+    
+    func fetchOwnedStoresAsync(for userId: Int) async throws -> [Store] {
+        guard let url = URL(string: "\(Constants.baseURL)/user_store/stores/user/\(userId)") else {
+            throw ServiceError.invalidURL
+        }
+        return try await fetchData(from: url)
+    }
 }

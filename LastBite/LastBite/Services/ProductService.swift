@@ -54,4 +54,39 @@ class ProductService {
             throw ServiceError.decodingError(error)
         }
     }
+    
+    func createProduct(_ product: ProductCreateRequest) async throws {
+        guard let url = URL(string: "\(Constants.baseURL)/products") else {
+            throw ServiceError.invalidURL
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        do {
+            request.httpBody = try JSONEncoder().encode(product)
+        } catch {
+            print("❌ Failed to encode product: \(error)")
+            throw ServiceError.serializationError(error)
+        }
+
+        do {
+            let (_, response) = try await URLSession.shared.data(for: request)
+
+            guard let httpResponse = response as? HTTPURLResponse,
+                  (200..<300).contains(httpResponse.statusCode) else {
+                let code = (response as? HTTPURLResponse)?.statusCode ?? -1
+                print("❌ Bad server response: HTTP \(code)")
+                throw ServiceError.badServerResponse(statusCode: code)
+            }
+
+            print("✅ Product created successfully.")
+
+        } catch {
+            print("❌ Network error while creating product: \(error)")
+            throw ServiceError.requestFailed(error)
+        }
+    }
+
 }
