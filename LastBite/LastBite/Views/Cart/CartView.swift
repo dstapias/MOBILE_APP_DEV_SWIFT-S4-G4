@@ -4,21 +4,42 @@ import SDWebImageSwiftUI
 struct CartView: View {
     // 1. El controlador gestiona el estado. @StateObject lo mantiene vivo.
     @StateObject private var controller: CartController
+    @EnvironmentObject var networkMonitor: NetworkMonitor
+
 
     // 3. Estado local SOLO para controlar si se muestra el sheet de checkout.
     @State private var showCheckout = false
 
     // 4. Inicializador CORRECTO que crea Controller e inyecta Repositorios
-    init(signInService: SignInUserService) {
-        let cartRepository = APICartRepository()
-        let orderRepository = APIOrderRepository() // Necesario para prepareCheckoutController
+    init(signInService: SignInUserService, networkMonitor: NetworkMonitor) {
+        // 1. Crear instancia API Repo
+        let apiCartRepository = APICartRepository()
+
+        // 2. Crear instancia Local Repo (asegúrate que el init? no falle aquí)
+        guard let localCartRepository = LocalCartRepository() else {
+            // Manejar error crítico: No se pudo inicializar Realm
+            // Puedes asignar un repo "dummy" o fallar de otra forma
+            fatalError("Failed to initialize LocalCartRepository!")
+        }
+
+        // 3. Crear instancia del Repo Orquestador (Caching)
+        let hybridCartRepository = HybridCartRepository(
+            apiRepository: apiCartRepository,
+            localRepository: localCartRepository
+        )
+
+        // 4. Crear Controller pasándole el Repo Orquestador
+        let orderRepository = APIOrderRepository() // Sigue necesitando este para preparar Checkout
         let cartController = CartController(
             signInService: signInService,
-            cartRepository: cartRepository,
-            orderRepository: orderRepository // Pasa el repo de órdenes
+            cartRepository: hybridCartRepository, // <- Inyecta Caching Repo
+            orderRepository: orderRepository,
+            networkMonitor: networkMonitor
         )
+
+        // 5. Asigna al StateObject wrapper
         self._controller = StateObject(wrappedValue: cartController)
-        print("🛒 CartView initialized and injected Repositories into CartController.")
+        print("🛒 CartView initialized and injected CACHING CartRepository into CartController.")
     }
 
 
@@ -40,6 +61,15 @@ struct CartView: View {
                     Text(errorMessage)
                         .foregroundColor(.red).font(.footnote)
                         .padding(.horizontal).padding(.bottom, 5)
+                        .transition(.opacity)
+                }
+                
+                if !networkMonitor.isConnected && !controller.cartItems.isEmpty {
+                    Text("Offline mode: don't worry, your cart is saved. You can still modify your cart now and place an order when you're back online.")                        .foregroundColor(.orange)
+                        .font(.footnote.weight(.semibold))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+                        .padding(.bottom, 5)
                         .transition(.opacity)
                 }
 
@@ -110,7 +140,8 @@ struct CartView: View {
                 NavigationStack {
                     CheckoutView(
                         cartItems: controller.cartItems, // <- Pasa los items
-                        cartId: cartId                  // <- Pasa el ID del carrito
+                        cartId: cartId,
+                        networkMonitor: networkMonitor
                     )
                 }
             } else {
@@ -202,7 +233,6 @@ struct CartRowView: View {
 struct CartView_Previews: PreviewProvider {
     static var previews: some View {
         // Necesita el servicio en el entorno para el init
-        CartView(signInService: SignInUserService.shared) // Pasa el servicio real o un mock
-            .environmentObject(SignInUserService.shared) // Asegura que esté en el entorno
+
     }
 }

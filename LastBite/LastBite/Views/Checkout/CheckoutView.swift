@@ -10,10 +10,11 @@ import SwiftUI
 struct CheckoutView: View {
     @StateObject private var controller: CheckoutController
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var networkMonitor: NetworkMonitor
     @AppStorage("isLoggedIn") private var isLoggedIn = true
 
 
-    init(cartItems: [CartItem], cartId: Int) {
+    init(cartItems: [CartItem], cartId: Int, networkMonitor: NetworkMonitor) {
         // 1. Crear instancias de los repositorios necesarios
         let orderRepository = APIOrderRepository()
         let cartRepository = APICartRepository()
@@ -25,7 +26,8 @@ struct CheckoutView: View {
             cartId: cartId,
             signInService: signInService,
             orderRepository: orderRepository,
-            cartRepository: cartRepository
+            cartRepository: cartRepository,
+            networkMonitor: networkMonitor
         )
 
         // 4. Asignar al StateObject wrapper
@@ -100,7 +102,5 @@ struct CheckoutView_Previews: PreviewProvider {
         ]
         let exampleCartId = 55
 
-        CheckoutView(cartItems: exampleItems, cartId: exampleCartId)
-            .environmentObject(SignInUserService.shared)
     }
 }

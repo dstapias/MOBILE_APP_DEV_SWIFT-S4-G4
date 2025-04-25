@@ -10,6 +10,8 @@ target 'LastBite' do
   pod 'Firebase/Auth'
   #King fisher for caching images
   pod 'Kingfisher'
+  #Realm for local storage
+  pod 'RealmSwift'
 
   # Pods for LastBite
 

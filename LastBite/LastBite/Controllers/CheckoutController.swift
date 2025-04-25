@@ -27,19 +27,22 @@ class CheckoutController: ObservableObject {
     private let signInService: SignInUserService
     private let orderRepository: OrderRepository
     private let cartRepository: CartRepository
+    private let networkMonitor: NetworkMonitor
 
     init(
         cartItems: [CartItem],
         cartId: Int,
         signInService: SignInUserService,
         orderRepository: OrderRepository,
-        cartRepository: CartRepository
+        cartRepository: CartRepository,
+        networkMonitor: NetworkMonitor
     ) {
         self.cartItems = cartItems
         self.cartId = cartId
         self.signInService = signInService
         self.orderRepository = orderRepository
         self.cartRepository = cartRepository
+        self.networkMonitor = networkMonitor
         print("🛒 CheckoutController initialized with Repositories for cart ID: \(cartId)")
         // Calcula costo total al inicio
         self.calculateTotalCost()
@@ -55,6 +58,11 @@ class CheckoutController: ObservableObject {
     /// Inicia y ejecuta todo el proceso de checkout de forma asíncrona.
     func confirmCheckout() async { // Marcado como async
         print("▶️ Controller: confirmCheckout action initiated")
+        guard networkMonitor.isConnected else { // 1. Verifica conexión
+             errorMessage = "No internet connection. Cannot proceed to checkout. Please try again when connected. Your cart will remain saved."
+             return
+         }
+
         guard let userId = signInService.userId else {
             errorMessage = "User is not logged in. Please sign in."
             return
@@ -70,6 +78,10 @@ class CheckoutController: ObservableObject {
 
         do {
             // --- Llama a los repositorios secuencialmente usando try await ---
+            // 2. Sincroniza cambios locales PRIMERO
+            print("Checkout: Attempting to sync local cart changes...")
+            try await cartRepository.synchronizeCart(cartId: cartId)
+            print("Checkout: Cart sync successful.")
             // 1. Crear Orden (obtiene ID)
             print("   Attempting to create order...")
             let newOrderId = try await orderRepository.createOrder(

@@ -18,7 +18,10 @@ protocol CartRepository {
     func fetchDetailedCartProducts(for cartId: Int) async throws -> [DetailedCartProduct]
 
     // Acciones de modificación
-    func addProductToCart(cartId: Int, productId: Int, quantity: Int) async throws
+    func addProductToCart(cartId: Int, product: Product, quantity: Int) async throws
     func updateProductQuantity(cartId: Int, productId: Int, quantity: Int) async throws
     func removeProductFromCart(cartId: Int, productId: Int) async throws
+    
+    func synchronizeCart(cartId: Int) async throws
+
 }

@@ -5,6 +5,9 @@ struct HomeView: View {
     // Dependencias del entorno y localización
     @EnvironmentObject var signInService: SignInUserService
     @StateObject private var locationManager = LocationManager() // Se mantiene para obtener ubicación
+    
+    @EnvironmentObject private var networkMonitor: NetworkMonitor   // 👈
+
 
     // 1. Usa StateObject para el HomeController
     @StateObject private var controller: HomeController
@@ -73,6 +76,11 @@ struct HomeView: View {
                 print("🏠 HomeView Appeared. Triggering loadInitialData.")
                 controller.loadInitialData()
 
+            }
+            .onReceive(networkMonitor.$isConnected) { isOn in
+                if isOn {                                   // se restableció
+                    controller.loadInitialData()            // refresco
+                }
             }
             .animation(.default, value: controller.storeItems)
             .animation(.default, value: controller.nearbyStores)

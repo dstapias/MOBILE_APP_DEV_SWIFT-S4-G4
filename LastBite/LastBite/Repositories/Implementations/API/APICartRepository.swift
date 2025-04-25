@@ -42,7 +42,8 @@ class APICartRepository: CartRepository {
          try await cartProductService.fetchDetailedCartProductsAsync(for: cartId)
     }
 
-    func addProductToCart(cartId: Int, productId: Int, quantity: Int) async throws {
+    func addProductToCart(cartId: Int, product: Product, quantity: Int) async throws {
+        let productId = product.product_id
         try await cartProductService.addProductToCartAsync(cartID: cartId, productID: productId, quantity: quantity)
     }
 
@@ -53,4 +54,6 @@ class APICartRepository: CartRepository {
     func removeProductFromCart(cartId: Int, productId: Int) async throws {
         try await cartProductService.removeProductFromCartAsync(cartID: cartId, productID: productId)
     }
+    
+    func synchronizeCart(cartId: Int) async throws {}
 }

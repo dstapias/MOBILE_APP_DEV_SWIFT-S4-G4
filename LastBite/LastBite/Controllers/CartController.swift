@@ -22,16 +22,19 @@ class CartController: ObservableObject {
     private let cartRepository: CartRepository
     private let orderRepository: OrderRepository
     private var cancellables = Set<AnyCancellable>()
+    private let networkMonitor: NetworkMonitor
 
     // MARK: - Initialization (Recibe Repositorios)
     init(
         signInService: SignInUserService,
         cartRepository: CartRepository,
-        orderRepository: OrderRepository
+        orderRepository: OrderRepository,
+        networkMonitor: NetworkMonitor
     ) {
         self.signInService = signInService
         self.cartRepository = cartRepository
         self.orderRepository = orderRepository
+        self.networkMonitor = networkMonitor
         print("🛒 CartController initialized with Repositories.")
     }
 
@@ -63,10 +66,10 @@ class CartController: ObservableObject {
         do {
             // 1. Obtiene carrito activo usando repositorio
             let cart = try await cartRepository.fetchActiveCart(for: userId)
-            self.activeCartId = cart.id // Actualiza ID
+            self.activeCartId = cart.cart_id // Actualiza ID
 
             // 2. Obtiene productos detallados usando repositorio
-            let detailedProducts = try await cartRepository.fetchDetailedCartProducts(for: cart.id)
+            let detailedProducts = try await cartRepository.fetchDetailedCartProducts(for: cart.cart_id)
             print("✅ CartController: Fetched \(detailedProducts.count) detailed products via Repo.")
 
             // 3. Mapea a CartItem
@@ -189,7 +192,7 @@ class CartController: ObservableObject {
              cartId: cartId,
              signInService: self.signInService, // Pasa servicio de usuario
              orderRepository: self.orderRepository, // Pasa repo de órdenes
-             cartRepository: self.cartRepository // Pasa repo de carrito
+             cartRepository: self.cartRepository, networkMonitor: self.networkMonitor
          )
     }
 }

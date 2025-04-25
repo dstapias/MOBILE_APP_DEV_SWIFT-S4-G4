@@ -55,7 +55,7 @@ class ProductDetailController: ObservableObject {
         do {
             let cart = try await cartRepository.fetchActiveCart(for: userId)
 
-            try await cartRepository.addProductToCart(cartId: cart.id, productId: product.id, quantity: quantity)
+            try await cartRepository.addProductToCart(cartId: cart.id, product: product, quantity: quantity)
 
             // Éxito
             print("✅ Product \(product.id) added/updated in cart \(cart.id) via Repo. Quantity: \(quantity)")
