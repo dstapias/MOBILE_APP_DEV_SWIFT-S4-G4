@@ -63,4 +63,8 @@ class APIAuthRepository: AuthRepository {
     func fetchCurrentUserInfo() async throws -> User {
         try await signInService.fetchUserInfoAsync()
     }
+    
+    func saveSignupAttempt() async throws {
+        try await signupService.saveSignupAttempt()
+    }
 }
