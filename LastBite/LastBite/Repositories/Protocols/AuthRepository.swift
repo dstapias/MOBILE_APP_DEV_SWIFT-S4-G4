@@ -37,7 +37,6 @@ protocol AuthRepository {
         userType: String,
         verificationCode: String // Código SMS (¿necesario en el backend?)
     ) async throws
-
     // --- Sesión ---
     /// Cierra la sesión actual (Firebase y limpia estado local).
     func signOut() // Esta suele ser síncrona
@@ -45,8 +44,7 @@ protocol AuthRepository {
     /// Obtiene la información del usuario del backend (si está logueado).
     /// Devuelve User o lanza error si no se puede obtener.
     func fetchCurrentUserInfo() async throws -> User
-
-    // Podrías añadir aquí acceso a propiedades si prefieres no usar los servicios directamente
-    // var currentUserId: Int? { get }
-    // var currentUser: User? { get }
+    
+    
+    func saveSignupAttempt() async throws
 }

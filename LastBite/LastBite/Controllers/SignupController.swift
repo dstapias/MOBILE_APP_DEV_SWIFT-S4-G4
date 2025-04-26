@@ -27,6 +27,11 @@ class SignupController: ObservableObject {
     /// Inicia el flujo de registro con número de teléfono.
     func startPhoneNumberSignup() {
         print("▶️ User initiated phone number signup.")
+        do{
+            Task {
+                try await authRepository.saveSignupAttempt()
+            }
+        }
         showPhoneNumberView = true // Activa la navegación en la vista
     }
 
