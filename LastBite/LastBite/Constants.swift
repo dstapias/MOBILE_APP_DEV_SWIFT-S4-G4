@@ -8,7 +8,7 @@
 import Foundation
 
 struct Constants {
-    static let baseURL = "http://192.168.11.34:5000/api" // ✅ Centralized backend URL
+    static let baseURL = "https://baf8-181-237-22-203.ngrok-free.app/api" // ✅ Centralized backend URL
     
     static let USER_TYPE_CUSTOMER = "CUSTOMER"
     static let USER_TYPE_STORE = "STORE"

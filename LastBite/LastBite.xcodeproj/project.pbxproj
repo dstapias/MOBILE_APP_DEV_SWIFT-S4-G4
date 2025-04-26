@@ -88,6 +88,7 @@
 		DE4F751E2D794F4800F20D45 /* SignupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE4F751D2D794F4800F20D45 /* SignupView.swift */; };
 		DE4F751F2D794F4800F20D45 /* SignupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE4F751D2D794F4800F20D45 /* SignupView.swift */; };
 		DE4F75202D794F4800F20D45 /* SignupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE4F751D2D794F4800F20D45 /* SignupView.swift */; };
+		DE5BA1512DBC994E00477A43 /* ProductType.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE5BA1502DBC994400477A43 /* ProductType.swift */; };
 		DE6292192DB880D8005B81A0 /* KFImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE6292182DB880BB005B81A0 /* KFImageView.swift */; };
 		DE62921D2DB9D38D005B81A0 /* CreateProductView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE62921C2DB9D383005B81A0 /* CreateProductView.swift */; };
 		DE62921F2DB9DEE0005B81A0 /* ProductCreateRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE62921E2DB9DED8005B81A0 /* ProductCreateRequest.swift */; };
@@ -231,6 +232,7 @@
 		DE2ACE0D2D7BD28C00A7D749 /* FourDigitCode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FourDigitCode.swift; sourceTree = "<group>"; };
 		DE2ACE0F2D7BD74800A7D749 /* LocationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationView.swift; sourceTree = "<group>"; };
 		DE4F751D2D794F4800F20D45 /* SignupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignupView.swift; sourceTree = "<group>"; };
+		DE5BA1502DBC994400477A43 /* ProductType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductType.swift; sourceTree = "<group>"; };
 		DE6292182DB880BB005B81A0 /* KFImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KFImageView.swift; sourceTree = "<group>"; };
 		DE62921C2DB9D383005B81A0 /* CreateProductView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateProductView.swift; sourceTree = "<group>"; };
 		DE62921E2DB9DED8005B81A0 /* ProductCreateRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductCreateRequest.swift; sourceTree = "<group>"; };
@@ -454,9 +456,8 @@
 		41A2F1D72D86B96D006C467C /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				DE5BA1502DBC994400477A43 /* ProductType.swift */,
 				DE62921E2DB9DED8005B81A0 /* ProductCreateRequest.swift */,
-				41A2F1D82D86B9A0006C467C /* CategoryItemData.swift */,
-				417CD0922DAD626200D63DFA /* Zone.swift */,
 				417CD0942DAD627800D63DFA /* Area.swift */,
 				417CD09E2DAD62F900D63DFA /* Cart.swift */,
 				417CD0B12DAD753D00D63DFA /* CartItem.swift */,
@@ -948,6 +949,7 @@
 				417CD0B62DAD7B1B00D63DFA /* CheckoutView.swift in Sources */,
 				410991D82DAE9E2D002B6270 /* WelcomeController.swift in Sources */,
 				417CD0A12DAD631A00D63DFA /* CartProduct.swift in Sources */,
+				DE5BA1512DBC994E00477A43 /* ProductType.swift in Sources */,
 				410991D62DAE9C27002B6270 /* FinalSignUpController.swift in Sources */,
 				41A4C2EB2DB0B3FF00190216 /* ZoneRepository.swift in Sources */,
 				4193FD052DBA0CC600A1C18E /* HybridCartRepository.swift in Sources */,
@@ -1138,7 +1140,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"LastBite/Preview Content\"";
-				DEVELOPMENT_TEAM = W3QFYRJQQN;
+				DEVELOPMENT_TEAM = 585XBRU6ZG;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Info.plist;
@@ -1152,7 +1154,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = co.uniandes.LastBite;
+				PRODUCT_BUNDLE_IDENTIFIER = co.uniandes.LastBiteV3;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -1169,7 +1171,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"LastBite/Preview Content\"";
-				DEVELOPMENT_TEAM = W3QFYRJQQN;
+				DEVELOPMENT_TEAM = 585XBRU6ZG;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Info.plist;
@@ -1183,7 +1185,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = co.uniandes.LastBite;
+				PRODUCT_BUNDLE_IDENTIFIER = co.uniandes.LastBiteV3;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;

@@ -227,12 +227,3 @@ struct CartRowView: View {
    }
 }
 
-
-// MARK: - Preview Provider
-
-struct CartView_Previews: PreviewProvider {
-    static var previews: some View {
-        // Necesita el servicio en el entorno para el init
-
-    }
-}

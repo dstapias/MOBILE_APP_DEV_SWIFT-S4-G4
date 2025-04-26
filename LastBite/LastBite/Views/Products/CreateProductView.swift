@@ -9,7 +9,7 @@ struct CreateProductView: View {
 
     @State private var name: String = ""
     @State private var detail: String = ""
-    @State private var productType: String = ""
+    @State private var selectedProductType: ProductType = .product
     @State private var score: String = ""
     @State private var unitPrice: String = ""
     @State private var successMessage: String?
@@ -28,7 +28,11 @@ struct CreateProductView: View {
             Section(header: Text("Product Info")) {
                 TextField("Name", text: $name)
                 TextField("Detail", text: $detail)
-                TextField("Product Type", text: $productType)
+                Picker("Product Type", selection: $selectedProductType) {
+                    ForEach(ProductType.allCases) { type in
+                        Text(type.displayName).tag(type)
+                    }
+                }
                 TextField("Score", text: $score)
                     .keyboardType(.decimalPad)
                 TextField("Price", text: $unitPrice)
@@ -119,7 +123,7 @@ struct CreateProductView: View {
                             name: name,
                             detail: detail,
                             imageBase64: base64,
-                            productType: productType,
+                            productType: selectedProductType.rawValue,
                             score: parsedScore,
                             unitPrice: price
                         )
