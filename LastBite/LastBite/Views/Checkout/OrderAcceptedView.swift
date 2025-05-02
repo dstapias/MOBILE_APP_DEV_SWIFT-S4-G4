@@ -10,6 +10,8 @@ import SwiftUI
 struct OrderAcceptedView: View {
     @State private var navigateToHome = false
     @AppStorage("isLoggedIn") private var isLoggedIn = true
+    @Environment(\.dismiss) var dismiss
+
 
     var body: some View {
         NavigationStack {
@@ -32,7 +34,10 @@ struct OrderAcceptedView: View {
                 
                 // Botón para volver al Home
                 Button(action: {
-                    navigateToHome = true
+                    // Call the dismiss action
+                    dismiss()
+                    // Optionally call the callback if provided
+                    // onDismiss?()
                 }) {
                     Text("Back to Home")
                         .fontWeight(.bold)

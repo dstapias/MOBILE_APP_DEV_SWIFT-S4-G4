@@ -3,6 +3,8 @@ import SDWebImageSwiftUI
 
 struct CartView: View {
     // 1. El controlador gestiona el estado. @StateObject lo mantiene vivo.
+    @Binding var selectedTab: Int
+
     @StateObject private var controller: CartController
     @EnvironmentObject var networkMonitor: NetworkMonitor
 
@@ -11,7 +13,7 @@ struct CartView: View {
     @State private var showCheckout = false
 
     // 4. Inicializador CORRECTO que crea Controller e inyecta Repositorios
-    init(signInService: SignInUserService, networkMonitor: NetworkMonitor) {
+    init(signInService: SignInUserService, networkMonitor: NetworkMonitor, selectedTab: Binding<Int>) {
         // 1. Crear instancia API Repo
         let apiCartRepository = APICartRepository()
 
@@ -39,6 +41,7 @@ struct CartView: View {
 
         // 5. Asigna al StateObject wrapper
         self._controller = StateObject(wrappedValue: cartController)
+        self._selectedTab = selectedTab // Assign the binding received from parent
         print("🛒 CartView initialized and injected CACHING CartRepository into CartController.")
     }
 
@@ -113,10 +116,13 @@ struct CartView: View {
                 .padding()
                 .disabled(isCheckoutDisabled)
                  // Presenta CheckoutView como sheet
-                .sheet(isPresented: $showCheckout) {
-                    // Llama a la función helper que prepara y presenta
-                    prepareAndPresentCheckoutView()
-                }
+                .sheet(isPresented: $showCheckout, onDismiss: {
+                        selectedTab = 0
+
+                 }) {
+                     // Llama a la función helper que prepara y presenta
+                     prepareAndPresentCheckoutView()
+                 }
 
             } // Fin VStack principal
             .navigationBarHidden(true) // Oculta barra de navegación si usas NavigationStack interno
