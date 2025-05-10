@@ -46,7 +46,7 @@ struct HomeView: View {
                     ordersSection
 
                     if !controller.forYouItems.isEmpty {
-                        CategorySectionView(title: "For you", items: controller.forYouItems)
+                        CategorySectionView(title: "Top Stores", items: controller.forYouItems)
                     }
 
                     if !controller.storeItems.isEmpty {
