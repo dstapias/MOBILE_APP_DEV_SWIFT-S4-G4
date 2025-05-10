@@ -15,6 +15,7 @@ class LocationController: ObservableObject {
     @Published var zones: [Zone] = []
     @Published var areas: [Area] = []
     @Published var selectedZoneId: Int? = nil
+    @Published var selectedAreaId: Int? = nil
     @Published var isLoadingZones: Bool = false
     @Published var isLoadingAreas: Bool = false
     @Published var errorMessage: String? = nil
@@ -33,15 +34,12 @@ class LocationController: ObservableObject {
     }
 
     var selectedAreaName: String {
-        let targetId = userService.selectedAreaId
-        guard let idToFind = targetId else { return "Select an area" }
-        var nameToReturn: String = "Select an area"
-        for area in areas { if area.id == idToFind { nameToReturn = area.area_name; break } }
-        return nameToReturn
+        guard let idToFind = selectedAreaId else { return "Select an area" }
+        return areas.first(where: { $0.id == idToFind })?.area_name ?? "Select an area"
     }
 
     var canProceed: Bool {
-        userService.selectedAreaId != nil
+        selectedAreaId != nil
     }
 
     // MARK: - Initialization (Recibe Repositorio)
@@ -62,9 +60,12 @@ class LocationController: ObservableObject {
         print("⏳ Loading zones via Repository...")
         isLoadingZones = true
         errorMessage = nil
-        areas = [] // Limpia áreas
-        userService.selectedAreaId = nil // Deselecciona
+        areas = []
 
+        // ❗️NO borres la selección si ya existe
+        if userService.selectedAreaId == nil {
+            userService.selectedAreaId = nil
+        }
         Task { // Lanza la tarea asíncrona
             var fetchedZones: [Zone] = [] // Variable local para zonas
             do {
@@ -98,7 +99,6 @@ class LocationController: ObservableObject {
         isLoadingAreas = true
         errorMessage = nil // Limpia errores específicos de áreas
         areas = [] // Limpia áreas anteriores
-        userService.selectedAreaId = nil // Deselecciona área
 
         do {
             // Llama al REPOSITORIO
@@ -133,16 +133,21 @@ class LocationController: ObservableObject {
     // selectArea (sin cambios, solo actualiza userService)
     func selectArea(area: Area) {
         print("👉 Area selected: \(area.area_name) (ID: \(area.id))")
+        self.selectedAreaId = area.id
         self.userService.selectedAreaId = area.id
     }
 
     // MARK: - Navigation (Sin cambios)
     func proceedToNextStep() {
-        if canProceed {
-            print("🚀 Proceeding to final sign up...")
+        if let areaId = selectedAreaId {
+            print("🚀 Proceeding with area ID: \(areaId)")
+            print("🧪 Saved in userService before navigation:", userService.selectedAreaId ?? -1)
+            userService.selectedAreaId = areaId
             self.showFinalSignUpView = true
         } else {
             print("⚠️ Cannot proceed, area not selected.")
+            self.errorMessage = "Please select an area before continuing."
         }
     }
+
 }

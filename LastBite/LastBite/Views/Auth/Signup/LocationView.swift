@@ -101,7 +101,7 @@ struct LocationView: View {
                                 // Muestra nombre basado en userService.selectedAreaId
                                 Text(controller.selectedAreaName)
                                     .font(.headline)
-                                    .foregroundColor(userService.selectedAreaId == nil ? .gray : .black)
+                                    .foregroundColor(controller.selectedAreaId == nil ? .gray : .black)
                                 Spacer()
                                 Image(systemName: "chevron.down")
                             }
@@ -146,7 +146,10 @@ struct LocationView: View {
             }
             // 9. fullScreenCover usa la propiedad publicada del controller
             .fullScreenCover(isPresented: $controller.showFinalSignUpView) {
-                FinalSignUpView(showFinalSignUpView: $controller.showFinalSignUpView, isLoggedIn: $isLoggedIn)
+                FinalSignUpView(
+                    showFinalSignUpView: $controller.showFinalSignUpView,
+                    isLoggedIn: $isLoggedIn
+                )
             }
             .animation(.default, value: controller.zones)
             .animation(.default, value: controller.areas)

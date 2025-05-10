@@ -27,15 +27,16 @@ class FinalSignupController: ObservableObject {
     private let signupStateService: SignupUserService
     private var cancellables = Set<AnyCancellable>()
 
+    @MainActor
     init(
         authRepository: AuthRepository,
-        signupStateService: SignupUserService = SignupUserService.shared
-    ) {
+        signupStateService: SignupUserService
+    ){
         self.authRepository = authRepository
         self.signupStateService = signupStateService
         print("✅ FinalSignupController initialized with Repository.")
-
-        setupValidationPipelines() // Configura validación local
+        print("🧪 Area ID:", signupStateService.selectedAreaId ?? -1)
+        setupValidationPipelines()
     }
 
     // MARK: - Validation Logic
@@ -80,12 +81,12 @@ class FinalSignupController: ObservableObject {
             return
         }
         let phoneNumber = signupStateService.phoneNumber
-         guard let areaId = signupStateService.selectedAreaId else {
-             errorMessage = "Area selection is missing. Please go back."
-             return
-         }
-         let userType = signupStateService.userType
-         let verificationCode = signupStateService.verificationCode
+        guard let areaId = signupStateService.selectedAreaId else {
+            errorMessage = "Area selection is missing. Please go back."
+            return
+        }
+        let userType = signupStateService.userType
+        let verificationCode = signupStateService.verificationCode
 
         print("🚀 Controller attempting final user registration via Repository...")
 

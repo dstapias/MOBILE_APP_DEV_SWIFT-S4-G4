@@ -13,22 +13,22 @@ struct FinalSignUpView: View {
     @State private var isPasswordVisible: Bool = false
     
     // 5. Inicializador
-    init(showFinalSignUpView: Binding<Bool>, isLoggedIn: Binding<Bool>) { // Mantiene sus bindings
-        self._showFinalSignUpView = showFinalSignUpView
-        self._isLoggedIn = isLoggedIn
+    init(showFinalSignUpView: Binding<Bool>, isLoggedIn: Binding<Bool>) {
+       self._showFinalSignUpView = showFinalSignUpView
+       self._isLoggedIn = isLoggedIn
 
-        // 1. Crear instancia del Repositorio
-        let authRepository = APIAuthRepository(
-            signInService: .shared, 
-            signupService: .shared
-        )
-
-        // 2. Crear el Controller inyectando el Repositorio
-        let finalController = FinalSignupController(authRepository: authRepository)
-
-        // 3. Asignar al StateObject wrapper
-        self._controller = StateObject(wrappedValue: finalController)
-        print("✅ FinalSignUpView initialized and injected AuthRepository into Controller.")
+       let controller = Self.createController()
+       self._controller = StateObject(wrappedValue: controller)
+       print("✅ FinalSignUpView: Controller initialized from safe context.")
+    }
+    @MainActor
+    private static func createController() -> FinalSignupController {
+       let authRepo = APIAuthRepository(
+           signInService: .shared,
+           signupService: .shared
+       )
+       let userService = SignupUserService.shared
+       return FinalSignupController(authRepository: authRepo, signupStateService: userService)
     }
 
     var body: some View {
@@ -157,14 +157,13 @@ struct FinalSignUpView: View {
              Text("User created successfully!")
         }
         .fullScreenCover(isPresented: $controller.navigateToSignIn) {
-            
-             SignInView(showSignInView: $controller.navigateToSignIn, isLoggedIn: $isLoggedIn)
-                .onAppear {
-                     showFinalSignUpView = false
-                 }
+            SignInView(
+                showSignInView: $controller.navigateToSignIn,
+                isLoggedIn: $isLoggedIn
+            )
         }
-         .onAppear {
-         }
+        .onAppear {
+        }
 
     }
 }
