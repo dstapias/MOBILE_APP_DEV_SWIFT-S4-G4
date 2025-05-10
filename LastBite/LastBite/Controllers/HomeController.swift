@@ -143,4 +143,18 @@ class HomeController: ObservableObject {
              self.errorMessage = "Failed to update order status."
         }
     }
+    
+    func refreshNearbyStoresManually() {
+        print("🔄 Manual refresh of nearby stores requested.")
+        if let lat = locationManager.latitude, let lon = locationManager.longitude {
+            let location = CLLocation(latitude: lat, longitude: lon)
+            Task {
+                await self.fetchNearbyStores(location: location)
+            }
+        } else {
+            print("⚠️ Cannot refresh: location is not available.")
+            self.errorMessage = "Location not available. Try again later."
+        }
+    }
+
 }

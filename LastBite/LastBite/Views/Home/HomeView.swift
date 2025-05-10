@@ -1,54 +1,42 @@
 import SwiftUI
-import SDWebImageSwiftUI // Si la usas
+import SDWebImageSwiftUI
 
 struct HomeView: View {
-    // Dependencias del entorno y localización
     @EnvironmentObject var signInService: SignInUserService
-    @StateObject private var locationManager = LocationManager() // Se mantiene para obtener ubicación
-    
-    @EnvironmentObject private var networkMonitor: NetworkMonitor   // 👈
+    @StateObject private var locationManager = LocationManager()
+    @EnvironmentObject private var networkMonitor: NetworkMonitor
 
-
-    // 1. Usa StateObject para el HomeController
     @StateObject private var controller: HomeController
-
-    // Estado local solo para la UI (texto de búsqueda)
     @State private var searchText = ""
 
-    // 2. Inicializador que crea el HomeController inyectando dependencias
     init() {
-            // 1. Crea las instancias de AMBOS repositorios concretos
-            let storeRepository = APIStoreRepository()
-            let orderRepository = APIOrderRepository()
+        let storeRepository = APIStoreRepository()
+        let orderRepository = APIOrderRepository()
+        let signInService = SignInUserService.shared
+        let locationManagerInstance = LocationManager()
 
-            // (Opcional) Obtener otras dependencias
-            let signInService = SignInUserService.shared
-            let locationManagerInstance = LocationManager() // O usa singleton/inyectado
+        let homeController = HomeController(
+            signInService: signInService,
+            locationManager: locationManagerInstance,
+            storeRepository: storeRepository,
+            orderRepository: orderRepository
+        )
 
-            // 2. Crea el HomeController pasándole AMBOS repositorios
-            let homeController = HomeController(
-                signInService: signInService,
-                locationManager: locationManagerInstance,
-                storeRepository: storeRepository,   // <- Inyecta Store Repo
-                orderRepository: orderRepository    // <- Inyecta Order Repo
-            )
-
-            // 3. Asigna al StateObject wrapper
-            self._controller = StateObject(wrappedValue: homeController)
-            print("🏠 HomeView initialized and injected Store & Order Repositories into HomeController.")
-        }
-
+        self._controller = StateObject(wrappedValue: homeController)
+        print("🏠 HomeView initialized and injected Store & Order Repositories into HomeController.")
+    }
 
     var body: some View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 16) {
                     headerSection
-
                     searchField
+
                     if controller.isLoading {
                         ProgressView("Loading...")
                     }
+
                     if let error = controller.errorMessage {
                         Text(error)
                             .foregroundColor(.red)
@@ -68,6 +56,7 @@ struct HomeView: View {
                     if !controller.nearbyStores.isEmpty {
                         CategorySectionView(title: "Nearby Stores", items: controller.nearbyStores)
                     }
+
                     if !controller.ownedStores.isEmpty {
                         CategorySectionView(title: "Owned Stores", items: controller.ownedStores)
                     }
@@ -75,14 +64,27 @@ struct HomeView: View {
                 .padding(.vertical)
             }
             .navigationTitle("Shop")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {
+                        controller.refreshNearbyStoresManually()
+                    }) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "location.circle.fill")
+                            Text("Update Location")
+                        }
+                        .font(.footnote.bold())
+                        .foregroundColor(.green)
+                    }
+                }
+            }
             .onAppear {
                 print("🏠 HomeView Appeared. Triggering loadInitialData.")
                 controller.loadInitialData()
-
             }
             .onReceive(networkMonitor.$isConnected) { isOn in
-                if isOn {                                   // se restableció
-                    controller.loadInitialData()            // refresco
+                if isOn {
+                    controller.loadInitialData()
                 }
             }
             .animation(.default, value: controller.storeItems)
@@ -96,10 +98,7 @@ struct HomeView: View {
         .navigationViewStyle(StackNavigationViewStyle())
     }
 
-    // --- Sub-Vistas ---
-
     private var headerSection: some View {
-        // Sin cambios, lee del servicio global
         Group {
             if let userId = signInService.userId, userId != -1 {
                 Text("Logged in as User ID: \(userId)")
@@ -156,7 +155,6 @@ struct HomeView: View {
 struct HomeView_Previews: PreviewProvider {
     static var previews: some View {
         let mockSignInService = SignInUserService.shared
-
         HomeView()
             .environmentObject(mockSignInService)
     }
