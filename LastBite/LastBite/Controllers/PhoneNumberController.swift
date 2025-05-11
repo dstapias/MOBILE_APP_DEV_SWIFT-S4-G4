@@ -16,7 +16,7 @@ class PhoneNumberController: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var errorMessage: String? = nil
     @Published var showFourDigitCodeView: Bool = false // Navegación
-    @Published var isPhoneNumberValid: Bool = false // Habilita botón
+    //@Published var isPhoneNumberValid: Bool = false // Habilita botón
 
     private let authRepository: AuthRepository
     private var cancellables = Set<AnyCancellable>()
@@ -36,11 +36,11 @@ class PhoneNumberController: ObservableObject {
                 return String(digitsOnly.prefix(10))
             }
             .sink { [weak self] processedNumber in
-                 guard let self = self else { return }
-                 if self.rawPhoneNumber != processedNumber {
-                     self.rawPhoneNumber = processedNumber
-                 }
-                 self.isPhoneNumberValid = processedNumber.count == 10
+                guard let self = self else { return }
+                DispatchQueue.main.async {
+                    self.rawPhoneNumber = processedNumber
+                }
+                 //self.isPhoneNumberValid = processedNumber.count == 10
             }
             .store(in: &cancellables)
     }
@@ -80,4 +80,9 @@ class PhoneNumberController: ObservableObject {
             self.isLoading = false
         }
     }
+    
+    var isPhoneNumberValid: Bool {
+        rawPhoneNumber.filter { $0.isNumber }.count == 10
+    }
+
 }

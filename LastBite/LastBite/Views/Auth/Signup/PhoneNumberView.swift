@@ -10,6 +10,8 @@ struct PhoneNumberView: View {
 
     // 2. FocusState se mantiene
     @FocusState private var isPhoneNumberFocused: Bool
+    
+    @State private var phoneNumberInput: String = ""
 
     // 5. Inicializador
     init(showPhoneNumberView: Binding<Bool>, showSignInView: Binding<Bool>, isLoggedIn: Binding<Bool>) {
@@ -57,13 +59,34 @@ struct PhoneNumberView: View {
                         Text("+57").font(.headline)
 
                         // 6. TextField bindeado a controller.rawPhoneNumber
-                        TextField("300 123 4567", text: $controller.rawPhoneNumber)
+                        TextField("300 123 4567", text: $phoneNumberInput)
                             .keyboardType(.numberPad)
                             .textContentType(.telephoneNumber)
                             .focused($isPhoneNumberFocused)
                             .frame(height: 40)
                             .padding(.leading, 5)
                             .background(Color.clear)
+                            .onChange(of: phoneNumberInput) { newValue in
+                                // 1. Solo números
+                                let digitsOnly = newValue.filter { $0.isNumber }
+
+                                // 2. No más de 10
+                                if digitsOnly.count <= 10 {
+                                    controller.rawPhoneNumber = digitsOnly
+                                    phoneNumberInput = digitsOnly
+                                } else {
+                                    // Recorta y actualiza ambos
+                                    let trimmed = String(digitsOnly.prefix(10))
+                                    controller.rawPhoneNumber = trimmed
+                                    phoneNumberInput = trimmed
+                                }
+                            }
+                        .keyboardType(.numberPad)
+                        .textContentType(.telephoneNumber)
+                        .focused($isPhoneNumberFocused)
+                        .frame(height: 40)
+                        .padding(.leading, 5)
+                        .background(Color.clear)
                     }
                     .frame(height: 50)
                     .padding(.horizontal, 10)
@@ -110,6 +133,7 @@ struct PhoneNumberView: View {
             .navigationTitle("Phone Number")
             .onAppear {
                 isPhoneNumberFocused = true
+                phoneNumberInput = controller.rawPhoneNumber
             }
             .fullScreenCover(isPresented: $controller.showFourDigitCodeView) {
                 FourDigitCodeView(showFourDigitCodeView: $controller.showFourDigitCodeView, showSignInView: $showSignInView, isLoggedIn: $isLoggedIn)

@@ -10,6 +10,9 @@ struct SignInView: View {
 
     // Estado local solo para UI (visibilidad contraseña)
     @State private var isPasswordVisible: Bool = false
+    @State private var emailInput: String = ""
+    @State private var passwordInput: String = ""
+
 
     // 2. Inicializador (opcional, si necesitas inyectar algo al controller)
     //    Si SignInController usa SignInUserService.shared, no necesitas un init especial.
@@ -62,10 +65,19 @@ struct SignInView: View {
                         Text("Email")
                             .font(.footnote).foregroundColor(.gray)
                         // 3. Bindea directamente al controller
-                        TextField("Enter your email", text: $controller.email)
+                        TextField("Enter your email", text: $emailInput)
                             .autocapitalization(.none)
                             .keyboardType(.emailAddress)
                             .padding(.bottom, 5)
+                            .onChange(of: emailInput) { newValue in
+                                if newValue.count <= 50 {
+                                    controller.email = newValue
+                                } else {
+                                    let trimmed = String(newValue.prefix(50))
+                                    emailInput = trimmed
+                                    controller.email = trimmed
+                                }
+                            }
                         Divider()
                     }
 
@@ -75,16 +87,22 @@ struct SignInView: View {
                             .font(.footnote).foregroundColor(.gray)
                         HStack {
                             if isPasswordVisible {
-                                // 3. Bindea directamente al controller
-                                TextField("Enter your password", text: $controller.password)
+                                TextField("Enter your password", text: $passwordInput)
                             } else {
-                                // 3. Bindea directamente al controller
-                                SecureField("Enter your password", text: $controller.password)
+                                SecureField("Enter your password", text: $passwordInput)
                             }
-                            // Botón de visibilidad (sin cambios)
                             Button(action: { isPasswordVisible.toggle() }) {
                                 Image(systemName: isPasswordVisible ? "eye.slash" : "eye")
                                     .foregroundColor(.gray)
+                            }
+                        }
+                        .onChange(of: passwordInput) { newValue in
+                            if newValue.count <= 50 {
+                                controller.password = newValue
+                            } else {
+                                let trimmed = String(newValue.prefix(50))
+                                passwordInput = trimmed
+                                controller.password = trimmed
                             }
                         }
                         .padding(.bottom, 5)
@@ -147,6 +165,10 @@ struct SignInView: View {
 
             } // Fin VStack principal
             .frame(width: geometry.size.width, height: geometry.size.height)
+            .onAppear {
+                    emailInput = controller.email
+                    passwordInput = controller.password
+            }
             // 7. Reacciona al cambio de estado de éxito del controller
             .onChange(of: controller.didSignInSuccessfully) { newValue in
                  if newValue {

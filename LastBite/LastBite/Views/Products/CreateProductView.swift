@@ -22,21 +22,57 @@ struct CreateProductView: View {
     
     @State private var isCreating: Bool = false
     @State private var showCreatedAlert: Bool = false
+    
+    @State private var nameInput: String = ""
+    @State private var detailInput: String = ""
+    @State private var scoreInput: String = "0" // Fijo en 0
+    @State private var unitPriceInput: String = ""
+
 
     var body: some View {
         Form {
             Section(header: Text("Product Info")) {
-                TextField("Name", text: $name)
-                TextField("Detail", text: $detail)
+                
+                // Nombre (máx 50 caracteres)
+                TextField("Name", text: $nameInput)
+                    .onChange(of: nameInput) { newValue in
+                        if newValue.count > 50 {
+                            nameInput = String(newValue.prefix(50))
+                        }
+                    }
+
+                // Detalle (máx 50 caracteres)
+                TextField("Detail", text: $detailInput)
+                    .onChange(of: detailInput) { newValue in
+                        if newValue.count > 50 {
+                            detailInput = String(newValue.prefix(50))
+                        }
+                    }
+
+                // Tipo de producto
                 Picker("Product Type", selection: $selectedProductType) {
                     ForEach(ProductType.allCases) { type in
                         Text(type.displayName).tag(type)
                     }
                 }
-                TextField("Score", text: $score)
-                    .keyboardType(.decimalPad)
-                TextField("Price", text: $unitPrice)
-                    .keyboardType(.decimalPad)
+
+                // Score fijo en 0
+                TextField("Score", text: .constant("0"))
+                    .disabled(true)
+                    .foregroundColor(.gray)
+
+                TextField("Price (COP)", text: $unitPriceInput)
+                    .keyboardType(.numberPad)
+                    .onChange(of: unitPriceInput) { newValue in
+                        let onlyDigits = newValue.filter { $0.isNumber }
+
+                        // Permitir que el usuario escriba libremente hasta 6 dígitos
+                        if onlyDigits.count <= 6 {
+                            unitPriceInput = onlyDigits
+                        } else {
+                            unitPriceInput = String(onlyDigits.prefix(6))
+                        }
+                    }
             }
 
             Section(header: Text("Product Image")) {
@@ -104,43 +140,45 @@ struct CreateProductView: View {
     }
 
     func submitProduct() {
-            guard let price = Double(unitPrice),
-                  let parsedScore = Double(score),
-                  let base64 = base64Image else {
-                errorMessage = "Please fill all fields correctly."
-                return
-            }
+        guard let price = Double(unitPriceInput), (5000...100000).contains(price),
+              let base64 = base64Image else {
+            errorMessage = "Please fill all fields correctly. Price must be between 5,000 and 100,000 COP."
+            return
+        }
 
-            isCreating = true
-            errorMessage = nil
+        // Score fijo en 0
+        let parsedScore = 0.0
 
-            DispatchQueue.global(qos: .userInitiated).async {
-                Task {
-                    do {
-                        //Este pedazo de codigo se deja para simular una demora y demostrar que no esta bloqueado el thread principal
-                        try await Task.sleep(nanoseconds: 20_000_000_000)
-                        try await controller.createProduct(
-                            name: name,
-                            detail: detail,
-                            imageBase64: base64,
-                            productType: selectedProductType.rawValue,
-                            score: parsedScore,
-                            unitPrice: price
-                        )
+        isCreating = true
+        errorMessage = nil
 
-                        DispatchQueue.main.async {
-                            controller.loadProductsAndTags()
-                            isCreating = false
-                            showCreatedAlert = true
-                        }
+        DispatchQueue.global(qos: .userInitiated).async {
+            Task {
+                do {
+                    // Simulación de demora (20 segundos)
+                    try await Task.sleep(nanoseconds: 20_000_000_000)
+                    try await controller.createProduct(
+                        name: nameInput,
+                        detail: detailInput,
+                        imageBase64: base64,
+                        productType: selectedProductType.rawValue,
+                        score: parsedScore,
+                        unitPrice: price
+                    )
 
-                    } catch {
-                        DispatchQueue.main.async {
-                            isCreating = false
-                            errorMessage = "❌ Failed to create product."
-                        }
+                    DispatchQueue.main.async {
+                        controller.loadProductsAndTags()
+                        isCreating = false
+                        showCreatedAlert = true
+                    }
+
+                } catch {
+                    DispatchQueue.main.async {
+                        isCreating = false
+                        errorMessage = "❌ Failed to create product."
                     }
                 }
             }
         }
+    }
 }

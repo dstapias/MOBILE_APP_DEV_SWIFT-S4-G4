@@ -12,6 +12,11 @@ struct FinalSignUpView: View {
     // 2. Estado local solo para UI (visibilidad contraseña)
     @State private var isPasswordVisible: Bool = false
     
+    @State private var nameInput: String = ""
+    @State private var emailInput: String = ""
+    @State private var passwordInput: String = ""
+
+    
     // 5. Inicializador
     init(showFinalSignUpView: Binding<Bool>, isLoggedIn: Binding<Bool>) {
        self._showFinalSignUpView = showFinalSignUpView
@@ -55,9 +60,17 @@ struct FinalSignUpView: View {
                 VStack(alignment: .leading, spacing: 5) {
                     Text("Full Name").font(.footnote).foregroundColor(.gray)
                     // 6. Bindea al controller
-                    TextField("Enter your name", text: $controller.name)
+                    TextField("Enter your name", text: $nameInput)
                         .autocapitalization(.words)
                         .padding(.bottom, 5)
+                        .onChange(of: nameInput) { newValue in
+                            if newValue.count <= 50 {
+                                controller.name = newValue
+                            } else {
+                                nameInput = String(newValue.prefix(50))
+                                controller.name = nameInput
+                            }
+                        }
                     Divider()
                 }
 
@@ -65,10 +78,18 @@ struct FinalSignUpView: View {
                 VStack(alignment: .leading, spacing: 5) {
                     Text("Email").font(.footnote).foregroundColor(.gray)
                     // 6. Bindea al controller
-                    TextField("Enter your email", text: $controller.email)
+                    TextField("Enter your email", text: $emailInput)
                         .keyboardType(.emailAddress)
                         .autocapitalization(.none)
                         .padding(.bottom, 5)
+                        .onChange(of: emailInput) { newValue in
+                            if newValue.count <= 50 {
+                                controller.email = newValue
+                            } else {
+                                emailInput = String(newValue.prefix(50))
+                                controller.email = emailInput
+                            }
+                        }
                     Divider()
                 }
                 // 7. Muestra error de formato de email basado en controller
@@ -81,18 +102,25 @@ struct FinalSignUpView: View {
                 VStack(alignment: .leading, spacing: 5) {
                     Text("Password").font(.footnote).foregroundColor(.gray)
                     HStack {
-                         if isPasswordVisible {
-                             // 6. Bindea al controller
-                             TextField("Enter your password", text: $controller.password)
-                         } else {
-                              // 6. Bindea al controller
-                             SecureField("Enter your password", text: $controller.password)
-                         }
-                         Button(action: { isPasswordVisible.toggle() }) {
-                             Image(systemName: isPasswordVisible ? "eye.slash" : "eye")
-                                 .foregroundColor(.gray)
-                         }
-                     }
+                        if isPasswordVisible {
+                            TextField("Enter your password", text: $passwordInput)
+                        } else {
+                            SecureField("Enter your password", text: $passwordInput)
+                        }
+                        Button(action: { isPasswordVisible.toggle() }) {
+                            Image(systemName: isPasswordVisible ? "eye.slash" : "eye")
+                                .foregroundColor(.gray)
+                        }
+                    }
+                    .onChange(of: passwordInput) { newValue in
+                        if newValue.count <= 50 {
+                            controller.password = newValue
+                        } else {
+                            let trimmed = String(newValue.prefix(50))
+                            passwordInput = trimmed
+                            controller.password = trimmed
+                        }
+                    }
                     .padding(.bottom, 5)
                     Divider()
                 }
@@ -163,6 +191,9 @@ struct FinalSignUpView: View {
             )
         }
         .onAppear {
+            nameInput = controller.name
+            emailInput = controller.email
+            passwordInput = controller.password
         }
 
     }
