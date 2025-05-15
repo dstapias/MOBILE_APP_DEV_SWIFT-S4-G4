@@ -2,11 +2,19 @@ import SwiftUI
 
 struct CategoryItemView: View {
     let item: CategoryItemData
+    let homeController : HomeController
+    
+    init(item: CategoryItemData, homeController: HomeController) {
+        self.item = item
+        self.homeController = homeController
+    }
 
     var body: some View {
+        let _ = print("➡️➡️ CategoryItemView body: HomeController instance = \(Unmanaged.passUnretained(homeController).toOpaque()) for item: \(item.title)")
+
         VStack {
             if let store = item.store {
-                NavigationLink(destination: ProductView(store: store, owned: item.isOwned)) {
+                NavigationLink(destination: ProductView(store: store, owned: item.isOwned, homeController: homeController)) {
                     content
                 }
             } else {

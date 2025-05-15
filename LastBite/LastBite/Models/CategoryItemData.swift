@@ -7,48 +7,64 @@
 
 import Foundation
 
-// Asegúrate de que tu struct 'Store' también sea Equatable
-// struct Store: /* ..., */ Equatable {
-//     let id: Int // O el tipo de ID que uses
+// Asumimos que tu struct 'Store' (del artifact 'swift_store_model_final')
+// ya conforma a Codable, Identifiable, y Equatable correctamente.
+// struct Store: Codable, Identifiable, Equatable {
+//     let store_id: Int
+//     let name: String
+//     var logo: String? // Importante que sea opcional
 //     // ... otras propiedades ...
-//
-//     // Swift puede generar '==' automáticamente si todas las propiedades son Equatable
-//     // O impleméntalo manualmente si es necesario:
-//     static func == (lhs: Store, rhs: Store) -> Bool {
-//         return lhs.id == rhs.id // Compara por ID usualmente
-//     }
 // }
 
+struct CategoryItemData: Identifiable, Equatable {
 
-struct CategoryItemData: Identifiable, Equatable { // Mantiene conformancia
-
-    // 1. Define un 'id' ESTABLE para Identifiable
-    //    Usamos el ID de la tienda si existe, sino el título.
-    //    Asegúrate de que esto sea único para los items en tus listas.
+    // Propiedad 'id' para conformar a Identifiable.
+    // Genera un ID único y estable.
     var id: String {
         if let store = store {
-            // Un prefijo ayuda a evitar colisiones si tienes items sin tienda con el mismo nombre que un ID de tienda
-            return "store_\(store.store_id)"
+            return "store_\(store.store_id)" // ID basado en el ID de la tienda
         } else {
-            return "title_\(title)" // Usa el título si no hay tienda
+            // Para items sin tienda, el ID se basa en el título.
+            // Reemplazar espacios y convertir a minúsculas para un ID más robusto.
+            return "title_\(title.lowercased().replacingOccurrences(of: " ", with: "_"))"
         }
     }
 
     let title: String
-    let imageName: String
-    var store: Store? = nil // La tienda asociada (opcional)
-    let isOwned: Bool
+    let imageName: String? // URL de la imagen, opcional para coincidir con store.logo
+    var store: Store?      // La tienda asociada, opcional
+    let isOwned: Bool      // Indica si la tienda es propiedad del usuario
 
-    // 2. Implementa '==' manualmente para Equatable
+    // Implementación de '==' para conformar a Equatable.
+    // Esto es crucial para que SwiftUI detecte cambios de contenido y actualice la UI.
     static func == (lhs: CategoryItemData, rhs: CategoryItemData) -> Bool {
-        // Define cuándo dos CategoryItemData representan lo mismo para la UI/animación
-        // Opción A: Basado en la identidad (misma tienda o mismo título si no hay tienda)
-         return lhs.id == rhs.id
+        // 1. Los IDs deben coincidir. Si no, definitivamente no son iguales.
+        guard lhs.id == rhs.id else { return false }
 
-        // Opción B: Más detallada (si quieres que cambie si el título o imagen cambia para la misma tienda ID)
-        // guard lhs.id == rhs.id else { return false } // Deben tener la misma identidad primero
-        // return lhs.title == rhs.title &&
-        //        lhs.imageName == rhs.imageName &&
-        //        lhs.store == rhs.store // Compara las tiendas (requiere Store: Equatable)
+        // 2. Si los IDs coinciden, compara el contenido relevante que podría cambiar visualmente.
+        return lhs.title == rhs.title &&
+               lhs.imageName == rhs.imageName && // Compara la URL de la imagen
+               lhs.isOwned == rhs.isOwned &&
+               lhs.store == rhs.store           // Compara las tiendas asociadas (requiere Store: Equatable)
+    }
+    
+    // Inicializador de conveniencia para crear CategoryItemData a partir de un objeto Store.
+    // Asegura que 'title' e 'imageName' se deriven consistentemente de 'store'.
+    init(store: Store, isOwned: Bool) {
+        self.store = store
+        self.title = store.name          // El título del item es el nombre de la tienda
+        self.imageName = store.logo      // El imageName es el logo de la tienda (que es String?)
+        self.isOwned = isOwned
+        // El 'id' se computará automáticamente usando store.store_id.
+    }
+
+    // Inicializador para items que podrían no tener una tienda asociada (si es un caso de uso válido)
+    // o si necesitas establecer title/imageName independientemente de una tienda.
+    init(title: String, imageName: String?, store: Store? = nil, isOwned: Bool = false) {
+        self.title = title
+        self.imageName = imageName
+        self.store = store
+        self.isOwned = isOwned
+        // El 'id' se computará usando el título si no hay tienda, o store_id si la hay.
     }
 }

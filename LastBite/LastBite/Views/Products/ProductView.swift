@@ -5,13 +5,22 @@ struct ProductView: View {
     // Dependencias (sin cambios)
     @EnvironmentObject var signInService: SignInUserService
     @StateObject private var controller: ProductController
+    @StateObject private var storeController: StoreController
+    
+    @Environment(\.dismiss) private var dismiss
+
+
     @State private var navigateToCreateProduct = false
+    @State private var navigateToUpdateStore = false
+    
     let owned: Bool // <- New flag to control owner access
+    let homeController: HomeController
 
     // Inicializador (sin cambios, asume que funciona como lo configuraste)
-    init(store: Store, owned: Bool = false) {
+    init(store: Store, owned: Bool = false, homeController: HomeController) {
             // 1. Crear instancias de TODOS los repositorios necesarios
             let productRepository = APIProductRepository()
+            let storeRepository = APIStoreRepository()
             let tagRepository = APITagRepository()
             let cartRepository = APICartRepository()
             let signInService = SignInUserService.shared // Obtener servicio
@@ -24,11 +33,18 @@ struct ProductView: View {
                 tagRepository: tagRepository,         // <- Inyecta Repo Tag
                 cartRepository: cartRepository        // <- Inyecta Repo Carrito
             )
+        
+        let storeController = StoreController(storeRepository: storeRepository)
 
             // 3. Asignar al StateObject wrapper
             self._controller = StateObject(wrappedValue: productController)
+        self._storeController = StateObject(wrappedValue: storeController)
             self.owned = owned
+        self.homeController = homeController
+        
             print("🛒 ProductView initialized and injected Repositories into ProductController for store: \(store.name)")
+        print("🛒 ProductView init: HomeController instance received = \(Unmanaged.passUnretained(homeController).toOpaque()) for store: \(store.name)")
+
         }
 
     // --- Cuerpo Principal (Simplificado) ---
@@ -53,15 +69,61 @@ struct ProductView: View {
         .animation(.default, value: controller.successMessage)
         .toolbar {
             if owned {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Add Product") {
-                        navigateToCreateProduct = true
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Menu {
+                            Button {
+                                navigateToUpdateStore = true
+                            } label: {
+                                Label("Update Store", systemImage: "pencil.circle.fill")
+                            }
+
+                            Button {
+                                navigateToCreateProduct = true
+                            } label: {
+                                Label("Add Product", systemImage: "plus.circle.fill")
+                            }
+                        } label: {
+
+                            Label("Actions", systemImage: "ellipsis.circle")
+                        }
+                        .tint(.primaryGreen)
                     }
                 }
-            }
         }
         .navigationDestination(isPresented: $navigateToCreateProduct) {
             CreateProductView(store: controller.store, controller: controller)
+        }
+        .navigationDestination(isPresented: $navigateToUpdateStore) {
+            UpdateStoreView(store: controller.store, controller: storeController, homeController: homeController, onDismissAfterUpdate: {
+                // Este closure se ejecuta DESPUÉS de que la alerta de UpdateStoreView
+                // ha llamado a homeController.loadInitialData() y ANTES de que UpdateStoreView llame a su propio dismiss().
+                print("🛍️ ProductView: Callback 'onDismissAfterUpdate' from UpdateStoreView received.")
+                
+                // Iniciar una tarea para obtener la tienda actualizada y luego actualizar la UI
+                Task {
+                    do {
+                        // 1. Re-obtener la tienda actualizada usando el StoreController
+                        let fetchedUpdatedStore = try await self.storeController.fetchStoreById(store_id: controller.store.store_id)
+                        
+                        print("🛍️ ProductView: Fetched store name from getStoreById: '\(fetchedUpdatedStore.name)'")
+                        
+                        // 2. Actualizar el ProductController interno con la tienda fresca.
+                        //    Esto hará que el .navigationTitle(controller.store.name) se actualice.
+                        self.controller.updateStore(fetchedUpdatedStore) // Llama al método que confirmaste que tienes
+                        
+                        // 3. Cambiar a la pestaña de Home (índice 0)
+                        print("🛍️ ProductView: Changing tab to 0 (Home).")                        
+                        // 4. Limpiar el mensaje de éxito en StoreController para evitar re-triggering.
+                        //    Esto es importante si StoreController.successMessage se usa para otras cosas.
+                        await MainActor.run { self.storeController.successMessage = nil }
+                        
+                    } catch {
+                        print("🛍️ ProductView: Failed to re-fetch or update store details in ProductController: \(error.localizedDescription)")
+                        // Opcionalmente, mostrar un error al usuario aquí si es apropiado.
+                    }
+                }
+                // NO LLAMAR A dismiss() AQUÍ. UpdateStoreView se encarga de su propio cierre.
+            })
         }
     }
 
@@ -187,15 +249,3 @@ struct ProductCard: View {
 }
 
 
-// --- Preview ---
-struct ProductView_Previews: PreviewProvider {
-    static var previews: some View {
-        let exampleStore = Store(
-            store_id: 1, name: "Preview Store", address: "123 Preview St",
-            latitude: 0, longitude: 0, logo: "https://via.placeholder.com/150", nit: "123"
-        )
-        let mockSignInService = SignInUserService.shared // O un mock real
-        ProductView(store: exampleStore)
-            .environmentObject(mockSignInService)
-    }
-}

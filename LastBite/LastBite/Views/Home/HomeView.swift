@@ -24,6 +24,8 @@ struct HomeView: View {
 
         self._controller = StateObject(wrappedValue: homeController)
         print("🏠 HomeView initialized and injected Store & Order Repositories into HomeController.")
+        print("🏠 HomeView init: HomeController instance (self.controller) = \(Unmanaged.passUnretained(homeController).toOpaque())")
+
     }
 
     var body: some View {
@@ -46,19 +48,19 @@ struct HomeView: View {
                     ordersSection
 
                     if !controller.forYouItems.isEmpty {
-                        CategorySectionView(title: "Top Stores", items: controller.forYouItems)
+                        CategorySectionView(title: "Top Stores", items: controller.forYouItems, homeController: controller)
                     }
 
                     if !controller.storeItems.isEmpty {
-                        CategorySectionView(title: "Stores", items: controller.storeItems)
+                        CategorySectionView(title: "Stores", items: controller.storeItems, homeController: controller)
                     }
 
                     if !controller.nearbyStores.isEmpty {
-                        CategorySectionView(title: "Nearby Stores", items: controller.nearbyStores)
+                        CategorySectionView(title: "Nearby Stores", items: controller.nearbyStores, homeController: controller)
                     }
 
                     if !controller.ownedStores.isEmpty {
-                        CategorySectionView(title: "Owned Stores", items: controller.ownedStores)
+                        CategorySectionView(title: "Owned Stores", items: controller.ownedStores, homeController: controller)
                     }
                 }
                 .padding(.vertical)
