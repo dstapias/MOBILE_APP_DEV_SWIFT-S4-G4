@@ -44,6 +44,52 @@ class StoreService {
         }
         // Los errores de ServiceError se relanzan automáticamente
     }
+    
+    private func sendData<B: Encodable>(
+        to url: URL,
+        method: String,
+        body: B?
+    ) async throws {
+        var request = URLRequest(url: url)
+        request.httpMethod = method
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        // Add other headers if needed
+
+        if let requestBody = body {
+            do {
+                request.httpBody = try JSONEncoder().encode(requestBody)
+                 if let bodyForPrint = String(data: request.httpBody!, encoding: .utf8) {
+                     print("📦 [\(method)] \(url.absoluteString) -> Body: \(bodyForPrint)")
+                } else {
+                     print("📦 [\(method)] \(url.absoluteString) -> Body: (Non-UTF8 data or empty)")
+                }
+            } catch {
+                print("❌ Encoding error for \(method) to \(url.absoluteString): \(error)")
+                throw ServiceError.invalidURL
+            }
+        } else {
+             print("📦 [\(method)] \(url.absoluteString) -> No Body")
+        }
+        
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+
+            guard let httpResponse = response as? HTTPURLResponse else {
+                throw ServiceError.badServerResponse(statusCode: -1)
+            }
+            print("📬 [\(method)] \(url.absoluteString) -> Status: \(httpResponse.statusCode)")
+
+            guard (200..<300).contains(httpResponse.statusCode) else {
+                print("❌ Response Body on Error (\(httpResponse.statusCode)): \(String(data: data, encoding: .utf8) ?? "No body")")
+                throw ServiceError.badServerResponse(statusCode: httpResponse.statusCode)
+            }
+            // Success, no specific data to decode and return
+        } catch let error where !(error is ServiceError) {
+            print("❌ Network Error for \(method) to \(url.absoluteString): \(error)")
+            throw ServiceError.requestFailed(error)
+        }
+    }
+
     // --- Fin Helper ---
 
 
@@ -76,6 +122,27 @@ class StoreService {
     
     func fetchOwnedStoresAsync(for userId: Int) async throws -> [Store] {
         guard let url = URL(string: "\(Constants.baseURL)/user_store/stores/user/\(userId)") else {
+            throw ServiceError.invalidURL
+        }
+        return try await fetchData(from: url)
+    }
+    
+    func updateStoreAsync(_ store: StoreUpdateRequest, store_id: Int) async throws {
+        guard let url = URL(string: "\(Constants.baseURL)/stores/\(store_id)") else {
+            throw ServiceError.invalidURL
+        }
+        try await sendData(to: url, method: "PUT", body: store)
+    }
+    
+    func deleteStoreAsync(_ storeId: Int) async throws {
+        guard let url = URL(string: "\(Constants.baseURL)/stores/\(storeId)") else {
+            throw ServiceError.invalidURL
+        }
+        try await sendData(to: url, method: "DELETE", body: Optional<String>.none)
+    }
+    
+    func fetchStoreByIdAsync(_ storeId: Int) async throws -> Store {
+        guard let url = URL(string: "\(Constants.baseURL)/stores/\(storeId)") else {
             throw ServiceError.invalidURL
         }
         return try await fetchData(from: url)
