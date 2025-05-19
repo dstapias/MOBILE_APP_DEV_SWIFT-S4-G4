@@ -11,6 +11,7 @@ struct CategorySectionView: View {
     let title: String
     let items: [CategoryItemData]
     let homeController: HomeController
+    let networkMonitor: NetworkMonitor
     
     var body: some View {
         let _ = print("➡️ CategorySectionView body: HomeController instance = \(Unmanaged.passUnretained(homeController).toOpaque()) for title: \(title)")
@@ -33,7 +34,7 @@ struct CategorySectionView: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 16) {
                     ForEach(items) { item in
-                        CategoryItemView(item: item, homeController: homeController)
+                        CategoryItemView(item: item, homeController: homeController, networkMonitor: networkMonitor)
                     }
                 }
                 .padding(.horizontal)

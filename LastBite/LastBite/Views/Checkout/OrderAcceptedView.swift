@@ -11,6 +11,7 @@ struct OrderAcceptedView: View {
     @State private var navigateToHome = false
     @AppStorage("isLoggedIn") private var isLoggedIn = true
     @Environment(\.dismiss) var dismiss
+    @Binding var selectedTab: Int
 
 
     var body: some View {
@@ -34,6 +35,7 @@ struct OrderAcceptedView: View {
                 
                 // Botón para volver al Home
                 Button(action: {
+                    selectedTab = 0
                     // Call the dismiss action
                     dismiss()
                     // Optionally call the callback if provided
@@ -52,15 +54,6 @@ struct OrderAcceptedView: View {
             }
             .navigationBarHidden(true)
             // Se activa la navegación programática cuando navigateToHome es true
-            .navigationDestination(isPresented: $navigateToHome) {
-                MainTabView().navigationBarBackButtonHidden(true)
-            }
         }
-    }
-}
-
-struct OrderAcceptedView_Previews: PreviewProvider {
-    static var previews: some View {
-        OrderAcceptedView()
     }
 }

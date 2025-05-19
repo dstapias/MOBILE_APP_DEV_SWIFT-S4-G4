@@ -3,10 +3,12 @@ import SwiftUI
 struct CategoryItemView: View {
     let item: CategoryItemData
     let homeController : HomeController
+    let networkMonitor : NetworkMonitor
     
-    init(item: CategoryItemData, homeController: HomeController) {
+    init(item: CategoryItemData, homeController: HomeController, networkMonitor : NetworkMonitor) {
         self.item = item
         self.homeController = homeController
+        self.networkMonitor = networkMonitor
     }
 
     var body: some View {
@@ -14,7 +16,7 @@ struct CategoryItemView: View {
 
         VStack {
             if let store = item.store {
-                NavigationLink(destination: ProductView(store: store, owned: item.isOwned, homeController: homeController)) {
+                NavigationLink(destination: ProductView(store: store, owned: item.isOwned, homeController: homeController, networkMonitor: networkMonitor)) {
                     content
                 }
             } else {

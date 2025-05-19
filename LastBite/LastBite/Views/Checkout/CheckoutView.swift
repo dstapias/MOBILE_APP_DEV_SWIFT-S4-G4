@@ -12,9 +12,10 @@ struct CheckoutView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var networkMonitor: NetworkMonitor
     @AppStorage("isLoggedIn") private var isLoggedIn = true
+    @Binding var selectedTab: Int
 
 
-    init(cartItems: [CartItem], cartId: Int, networkMonitor: NetworkMonitor) {
+    init(cartItems: [CartItem], cartId: Int, networkMonitor: NetworkMonitor, selectedTab: Binding<Int>) {
         // 1. Crear instancias de los repositorios necesarios
         let orderRepository = APIOrderRepository()
         let cartRepository = APICartRepository()
@@ -32,6 +33,7 @@ struct CheckoutView: View {
 
         // 4. Asignar al StateObject wrapper
         self._controller = StateObject(wrappedValue: checkoutController)
+        self._selectedTab = selectedTab
         print("🛒 CheckoutView initialized and injected Repositories into Controller.")
     }
 
@@ -85,7 +87,7 @@ struct CheckoutView: View {
                              onDismiss: {
                                  dismiss()
                              }) {
-                 OrderAcceptedView()
+                                 OrderAcceptedView( selectedTab: $selectedTab)
             }
                              .onChange(of: isLoggedIn) { logged in
                                  if !logged { dismiss() }

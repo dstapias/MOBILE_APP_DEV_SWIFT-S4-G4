@@ -147,7 +147,8 @@ struct CartView: View {
                     CheckoutView(
                         cartItems: controller.cartItems, // <- Pasa los items
                         cartId: cartId,
-                        networkMonitor: networkMonitor
+                        networkMonitor: networkMonitor,
+                        selectedTab: $selectedTab
                     )
                 }
             } else {

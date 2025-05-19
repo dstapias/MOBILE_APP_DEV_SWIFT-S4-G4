@@ -45,15 +45,6 @@ struct UpdateStoreView: View {
     @State private var alertTitle: String = ""
     @State private var alertMessage: String = ""
     
-    
-
-    init(store: Store, controller: StoreController, homeController: HomeController, onDismissAfterUpdate: (() -> Void)? = nil) {
-        self.store = store
-        self.controller = controller
-        self.homeController = homeController
-        self.onDismissAfterUpdate = onDismissAfterUpdate
-    }
-    
     private static var timeFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "HH:mm:ss" // Asegúrate que coincida con el formato de tu backend
@@ -61,6 +52,36 @@ struct UpdateStoreView: View {
         formatter.timeZone = TimeZone(secondsFromGMT: 0) // O la zona horaria relevante si es necesario
         return formatter
     }()
+    
+    
+
+    init(store: Store, controller: StoreController, homeController: HomeController, onDismissAfterUpdate: (() -> Void)? = nil) {
+        self.store = store
+        self.controller = controller
+        self.homeController = homeController
+        self.onDismissAfterUpdate = onDismissAfterUpdate
+        
+        // Inicializar los @State con los valores de la tienda actual
+                _nameInput = State(initialValue: store.name)
+                _nitInput = State(initialValue: store.nit)
+                _addressInput = State(initialValue: store.address)
+                _latitudeInput = State(initialValue: String(store.latitude))
+                _longitudeInput = State(initialValue: String(store.longitude))
+                
+                // Inicializar DatePickers (manejando posible fallo de parseo)
+                if let opensDate = Self.timeFormatter.date(from: store.opens_at) {
+                    _opensAtDate = State(initialValue: opensDate)
+                } else {
+                    _opensAtDate = State(initialValue: Date()) // Fallback
+                    print("⚠️ Error al parsear opens_at: \(store.opens_at) para tienda \(store.store_id)")
+                }
+                if let closesDate = Self.timeFormatter.date(from: store.closes_at) {
+                    _closesAtDate = State(initialValue: closesDate)
+                } else {
+                    _closesAtDate = State(initialValue: Date()) // Fallback
+                    print("⚠️ Error al parsear closes_at: \(store.closes_at) para tienda \(store.store_id)")
+                }
+    }
 
     var body: some View {
         Form {
@@ -236,53 +257,34 @@ struct UpdateStoreView: View {
         let opensAtString = Self.timeFormatter.string(from: opensAtDate)
         let closesAtString = Self.timeFormatter.string(from: closesAtDate)
 
-        DispatchQueue.global(qos: .userInitiated).async {
-            Task {
-                do {
-                    try await controller.updateStore(store_id: store.store_id, name: nameInput, nit: nitInput, imageBase64: newBase64Image, address: addressInput, latitude: lat, longitude: lon, opens_at: opensAtString, closes_at: closesAtString)
-
-                    DispatchQueue.main.async {
-                        homeController.loadInitialData()
-                        alertTitle = "✅ Store Updated"
-                        isCreating = false
-                        showCreatedAlert = true
-                    }
-
-                } catch {
-                    DispatchQueue.main.async {
-                        isCreating = false
-                        errorMessage = "❌ Failed to update Store."
-                    }
-                }
+        Task {
+            await controller.updateStore(store_id: store.store_id, name: nameInput, nit: nitInput, imageBase64: newBase64Image, address: addressInput, latitude: lat, longitude: lon, opens_at: opensAtString, closes_at: closesAtString)
+            
+            if let errorMsg = controller.errorMessage {
+                alertTitle = "Falló la Actualización ❌"
+            } else {
+                alertTitle = "Actualización Iniciada ✅"
+                alertMessage = controller.successMessage ?? "La tienda se actualizó localmente y se sincronizará si es necesario."
+                homeController.loadInitialData() // Actualizar datos en HomeView para reflejar cambios
             }
+            self.isCreating = false
+            showCreatedAlert = true
         }
+
     }
     
     func deleteStore() {
-        isCreating = true
-        errorMessage = nil
-
-        DispatchQueue.global(qos: .userInitiated).async {
-            Task {
-                do {
-                    try await controller.deleteStore(
-                        store_id: store.store_id
-                    )
-
-                    DispatchQueue.main.async {
-                        homeController.loadInitialData()
-                        alertTitle = "🗑️ Store Deleted"
-                        isCreating = false
-                        showCreatedAlert = true
-                    }
-
-                } catch {
-                    DispatchQueue.main.async {
-                        isCreating = false
-                        errorMessage = "❌ Failed to create Store."
-                    }
-                }
+        Task {
+            await controller.deleteStore(store_id: store.store_id)
+            
+            if let errorMsg = controller.errorMessage {
+                alertTitle = "Falló la Eliminación ❌"
+                errorMessage = errorMsg
+            } else {
+                alertTitle = "Eliminación Iniciada 🗑️"
+                homeController.loadInitialData()
             }
+            showCreatedAlert = true
         }
     }
 }
