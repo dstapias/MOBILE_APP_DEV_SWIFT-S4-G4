@@ -8,19 +8,23 @@ struct HomeView: View {
 
     @StateObject private var controller: HomeController
     @State private var searchText = ""
+    @State private var viewRefreshId = UUID()
 
-    init() {
-        let storeRepository = APIStoreRepository()
+
+    init(controller: HomeController, networkMonitor: NetworkMonitor, signInService: SignInUserService) {
+        let apiStoreRepository = APIStoreRepository()
+        let localStoreRepository = LocalStoreRepository()
         let orderRepository = APIOrderRepository()
-        let signInService = SignInUserService.shared
-        let locationManagerInstance = LocationManager()
-
-        let homeController = HomeController(
-            signInService: signInService,
-            locationManager: locationManagerInstance,
-            storeRepository: storeRepository,
-            orderRepository: orderRepository
+        let signInService = signInService
+            let locManager = LocationManager()
+            self._locationManager = StateObject(wrappedValue: locManager)
+        let hybridStoreRepository = HybridStoreRepository(
+            apiRepository: apiStoreRepository,
+            localRepository: localStoreRepository,
+            networkMonitor: networkMonitor, // Usando la instancia obtenida
+            firebaseService: FirebaseService.shared
         )
+        let homeController = controller
 
         self._controller = StateObject(wrappedValue: homeController)
         print("🏠 HomeView initialized and injected Store & Order Repositories into HomeController.")
@@ -29,76 +33,118 @@ struct HomeView: View {
     }
 
     var body: some View {
-        NavigationView {
-            ScrollView {
-                VStack(spacing: 16) {
-                    headerSection
-                    searchField
+            NavigationView {
+                ScrollView {
+                    VStack(spacing: 16) {
+                        headerSection // Usará signInService del entorno
+                        searchField
 
-                    if controller.isLoading {
-                        ProgressView("Loading...")
+                        loadingAndErrorSection // Vista computada para carga y error
+
+                        ordersSection // Tu vista computada/subvista para órdenes
+
+                        storeCategoriesAndSyncSection // Nueva vista computada para categorías y botón de sync
                     }
-
-                    if let error = controller.errorMessage {
-                        Text(error)
-                            .foregroundColor(.red)
-                            .padding(.horizontal)
-                    }
-
-                    ordersSection
-
-                    if !controller.forYouItems.isEmpty {
-                        CategorySectionView(title: "Top Stores", items: controller.forYouItems, homeController: controller)
-                    }
-
-                    if !controller.storeItems.isEmpty {
-                        CategorySectionView(title: "Stores", items: controller.storeItems, homeController: controller)
-                    }
-
-                    if !controller.nearbyStores.isEmpty {
-                        CategorySectionView(title: "Nearby Stores", items: controller.nearbyStores, homeController: controller)
-                    }
-
-                    if !controller.ownedStores.isEmpty {
-                        CategorySectionView(title: "Owned Stores", items: controller.ownedStores, homeController: controller)
-                    }
+                    .padding(.vertical)
                 }
-                .padding(.vertical)
-            }
-            .navigationTitle("Shop")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {
-                        controller.refreshNearbyStoresManually()
-                    }) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "location.circle.fill")
-                            Text("Update Location")
+                .id(viewRefreshId)
+                .navigationTitle("Shop")
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button(action: {
+                            controller.refreshNearbyStoresManually()
+                        }) {
+                            HStack(spacing: 4) {
+                                Image(systemName: "location.circle.fill")
+                                Text("Update Location")
+                            }
+                            .font(.footnote.bold())
+                            .foregroundColor(.green)
                         }
-                        .font(.footnote.bold())
-                        .foregroundColor(.green)
                     }
                 }
+                .onAppear {
+                    print("🏠 HomeView Appeared. Triggering loadInitialData.")
+                        print("🏠 HomeView .onAppear: Connected. Attempting sync.")
+                        Task { await controller.synchronizeAllPendingData()
+                            try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 segundos de delay
+                            print("Delay completado, actualizando viewRefreshId.")
+                            viewRefreshId = UUID()
+                            controller.loadInitialData() // Carga inicial
+
+                        }
+
+                    
+                }
+                .onReceive(networkMonitor.$isConnected) { isConnected in
+                    print("🏠 HomeView .onReceive: Network status is \(isConnected ? "Online" : "Offline")")
+                        print("🏠 HomeView: Network reconnected. Triggering sync.")
+                        Task { await controller.synchronizeAllPendingData()
+                            try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 segundos de delay
+                            print("Delay completado, actualizando viewRefreshId.")
+                            viewRefreshId = UUID()
+                            controller.loadInitialData() // Carga inicial
+                        }
+                        // Considera si necesitas llamar a loadInitialData aquí también,
+                        // o si synchronizeAllPendingData ya refresca los datos necesarios.
+                        // Si sync actualiza datos, y loadInitialData en controller también, podría ser redundante.
+                        // controller.loadInitialData()
+
+                }
+                // Es mejor aplicar animaciones más granularmente si es posible.
+                // Por ahora, las dejo para estados globales.
+                .animation(.default, value: controller.isLoading)
+                .animation(.default, value: controller.errorMessage)
             }
-            .onAppear {
-                print("🏠 HomeView Appeared. Triggering loadInitialData.")
-                controller.loadInitialData()
-            }
-            .onReceive(networkMonitor.$isConnected) { isOn in
-                if isOn {
-                    controller.loadInitialData()
+            .navigationViewStyle(StackNavigationViewStyle())
+        }
+
+        // MARK: - Subvistas Computadas para Mejorar Claridad y Rendimiento del Compilador
+
+        private var loadingAndErrorSection: some View {
+            Group { // Group puede ayudar al compilador con múltiples condicionales
+                if controller.isLoading {
+                    ProgressView("Loading...")
+                }
+
+                if let error = controller.errorMessage {
+                    Text(error)
+                        .foregroundColor(.red)
+                        .padding(.horizontal)
+                        .transition(.opacity) // Añadir transición para aparición/desaparición suave
                 }
             }
-            .animation(.default, value: controller.storeItems)
-            .animation(.default, value: controller.nearbyStores)
-            .animation(.default, value: controller.ownedStores)
-            .animation(.default, value: controller.forYouItems)
-            .animation(.default, value: controller.activeOrders)
-            .animation(.default, value: controller.isLoading)
-            .animation(.default, value: controller.errorMessage)
         }
-        .navigationViewStyle(StackNavigationViewStyle())
-    }
+
+        @ViewBuilder
+        private var storeCategoriesAndSyncSection: some View {
+            // Las secciones de categorías
+            if !controller.forYouItems.isEmpty {
+                CategorySectionView(title: "Top Stores", items: controller.forYouItems, homeController: controller, networkMonitor: networkMonitor)
+                    .animation(.default, value: controller.forYouItems) // Animar esta sección específica
+            }
+
+            if !controller.storeItems.isEmpty {
+                CategorySectionView(title: "Stores", items: controller.storeItems, homeController: controller, networkMonitor: networkMonitor)
+                    .animation(.default, value: controller.storeItems)
+            }
+
+            if !controller.nearbyStores.isEmpty {
+                CategorySectionView(title: "Nearby Stores", items: controller.nearbyStores, homeController: controller, networkMonitor: networkMonitor)
+                    .animation(.default, value: controller.nearbyStores)
+            }
+
+            if !controller.ownedStores.isEmpty {
+                CategorySectionView(title: "Owned Stores", items: controller.ownedStores, homeController: controller, networkMonitor: networkMonitor)
+                    .animation(.default, value: controller.ownedStores)
+            }
+            
+            // Botón de Sincronización y mensaje offline
+            // Usa la instancia de networkMonitor del entorno de HomeView
+        }
+
+        // --- Tus Subvistas Existentes (o propiedades computadas) ---
+        // Asegúrate de que usen @EnvironmentObject si necesitan signInService o networkMonitor directamente.
 
     private var headerSection: some View {
         Group {
@@ -116,13 +162,13 @@ struct HomeView: View {
         }
     }
 
-    private var searchField: some View {
-        TextField("Search store", text: $searchText)
-            .padding(10)
-            .background(Color(.systemGray6))
-            .cornerRadius(8)
-            .padding(.horizontal)
-    }
+        private var searchField: some View {
+            TextField("Search store", text: $searchText)
+                .padding(10)
+                .background(Color(.systemGray6))
+                .cornerRadius(8)
+                .padding(.horizontal)
+        }
 
     private var ordersSection: some View {
         Group {
@@ -150,14 +196,5 @@ struct HomeView: View {
                 }
             }
         }
-    }
-}
-
-// --- Preview ---
-struct HomeView_Previews: PreviewProvider {
-    static var previews: some View {
-        let mockSignInService = SignInUserService.shared
-        HomeView()
-            .environmentObject(mockSignInService)
     }
 }

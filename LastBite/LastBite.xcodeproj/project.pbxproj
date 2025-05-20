@@ -71,6 +71,9 @@
 		41DBA0282DB4050600841B2A /* APIProductRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41DBA0272DB4050600841B2A /* APIProductRepository.swift */; };
 		41DBA02A2DB4053000841B2A /* TagRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41DBA0292DB4053000841B2A /* TagRepository.swift */; };
 		41DBA02C2DB4055D00841B2A /* APITagRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41DBA02B2DB4055D00841B2A /* APITagRepository.swift */; };
+		41E9FEA22DD9853300FF6393 /* RealmStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41E9FEA12DD9853300FF6393 /* RealmStore.swift */; };
+		41E9FEA42DD98B3F00FF6393 /* LocalStoreRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41E9FEA32DD98B3F00FF6393 /* LocalStoreRepository.swift */; };
+		41E9FEA62DD997E400FF6393 /* HybridStoreRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41E9FEA52DD997E400FF6393 /* HybridStoreRepository.swift */; };
 		860DE9F73C917DEE422C954B /* Pods_LastBite_LastBiteUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43701770524729CEF4EF2407 /* Pods_LastBite_LastBiteUITests.framework */; };
 		ADEDA1C84A26254439006DCC /* Pods_LastBiteTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EB2EC236CA2AB824464BED0B /* Pods_LastBiteTests.framework */; };
 		DE11E70C2D793C1000EB9862 /* LastBiteApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE11E70B2D793C1000EB9862 /* LastBiteApp.swift */; };
@@ -216,6 +219,9 @@
 		41DBA0272DB4050600841B2A /* APIProductRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIProductRepository.swift; sourceTree = "<group>"; };
 		41DBA0292DB4053000841B2A /* TagRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagRepository.swift; sourceTree = "<group>"; };
 		41DBA02B2DB4055D00841B2A /* APITagRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APITagRepository.swift; sourceTree = "<group>"; };
+		41E9FEA12DD9853300FF6393 /* RealmStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmStore.swift; sourceTree = "<group>"; };
+		41E9FEA32DD98B3F00FF6393 /* LocalStoreRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalStoreRepository.swift; sourceTree = "<group>"; };
+		41E9FEA52DD997E400FF6393 /* HybridStoreRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HybridStoreRepository.swift; sourceTree = "<group>"; };
 		43701770524729CEF4EF2407 /* Pods_LastBite_LastBiteUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_LastBite_LastBiteUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		483BAD0D8AAD3B21B2716729 /* Pods-LastBiteTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LastBiteTests.debug.xcconfig"; path = "Target Support Files/Pods-LastBiteTests/Pods-LastBiteTests.debug.xcconfig"; sourceTree = "<group>"; };
 		92980C0455F4A31759E3C7E1 /* Pods-LastBiteTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LastBiteTests.release.xcconfig"; path = "Target Support Files/Pods-LastBiteTests/Pods-LastBiteTests.release.xcconfig"; sourceTree = "<group>"; };
@@ -424,6 +430,7 @@
 			isa = PBXGroup;
 			children = (
 				4193FCF42DB9C3AA00A1C18E /* LocalCartRepository.swift */,
+				41E9FEA32DD98B3F00FF6393 /* LocalStoreRepository.swift */,
 			);
 			path = Local;
 			sourceTree = "<group>";
@@ -434,6 +441,7 @@
 				4193FCF92DB9C54400A1C18E /* RealmCart.swift */,
 				4193FCFB2DB9C56800A1C18E /* RealmCartItem.swift */,
 				4193FD012DB9EBBB00A1C18E /* RealmCartProduct.swift */,
+				41E9FEA12DD9853300FF6393 /* RealmStore.swift */,
 			);
 			path = Persistence;
 			sourceTree = "<group>";
@@ -456,6 +464,7 @@
 			isa = PBXGroup;
 			children = (
 				4193FD042DBA0CC600A1C18E /* HybridCartRepository.swift */,
+				41E9FEA52DD997E400FF6393 /* HybridStoreRepository.swift */,
 			);
 			path = Hybrid;
 			sourceTree = "<group>";
@@ -896,12 +905,14 @@
 				DEC0D3692D7C03960006D9B4 /* FinalSignUp.swift in Sources */,
 				410991E32DAED631002B6270 /* ServiceError.swift in Sources */,
 				417CD0932DAD626200D63DFA /* Zone.swift in Sources */,
+				41E9FEA22DD9853300FF6393 /* RealmStore.swift in Sources */,
 				417CD0AC2DAD720E00D63DFA /* SigninController.swift in Sources */,
 				DE4F751E2D794F4800F20D45 /* SignupView.swift in Sources */,
 				DE678CAD2D8CE21B004485D2 /* CartService.swift in Sources */,
 				41A2F1DC2D86B9E0006C467C /* CategoryItemView.swift in Sources */,
 				DEC0D35F2D7BE5E30006D9B4 /* SigninView.swift in Sources */,
 				DE6292212DB9E828005B81A0 /* FireBaseService.swift in Sources */,
+				41E9FEA62DD997E400FF6393 /* HybridStoreRepository.swift in Sources */,
 				410991F42DAF39BD002B6270 /* CartProtocol.swift in Sources */,
 				41A2F1D92D86B9A0006C467C /* CategoryItemData.swift in Sources */,
 				410991EC2DAF31C8002B6270 /* OrderRepository.swift in Sources */,
@@ -935,6 +946,7 @@
 				41A4C2F32DB0B73800190216 /* APIAuthRepository.swift in Sources */,
 				DE11E70C2D793C1000EB9862 /* LastBiteApp.swift in Sources */,
 				DE678C972D8BA070004485D2 /* StoreService.swift in Sources */,
+				41E9FEA42DD98B3F00FF6393 /* LocalStoreRepository.swift in Sources */,
 				41C0711E2DD3ED6E000DBE3D /* StoreController.swift in Sources */,
 				417CD0972DAD62B900D63DFA /* User.swift in Sources */,
 				41A4C2EF2DB0B6F000190216 /* AuthRepository.swift in Sources */,

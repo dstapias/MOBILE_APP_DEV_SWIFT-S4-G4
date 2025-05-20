@@ -11,6 +11,7 @@ import CoreLocation
 
 @MainActor
 class HomeController: ObservableObject {
+    private let networkMonitor: NetworkMonitor
 
     @Published var storeItems: [CategoryItemData] = []
     @Published var nearbyStores: [CategoryItemData] = []
@@ -22,20 +23,22 @@ class HomeController: ObservableObject {
 
     private let signInService: SignInUserService
     private let locationManager: LocationManager
-    private let storeRepository: StoreRepository
+    private let storeRepository: HybridStoreRepository
     private let orderRepository: OrderRepository
     private var cancellables = Set<AnyCancellable>()
 
     init(
         signInService: SignInUserService,
         locationManager: LocationManager,
-        storeRepository: StoreRepository,
-        orderRepository: OrderRepository
+        storeRepository: HybridStoreRepository,
+        orderRepository: OrderRepository,
+        networkMonitor: NetworkMonitor
     ) {
         self.signInService = signInService
         self.locationManager = locationManager
         self.storeRepository = storeRepository
         self.orderRepository = orderRepository
+        self.networkMonitor = networkMonitor 
         print("🏠 HomeController initialized with ALL Repositories.")
         subscribeToLocationUpdates()
     }
@@ -60,7 +63,7 @@ class HomeController: ObservableObject {
 
     // MARK: - Data Loading Methods
 
-    func loadInitialData() {
+    func                                                                                                                                                                                                                                  loadInitialData() {
         print("Primera Carga")
         guard !isLoading else { return }
         print("🏠 Loading initial data via Repositories...")
@@ -103,6 +106,7 @@ class HomeController: ObservableObject {
                 print("❌ Failed to load initial data: \(error.localizedDescription)")
                 self.errorMessage = "Failed to load new data. Please check your internet connection and try again."
             }
+            self.objectWillChange.send()
             self.isLoading = false
         }
     }
@@ -170,5 +174,50 @@ class HomeController: ObservableObject {
         }
     }
 
+    
+    @MainActor // Asegurar que se llama desde el hilo principal si actualiza UI o propiedades @Published directamente
+    func synchronizeAllPendingData() async {
+        // Usar la instancia de NetworkMonitor que HomeController ya tiene o una global/compartida
+        // Asumiré que tienes acceso a NetworkMonitor.shared o una instancia inyectada.
+        // Si networkMonitor es una propiedad de HomeController: self.networkMonitor.isConnected
+        
+        guard self.networkMonitor.isConnected else { // Asegúrate que NetworkMonitor.shared sea tu forma real de acceder
+            print("🏠 HomeController: Sincronización abortada (offline).")
+            // self.errorMessage = "No hay conexión para sincronizar." // Opcional
+            return
+        }
+        
+        print("🔄 HomeController: Intentando sincronizar datos pendientes de tiendas...")
+        // self.isLoading = true // Podrías querer un estado de carga específico para la sincronización
+        // self.errorMessage = nil
+
+        do {
+            // Llama al método del StoreRepository (que es el HybridStoreRepository)
+            let (updated, deleted, images) = try await storeRepository.synchronizePendingStores()
+            
+            print("🔄 HomeController: Sincronización de tiendas completada. Actualizadas: \(updated), Borradas: \(deleted), Imágenes: \(images).")
+            
+            if updated > 0 || deleted > 0 || images > 0 {
+                print("🔄 HomeController: Hubo cambios sincronizados en tiendas, recargando datos iniciales...")
+                // No necesitas establecer successMessage aquí si la UI no lo va a mostrar,
+                // o si el StoreController (si se usara para sync) lo hiciera.
+                // Pero si HomeController tiene su propio successMessage para esto:
+                // self.successMessage = "Datos de tiendas sincronizados."
+                
+                loadInitialData() // Recargar para reflejar los cambios sincronizados
+            } else {
+                print("🔄 HomeController: No hay datos de tiendas pendientes para sincronizar.")
+                // self.successMessage = "Datos de tiendas ya estaban actualizados."
+            }
+            
+            // Aquí podrías añadir la sincronización para otros repositorios si fuera necesario
+            // Ejemplo: if let cartRepo = self.cartRepository as? HybridCartRepository { ... }
+
+        } catch {
+            print("❌ HomeController: Fallo la sincronización de tiendas: \(error.localizedDescription)")
+            self.errorMessage = "Fallo durante la sincronización de datos de tiendas."
+        }
+        // self.isLoading = false
+    }
 
 }

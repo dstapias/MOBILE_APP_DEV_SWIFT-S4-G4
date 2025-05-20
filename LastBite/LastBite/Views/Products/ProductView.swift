@@ -13,14 +13,19 @@ struct ProductView: View {
     @State private var navigateToCreateProduct = false
     @State private var navigateToUpdateStore = false
     
-    let owned: Bool // <- New flag to control owner access
+    var owned: Bool // <- New flag to control owner access
     let homeController: HomeController
+    let storeObject: Store // La tienda que esta vista está mostrando
+
 
     // Inicializador (sin cambios, asume que funciona como lo configuraste)
-    init(store: Store, owned: Bool = false, homeController: HomeController) {
+    init(store: Store, owned: Bool = false, homeController: HomeController, networkMonitor: NetworkMonitor) {
+        self.storeObject = store
+        self.owned = owned
             // 1. Crear instancias de TODOS los repositorios necesarios
             let productRepository = APIProductRepository()
             let storeRepository = APIStoreRepository()
+        let localStoreRepository = LocalStoreRepository()
             let tagRepository = APITagRepository()
             let cartRepository = APICartRepository()
             let signInService = SignInUserService.shared // Obtener servicio
@@ -34,7 +39,16 @@ struct ProductView: View {
                 cartRepository: cartRepository        // <- Inyecta Repo Carrito
             )
         
-        let storeController = StoreController(storeRepository: storeRepository)
+        let hybridStoreRepo = HybridStoreRepository(
+            apiRepository: storeRepository,
+            localRepository: localStoreRepository,
+            networkMonitor: networkMonitor,         // <--- Usar la instancia inyectada
+            firebaseService: FirebaseService.shared
+        )
+        
+        
+        
+        let storeController = StoreController(storeRepository: hybridStoreRepo, networkMonitor: networkMonitor)
 
             // 3. Asignar al StateObject wrapper
             self._controller = StateObject(wrappedValue: productController)

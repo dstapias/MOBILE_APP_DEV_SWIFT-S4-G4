@@ -39,8 +39,6 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 
         do {
             let realm = try Realm()
-            try realm.write { realm.deleteAll() }
-            print("🗑️ Realm tables truncated")
         } catch { print("Realm wipe failed: \(error)") }
             // 4. (Opcional pero recomendado) Intenta abrir Realm ahora mismo para forzar la migración.
             //    Esto asegura que cualquier error de migración ocurra aquí al inicio.
@@ -91,7 +89,7 @@ struct YourApp: App {
     var body: some Scene {
             WindowGroup {
                 if isLoggedIn {
-                    MainTabView()
+                    MainTabView(networkMonitor: networkMonitor, signInService: signInService)
                         .environmentObject(signInService)
                         .environmentObject(networkMonitor)
 

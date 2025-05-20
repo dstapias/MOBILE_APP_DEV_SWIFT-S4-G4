@@ -8,15 +8,18 @@
 import Foundation
 
 class StoreController: ObservableObject {
-    private let storeRepository: StoreRepository
+    private let storeRepository: HybridStoreRepository
     @Published var isLoading: Bool = false
     @Published var errorMessage: String? = nil
     @Published var successMessage: String? = nil
     
+    private let networkMonitor: NetworkMonitor
+    
     init(
-        storeRepository: StoreRepository
+        storeRepository: HybridStoreRepository, networkMonitor: NetworkMonitor
     ) {
         self.storeRepository = storeRepository
+        self.networkMonitor = networkMonitor
         print("📦 StoreController initialized")
     }
     
@@ -31,33 +34,16 @@ class StoreController: ObservableObject {
         longitude: Double,
         opens_at: String,
         closes_at: String
-    ) async throws {
+    ) async {
         print("🚀 Starting store update...")
-        var finalImageURLForBackend: String? = nil // Esta será la URL para enviar al backend
+        self.isLoading = true
+        self.errorMessage = nil
+        self.successMessage = nil
+       
 
         do {
             // 1. Subir imagen a Firebase y obtener URL
             // Paso 1: Subir la imagen a Firebase SI se proporcionó una nueva imagen Base64 VÁLIDA.
-                       if let potentialBase64String = imageBase64,
-                          !potentialBase64String.isEmpty,
-                          // Añadimos una comprobación para asegurarnos de que no es una URL
-                          !potentialBase64String.starts(with: "http://"),
-                          !potentialBase64String.starts(with: "https://") {
-                           
-                           print("📸 StoreController: Attempting to upload new image via FirebaseService with presumed Base64 data (length: \(potentialBase64String.count))...")
-                           let fileName = "\(UUID().uuidString).jpg" // O .png, según tu formato
-                           
-                           finalImageURLForBackend = try await FirebaseService.shared.uploadImageToFirebase(base64: potentialBase64String, fileName: fileName)
-                           print("📸 StoreController: New image uploaded. Firebase URL: \(finalImageURLForBackend ?? "No URL returned")")
-                       
-                       } else if let receivedString = imageBase64, !receivedString.isEmpty {
-                           // Si imageBase64 no estaba vacío pero parecía una URL o no pasó la validación de Base64.
-                           print("ℹ️ StoreController: imageBase64 parameter received a string that is likely a URL or not valid Base64 ('\(receivedString.prefix(100))...'). Skipping Firebase upload, assuming no new image or incorrect data passed.")
-                           // finalImageURLForBackend permanece nil, lo que significa "no cambiar el logo".
-                       } else {
-                           print("ℹ️ StoreController: No new image base64 provided (it was nil or empty). Skipping Firebase upload.")
-                           // finalImageURLForBackend permanece nil.
-                       }
             // 2. Crear solicitud con la URL obtenida
             let storeRequest = StoreUpdateRequest(
                     name: name,
@@ -65,7 +51,7 @@ class StoreController: ObservableObject {
                 address: address,
                 longitude: longitude,
                 latitude: latitude,
-                logo: finalImageURLForBackend,
+                logo: imageBase64,
                 opens_at: opens_at,
                 closes_at: closes_at,
             )
@@ -79,43 +65,50 @@ class StoreController: ObservableObject {
         } catch let error as ServiceError {
             print("❌ Service error updating store: \(error.localizedDescription)")
             self.errorMessage = error.localizedDescription
-            self.successMessage = nil
-            throw error
+            if error.isNetworkConnectionError && !networkMonitor.isConnected {
+                 self.successMessage = nil // Borrar mensaje de éxito si hubo error.
+            }
 
         } catch {
             print("❌ Unexpected error: \(error.localizedDescription)")
             self.errorMessage = "Unexpected error occurred."
             self.successMessage = nil
-            throw error
         }
+        self.isLoading = false
     }
     
     
     @MainActor
     func deleteStore(
         store_id: Int
-    ) async throws {
+    ) async {
         print("🚀 Deleting store...")
-
+        self.isLoading = true
+        self.errorMessage = nil
+        self.successMessage = nil
         do {
             // 3. Enviar al backend
             try await storeRepository.deleteStore(store_id: store_id)
+            if networkMonitor.isConnected {
+                self.successMessage = "Tienda eliminada exitosamente."
+            } else {
+                self.successMessage = "Tienda marcada para eliminar localmente. Se sincronizará cuando haya conexión."
+            }
             print("✅ Store deleted successfully.")
-            self.successMessage = "Store deleted successfully."
-            self.errorMessage = nil
 
         } catch let error as ServiceError {
             print("❌ Service error deleting store: \(error.localizedDescription)")
-            self.errorMessage = error.localizedDescription
-            self.successMessage = nil
-            throw error
+            self.errorMessage = "Fallo al eliminar: \(error.localizedDescription)"
+             if error.isNetworkConnectionError && !networkMonitor.isConnected {
+                 self.successMessage = nil
+             }
 
         } catch {
             print("❌ Unexpected error: \(error.localizedDescription)")
             self.errorMessage = "Unexpected error occurred."
             self.successMessage = nil
-            throw error
         }
+        self.isLoading = false
     }
     
     @MainActor
@@ -124,5 +117,50 @@ class StoreController: ObservableObject {
             return try await storeRepository.fetchStoreById(store_id: store_id)
         }
     }
+    
+    /// Dispara la sincronización de todas las tiendas pendientes (actualizaciones y borrados).
+        func synchronizePendingStores() async {
+            guard !isLoading else {
+                print("🛍️ StoreController: Sincronización ya en progreso o controlador ocupado.")
+                return
+            }
+            guard await networkMonitor.isConnected else {
+                print("🛍️ StoreController: No hay conexión a internet para sincronizar.")
+                self.errorMessage = "No hay conexión para sincronizar." // Opcional: informar al usuario
+                return
+            }
+            
+            print("🔄 StoreController: Intentando sincronizar tiendas pendientes...")
+            self.isLoading = true
+            self.errorMessage = nil // Limpiar errores previos
+            self.successMessage = nil // Limpiar mensajes de éxito previos
+            
+            do {
+                let (updatedCount, deletedCount, imagesUploadedCount) = try await storeRepository.synchronizePendingStores()
+                
+                var messages: [String] = []
+                if updatedCount > 0 { messages.append("\(updatedCount) actualiz.") }
+                if deletedCount > 0 { messages.append("\(deletedCount) elimin.") }
+                if imagesUploadedCount > 0 { messages.append("\(imagesUploadedCount) imág. subidas") }
+
+                if messages.isEmpty {
+                    self.successMessage = "No hay cambios pendientes en tiendas para sincronizar."
+                } else {
+                    self.successMessage = "Sincronización: " + messages.joined(separator: ", ") + "."
+                }
+                print("✅ StoreController: Sincronización completada. \(self.successMessage ?? "")")
+                
+                // Opcional: Si la sincronización resultó en cambios, podrías querer
+                // notificar a otras partes de la app para que recarguen datos.
+                // if updatedCount > 0 || deletedCount > 0 {
+                // NotificationCenter.default.post(name: .didSyncStores, object: nil)
+                // }
+
+            } catch {
+                print("❌ StoreController: Fallo en la sincronización de tiendas pendientes: \(error.localizedDescription)")
+                self.errorMessage = "Fallo en la sincronización: \(error.localizedDescription)"
+            }
+            self.isLoading = false
+        }
     
 }
