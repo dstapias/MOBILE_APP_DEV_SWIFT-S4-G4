@@ -78,10 +78,9 @@ class HomeController: ObservableObject {
 
         Task {
             do {
-                // Ejecuta todo en paralelo
                 async let storesTaskResult = storeRepository.fetchStores()
                 async let topStoresTaskResult = storeRepository.fetchTopStores()
-                async let ordersTaskResult = fetchNotReceivedOrders() // Llama al método del controller
+                async let ordersTaskResult: () = fetchNotReceivedOrders()
                 async let ownedStoresResult = storeRepository.fetchOwnedStores(for: userId)
                 print("se actualizan los datos")
 
@@ -92,12 +91,26 @@ class HomeController: ObservableObject {
                 
 
                 
-                try await ordersTaskResult // Espera a que termine
+                try await ordersTaskResult
 
-                // Actualiza estado (ya estamos en @MainActor)
-                self.storeItems = fetchedStores.map { CategoryItemData(title: $0.name, imageName: $0.logo ?? "", store: $0, isOwned: false) }
-                self.forYouItems = fetchedTopStores.map { CategoryItemData(title: $0.name, imageName: $0.logo ?? "", store: $0, isOwned: false) }
-                self.ownedStores = fetchedOwnedStores.map { CategoryItemData(title: $0.name, imageName: $0.logo ?? "", store: $0, isOwned: true) }
+                async let mappedStoreItems = Task.detached {
+                             print("🧵 Mapping storeItems on a background thread.")
+                             return fetchedStores.map { CategoryItemData(title: $0.name, imageName: $0.logo ?? "", store: $0, isOwned: false) }
+                         }.value
+
+                         async let mappedForYouItems = Task.detached {
+                             print("🧵 Mapping forYouItems on a background thread.")
+                             return fetchedTopStores.map { CategoryItemData(title: $0.name, imageName: $0.logo ?? "", store: $0, isOwned: false) }
+                         }.value
+
+                         async let mappedOwnedStores = Task.detached {
+                             print("🧵 Mapping ownedStores on a background thread.")
+                             return fetchedOwnedStores.map { CategoryItemData(title: $0.name, imageName: $0.logo ?? "", store: $0, isOwned: true) }
+                         }.value
+                         
+                         self.storeItems = await mappedStoreItems
+                         self.forYouItems = await mappedForYouItems
+                         self.ownedStores = await mappedOwnedStores
 
 
                 print("✅ Initial data loaded successfully.")

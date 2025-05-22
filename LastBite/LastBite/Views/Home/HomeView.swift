@@ -8,7 +8,6 @@ struct HomeView: View {
 
     @StateObject private var controller: HomeController
     @State private var searchText = ""
-    @State private var viewRefreshId = UUID()
 
 
     init(controller: HomeController, networkMonitor: NetworkMonitor, signInService: SignInUserService) {
@@ -47,7 +46,6 @@ struct HomeView: View {
                     }
                     .padding(.vertical)
                 }
-                .id(viewRefreshId)
                 .navigationTitle("Shop")
                 .toolbar {
                     ToolbarItem(placement: .navigationBarTrailing) {
@@ -67,10 +65,7 @@ struct HomeView: View {
                     print("🏠 HomeView Appeared. Triggering loadInitialData.")
                         print("🏠 HomeView .onAppear: Connected. Attempting sync.")
                         Task { await controller.synchronizeAllPendingData()
-                            try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 segundos de delay
-                            print("Delay completado, actualizando viewRefreshId.")
-                            viewRefreshId = UUID()
-                            controller.loadInitialData() // Carga inicial
+                            controller.loadInitialData()
 
                         }
 
@@ -80,10 +75,7 @@ struct HomeView: View {
                     print("🏠 HomeView .onReceive: Network status is \(isConnected ? "Online" : "Offline")")
                         print("🏠 HomeView: Network reconnected. Triggering sync.")
                         Task { await controller.synchronizeAllPendingData()
-                            try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 segundos de delay
-                            print("Delay completado, actualizando viewRefreshId.")
-                            viewRefreshId = UUID()
-                            controller.loadInitialData() // Carga inicial
+                            controller.loadInitialData()
                         }
                         // Considera si necesitas llamar a loadInitialData aquí también,
                         // o si synchronizeAllPendingData ya refresca los datos necesarios.
