@@ -6,8 +6,10 @@ struct HomeView: View {
     @StateObject private var locationManager = LocationManager()
     @EnvironmentObject private var networkMonitor: NetworkMonitor
 
-    @StateObject private var controller: HomeController
+    @StateObject private var controller: HomeController    // 1️⃣ Decláralo aquí
+    @StateObject private var storeController: StoreController
     @State private var searchText = ""
+    @State private var navigateToCreateStore = false
 
 
     init(controller: HomeController, networkMonitor: NetworkMonitor, signInService: SignInUserService) {
@@ -23,8 +25,14 @@ struct HomeView: View {
             networkMonitor: networkMonitor, // Usando la instancia obtenida
             firebaseService: FirebaseService.shared
         )
+        let storeCtrl = StoreController(
+                    storeRepository: hybridStoreRepository,
+                    networkMonitor: networkMonitor
+        )
+        
         let homeController = controller
-
+        // 3️⃣ Así inicializas el @StateObject
+        self._storeController = StateObject(wrappedValue: storeCtrl)
         self._controller = StateObject(wrappedValue: homeController)
         print("🏠 HomeView initialized and injected Store & Order Repositories into HomeController.")
         print("🏠 HomeView init: HomeController instance (self.controller) = \(Unmanaged.passUnretained(homeController).toOpaque())")
@@ -46,18 +54,34 @@ struct HomeView: View {
                     }
                     .padding(.vertical)
                 }
+                .navigationDestination(isPresented: $navigateToCreateStore) {
+                  CreateStoreView(
+                    controller: storeController,
+                    homeController: controller,
+                    onDismissAfterCreate: {
+                      controller.loadInitialData()
+                    }
+                  )
+                }
                 .navigationTitle("Shop")
                 .toolbar {
                     ToolbarItem(placement: .navigationBarTrailing) {
-                        Button(action: {
-                            controller.refreshNearbyStoresManually()
-                        }) {
-                            HStack(spacing: 4) {
-                                Image(systemName: "location.circle.fill")
-                                Text("Update Location")
+                        Menu{
+                            Button {
+                                controller.refreshNearbyStoresManually()
+                            } label: {
+                                Label("Update Location", systemImage: "location.circle.fill")
                             }
-                            .font(.footnote.bold())
-                            .foregroundColor(.green)
+                            
+                            Button {
+                                navigateToCreateStore = true
+                            } label: {
+                                Label("Create Store", systemImage: "building.2.crop.circle")
+                            }
+                        }label: {
+                            Image(systemName: "ellipsis.circle")
+                                .font(.title2)
+                                .foregroundColor(.green)
                         }
                     }
                 }

@@ -33,6 +33,7 @@ class RealmStore: Object, ObjectKeyIdentifiable {
     // Flags para la lógica de sincronización offline
     @Persisted var needsSyncUpdate: Bool = false // True si se actualizó offline y necesita sincronización con la API
     @Persisted var needsSyncDelete: Bool = false // True si se eliminó offline y necesita sincronización con la API
+    @Persisted var needsSyncCreate: Bool = false // True si se eliminó offline y necesita sincronización con la API
     @Persisted var pendingImageBase64: String?   // Almacena el base64 de una NUEVA imagen seleccionada offline
 
     // Convenience initializer para crear un RealmStore desde un objeto Store (del dominio)
