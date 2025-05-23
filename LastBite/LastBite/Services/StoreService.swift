@@ -149,6 +149,7 @@ class StoreService {
     }
     
     func createStoreAsync(_ store: StoreCreateRequest) async throws -> Store {
+        print(store)
         guard let url = URL(string: "\(Constants.baseURL)/stores") else {
             throw ServiceError.invalidURL
         }
@@ -175,6 +176,10 @@ class StoreService {
                 throw ServiceError.badServerResponse(statusCode: -1)
             }
             print("📦 [POST] \(url.absoluteString) -> Status: \(httpResponse.statusCode)")
+            if let body = request.httpBody,
+               let jsonAgain = String(data: body, encoding: .utf8) {
+                print("🔍 JSON ANTES (recheck):\n\(jsonAgain)")
+            }
             guard (200..<300).contains(httpResponse.statusCode) else {
                 print("❌ Response Body on Error (\(httpResponse.statusCode)): \(String(data: data, encoding: .utf8) ?? "No body")")
                 throw ServiceError.badServerResponse(statusCode: httpResponse.statusCode)

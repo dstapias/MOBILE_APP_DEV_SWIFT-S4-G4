@@ -329,31 +329,54 @@ class HybridStoreRepository: StoreRepository {
         let storesToCreate = try await localRepository.fetchStoresNeedingSyncCreate()
         print("🔄 HybridStoreRepo: \(storesToCreate.count) tiendas para crear.")
         for realmStore in storesToCreate {
-            // Construir el request a partir del RealmStore
+            // 1️⃣ Subir la imagen Base64 pendiente a Firebase (si existe)
+            var finalLogoUrlForApi: String? = nil
+            if let base64 = realmStore.pendingImageBase64,
+               isBase64String(base64) {
+                print("📸 HybridStoreRepo (Sync): Subiendo imagen pendiente para creación de tienda \(realmStore.store_id)...")
+                do {
+                    let fileName = "store_logos/new_\(realmStore.store_id)_\(UUID().uuidString)"
+                    finalLogoUrlForApi = try await firebaseService.uploadImageToFirebase(
+                        base64: base64,
+                        fileName: fileName
+                    )
+                    print("📸 Imagen subida. URL: \(finalLogoUrlForApi!)")
+                } catch {
+                    print("❌ HybridStoreRepo (Sync): Falló la subida de imagen para tienda \(realmStore.store_id): \(error). Creando sin logo.")
+                    finalLogoUrlForApi = nil
+                }
+            }
+
+            // 2️⃣ Construir el StoreCreateRequest con la URL final (o nil)
             let createReq = StoreCreateRequest(
-                name: realmStore.name,
-                nit: realmStore.nit,
-                address: realmStore.address,
+                name:     realmStore.name,
+                nit:      realmStore.nit,
+                address:  realmStore.address,
                 longitude: realmStore.longitude,
-                latitude: realmStore.latitude,
-                logo: realmStore.pendingImageBase64,  // si hay imagen offline
-                opens_at: realmStore.opens_at,
+                latitude:  realmStore.latitude,
+                logo:      finalLogoUrlForApi,          // aquí va la URL, no el Base64
+                opens_at:  realmStore.opens_at,
                 closes_at: realmStore.closes_at
             )
+
+            // 3️⃣ Llamar a la API
             do {
                 let created = try await apiRepository.createStore(createReq)
-                // Guardar la tienda creada con su ID real y limpiar flags de creación
+
+                // 4️⃣ Guardar la entidad real devuelta por el servidor
                 try await localRepository.saveStore(
                     store: created,
                     needsSyncUpdate: false,
                     needsSyncDelete: false,
                     pendingImageBase64: nil
                 )
+                // 5️⃣ Limpiar la flag de creación
                 try await localRepository.clearSyncCreateFlag(storeId: realmStore.store_id)
+
                 successfulCreates += 1
-                print("✅ HybridStoreRepo: Creación exitosa de tienda temporal \(realmStore.store_id) -> \(created.store_id).")
+                print("✅ HybridStoreRepo: Creación exitosa de tienda temporal \(realmStore.store_id) → \(created.store_id).")
             } catch {
-                print("❌ HybridStoreRepo: Falló crear tienda pendiente \(realmStore.store_id): \(error).")
+                print("❌ HybridStoreRepo: Error al crear tienda pendiente \(realmStore.store_id): \(error)")
             }
         }
         print("🔄 HybridStoreRepo: Sincronización finalizada. Actualizadas: \(successfulUpdates), Borradas: \(successfulDeletes), Imágenes subidas: \(successfulImageUploads),  Creadas: \(successfulCreates).")
@@ -371,7 +394,7 @@ class HybridStoreRepository: StoreRepository {
             if let logoValue = storeRequest.logo, isBase64String(logoValue) {
                 print("🛍️ HybridStoreRepo (Online): logo es base64. Subiendo a Firebase...")
                 do {
-                    let fileName = "store_logos/new_\(UUID().uuidString).jpg"
+                    let fileName = "store_logos/new_\(UUID().uuidString)"
                     finalLogoUrlForApi = try await firebaseService.uploadImageToFirebase(base64: logoValue, fileName: fileName)
                     print("📸 Imagen subida. URL: \(finalLogoUrlForApi ?? "")")
                 } catch {
