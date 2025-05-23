@@ -252,13 +252,14 @@ class HybridStoreRepository: StoreRepository {
 
     /// Sincroniza las tiendas pendientes (actualizaciones y borrados) con la API.
     /// Devuelve el número de operaciones exitosas.
-    func synchronizePendingStores() async throws -> (updated: Int, deleted: Int, imagesUploaded: Int) {
+    func synchronizePendingStores() async throws -> (updated: Int, deleted: Int, imagesUploaded: Int, created:Int) {
         guard networkMonitor.isConnected else {
             print("🛍️ HybridStoreRepo: Sincronización abortada (offline).")
-            return (0, 0, 0)
+            return (0, 0, 0, 0)
         }
 
         print("🔄 HybridStoreRepo: Iniciando sincronización de tiendas pendientes...")
+        var successfulCreates = 0
         var successfulUpdates = 0
         var successfulDeletes = 0
         var successfulImageUploads = 0
@@ -273,7 +274,7 @@ class HybridStoreRepository: StoreRepository {
             if let base64 = realmStore.pendingImageBase64, !base64.isEmpty {
                 print("📸 HybridStoreRepo (Sync): Subiendo imagen pendiente para tienda \(realmStore.store_id)...")
                 do {
-                    let fileName = "store_logos/\(realmStore.store_id)_\(UUID().uuidString).jpg" // Nombre único
+                    let fileName = "store_logos/\(realmStore.store_id)_\(UUID().uuidString)" // Nombre único
                     logoUrlForAPI = try await firebaseService.uploadImageToFirebase(base64: base64, fileName: fileName)
                     successfulImageUploads += 1
                     print("📸 HybridStoreRepo (Sync): Imagen subida para tienda \(realmStore.store_id). URL: \(logoUrlForAPI ?? "nil")")
@@ -322,9 +323,81 @@ class HybridStoreRepository: StoreRepository {
             }
         }
         
-        print("🔄 HybridStoreRepo: Sincronización finalizada. Actualizadas: \(successfulUpdates), Borradas: \(successfulDeletes), Imágenes subidas: \(successfulImageUploads).")
-        return (successfulUpdates, successfulDeletes, successfulImageUploads)
+        
+        
+        // 0️⃣ Sincronizar Creaciones
+        let storesToCreate = try await localRepository.fetchStoresNeedingSyncCreate()
+        print("🔄 HybridStoreRepo: \(storesToCreate.count) tiendas para crear.")
+        for realmStore in storesToCreate {
+            // Construir el request a partir del RealmStore
+            let createReq = StoreCreateRequest(
+                name: realmStore.name,
+                nit: realmStore.nit,
+                address: realmStore.address,
+                longitude: realmStore.longitude,
+                latitude: realmStore.latitude,
+                logo: realmStore.pendingImageBase64,  // si hay imagen offline
+                opens_at: realmStore.opens_at,
+                closes_at: realmStore.closes_at
+            )
+            do {
+                let created = try await apiRepository.createStore(createReq)
+                // Guardar la tienda creada con su ID real y limpiar flags de creación
+                try await localRepository.saveStore(
+                    store: created,
+                    needsSyncUpdate: false,
+                    needsSyncDelete: false,
+                    pendingImageBase64: nil
+                )
+                try await localRepository.clearSyncCreateFlag(storeId: realmStore.store_id)
+                successfulCreates += 1
+                print("✅ HybridStoreRepo: Creación exitosa de tienda temporal \(realmStore.store_id) -> \(created.store_id).")
+            } catch {
+                print("❌ HybridStoreRepo: Falló crear tienda pendiente \(realmStore.store_id): \(error).")
+            }
+        }
+        print("🔄 HybridStoreRepo: Sincronización finalizada. Actualizadas: \(successfulUpdates), Borradas: \(successfulDeletes), Imágenes subidas: \(successfulImageUploads),  Creadas: \(successfulCreates).")
+        return (successfulUpdates, successfulDeletes, successfulImageUploads, successfulCreates)
     }
+    
+    /// Crea una nueva tienda.
+    func createStore(_ storeRequest: StoreCreateRequest) async throws -> Store {
+        print("🚀 HybridStoreRepo: Starting store creation...")
+        if networkMonitor.isConnected {
+            var requestForApi = storeRequest
+            var finalLogoUrlForApi: String? = storeRequest.logo
+
+            // Si la imagen es Base64, subir a Firebase primero
+            if let logoValue = storeRequest.logo, isBase64String(logoValue) {
+                print("🛍️ HybridStoreRepo (Online): logo es base64. Subiendo a Firebase...")
+                do {
+                    let fileName = "store_logos/new_\(UUID().uuidString).jpg"
+                    finalLogoUrlForApi = try await firebaseService.uploadImageToFirebase(base64: logoValue, fileName: fileName)
+                    print("📸 Imagen subida. URL: \(finalLogoUrlForApi ?? "")")
+                } catch {
+                    print("❌ Falló subir imagen a Firebase: \(error.localizedDescription). Creando sin logo.")
+                    finalLogoUrlForApi = nil
+                }
+            }
+            requestForApi.logo = finalLogoUrlForApi
+
+            // Llamada a la API para crear la tienda
+            print("🛍️ HybridStoreRepo: Llamando API createStore con logo: \(requestForApi.logo ?? "nil")")
+            let createdStore = try await apiRepository.createStore(requestForApi)
+
+            // Guardar localmente la tienda creada
+            try await localRepository.saveStore(store: createdStore)
+            print("✅ HybridStoreRepo: Store creada y guardada localmente: \(createdStore)")
+            return createdStore
+
+        } else {
+            print("🛍️ HybridStoreRepo: Offline. Marcando tienda para creación local.")
+            // Marcar para creación local (implementación en LocalStoreRepository)
+            let pendingStore = try await localRepository.markStoreForCreate(storeData: storeRequest, newImageBase64: storeRequest.logo)
+            return pendingStore
+        }
+    }
+
     
     // Helper para verificar si un string parece base64 (muy básico)
     private func isBase64String(_ string: String?) -> Bool {

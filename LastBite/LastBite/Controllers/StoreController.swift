@@ -53,7 +53,7 @@ class StoreController: ObservableObject {
                 latitude: latitude,
                 logo: imageBase64,
                 opens_at: opens_at,
-                closes_at: closes_at,
+                closes_at: closes_at
             )
 
             // 3. Enviar al backend
@@ -118,6 +118,56 @@ class StoreController: ObservableObject {
         }
     }
     
+    /// Create a new store
+    @MainActor
+    func createStore(
+        name: String,
+        nit: String,
+        address: String,
+        latitude: Double,
+        longitude: Double,
+        opens_at: String,
+        closes_at: String,
+        imageBase64: String?
+    ) async {
+        print("🚀 Starting store creation...")
+        self.isLoading = true
+        self.errorMessage = nil
+        self.successMessage = nil
+
+        do {
+            let createRequest = StoreCreateRequest(
+                name: name,
+                nit: nit,
+                address: address,
+                longitude: longitude,
+                latitude: latitude,
+                logo: imageBase64,
+                opens_at: opens_at,
+                closes_at: closes_at
+            )
+
+            let newStore = try await storeRepository.createStore(createRequest)
+            print("✅ Store created successfully: \(newStore)")
+            if networkMonitor.isConnected {
+                self.successMessage = "Tienda creada exitosamente."
+            } else {
+                self.successMessage = "Tienda creada localmente. Se sincronizará cuando haya conexión."
+            }
+        } catch let error as ServiceError {
+            print("❌ Service error creating store: \(error.localizedDescription)")
+            self.errorMessage = error.localizedDescription
+            if error.isNetworkConnectionError && !networkMonitor.isConnected {
+                self.successMessage = nil
+            }
+        } catch {
+            print("❌ Unexpected error creating store: \(error.localizedDescription)")
+            self.errorMessage = "Ocurrió un error inesperado."
+        }
+        self.isLoading = false
+    }
+
+    
     /// Dispara la sincronización de todas las tiendas pendientes (actualizaciones y borrados).
         func synchronizePendingStores() async {
             guard !isLoading else {
@@ -136,9 +186,10 @@ class StoreController: ObservableObject {
             self.successMessage = nil // Limpiar mensajes de éxito previos
             
             do {
-                let (updatedCount, deletedCount, imagesUploadedCount) = try await storeRepository.synchronizePendingStores()
+                let (updatedCount, deletedCount, imagesUploadedCount, createdCount) = try await storeRepository.synchronizePendingStores()
                 
                 var messages: [String] = []
+                if createdCount > 0   { messages.append("\(createdCount) cread.") }
                 if updatedCount > 0 { messages.append("\(updatedCount) actualiz.") }
                 if deletedCount > 0 { messages.append("\(deletedCount) elimin.") }
                 if imagesUploadedCount > 0 { messages.append("\(imagesUploadedCount) imág. subidas") }

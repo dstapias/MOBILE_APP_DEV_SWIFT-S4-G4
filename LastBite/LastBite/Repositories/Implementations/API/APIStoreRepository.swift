@@ -59,4 +59,11 @@ class APIStoreRepository: StoreRepository {
         try await storeService.fetchStoreByIdAsync(store_id)
     }
     
+    /// Crea una nueva tienda via API.
+    /// - Parameter store: Datos de la tienda a crear.
+    /// - Returns: El objeto Store creado.
+    func createStore(_ store: StoreCreateRequest) async throws -> Store {
+        try await storeService.createStoreAsync(store)
+    }
+    
 }

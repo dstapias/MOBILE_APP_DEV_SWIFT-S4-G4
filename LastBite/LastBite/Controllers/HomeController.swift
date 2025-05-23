@@ -206,11 +206,11 @@ class HomeController: ObservableObject {
 
         do {
             // Llama al método del StoreRepository (que es el HybridStoreRepository)
-            let (updated, deleted, images) = try await storeRepository.synchronizePendingStores()
+            let (updated, deleted, images, created) = try await storeRepository.synchronizePendingStores()
             
-            print("🔄 HomeController: Sincronización de tiendas completada. Actualizadas: \(updated), Borradas: \(deleted), Imágenes: \(images).")
+            print("🔄 HomeController: Sincronización de tiendas completada. Actualizadas: \(updated), Borradas: \(deleted), Imágenes: \(images), Creadas: \(created).")
             
-            if updated > 0 || deleted > 0 || images > 0 {
+            if updated > 0 || deleted > 0 || images > 0 || created > 0 {
                 print("🔄 HomeController: Hubo cambios sincronizados en tiendas, recargando datos iniciales...")
                 // No necesitas establecer successMessage aquí si la UI no lo va a mostrar,
                 // o si el StoreController (si se usara para sync) lo hiciera.

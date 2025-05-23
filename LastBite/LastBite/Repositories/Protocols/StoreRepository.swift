@@ -38,4 +38,9 @@ protocol StoreRepository {
     
     func fetchStoreById(store_id: Int) async throws -> Store
     
+    /// Crea una nueva tienda.
+    /// - Parameter store: Datos de la tienda a crear.
+    /// - Returns: El objeto Store recién creado.
+    func createStore(_ store: StoreCreateRequest) async throws -> Store
+    
 }

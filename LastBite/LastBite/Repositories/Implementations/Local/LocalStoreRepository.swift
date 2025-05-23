@@ -264,6 +264,67 @@ class LocalStoreRepository {
         return realmStoresToDelete.map { $0.store_id }
     }
     
+    /// Devuelve un array de RealmStore que necesitan ser creadas en la API.
+    func fetchStoresNeedingSyncCreate() async throws -> [RealmStore] {
+        let realm = try getRealmInstance()
+        let realmStoresToCreate = realm.objects(RealmStore.self)
+            .filter("needsSyncCreate == true")
+            .freeze()
+        return Array(realmStoresToCreate)
+    }
+    
+    /// Limpia el flag needsSyncCreate después de una creación exitosa en la API.
+    func clearSyncCreateFlag(storeId: Int) async throws {
+        let realm = try getRealmInstance()
+        try realm.write {
+            guard let realmStore = realm.object(ofType: RealmStore.self, forPrimaryKey: storeId) else {
+                return
+            }
+            realmStore.needsSyncCreate = false
+        }
+    }
+    
+    
+    func markStoreForCreate (
+        storeData: StoreCreateRequest,
+        newImageBase64: String?
+    ) async throws -> Store {
+        let realm = try getRealmInstance()
+        var createdDomainStore: Store!
+        try realm.write {
+            let realmStore = RealmStore()
+            // ID temporal negativo para distinguir creaciones offline
+            realmStore.store_id = Int.random(in: Int.min..<0)
+
+            // Asigna directamente (son no opcionales)
+            realmStore.name      = storeData.name
+            realmStore.nit       = storeData.nit
+            realmStore.address   = storeData.address
+            realmStore.latitude  = storeData.latitude
+            realmStore.longitude = storeData.longitude
+            realmStore.opens_at  = storeData.opens_at
+            realmStore.closes_at = storeData.closes_at
+
+            // Imagen pendiente
+            if let base64 = newImageBase64 {
+                realmStore.pendingImageBase64 = base64
+            }
+
+            // Flags de sincronización
+            realmStore.needsSyncCreate = true
+            realmStore.needsSyncUpdate = false
+            realmStore.needsSyncDelete = false
+
+            // Fecha local de creación
+            realmStore.created_at = ISO8601DateFormatter().string(from: Date())
+
+            realm.add(realmStore, update: .error)
+            print("🛍️ LocalStoreRepo: Marcada tienda \(realmStore.store_id) para CREACIÓN local.")
+            createdDomainStore = realmStore.toDomainModel()
+        }
+        return createdDomainStore
+    }
+    
     // Helper para verificar si un string parece base64 (muy básico)
     private func isBase64String(_ string: String?) -> Bool {
         guard let str = string, !str.isEmpty else { return false }
