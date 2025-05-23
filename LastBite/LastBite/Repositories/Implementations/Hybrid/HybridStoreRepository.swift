@@ -335,7 +335,7 @@ class HybridStoreRepository: StoreRepository {
                isBase64String(base64) {
                 print("📸 HybridStoreRepo (Sync): Subiendo imagen pendiente para creación de tienda \(realmStore.store_id)...")
                 do {
-                    let fileName = "store_logos/new_\(realmStore.store_id)_\(UUID().uuidString).jpg"
+                    let fileName = "store_logos/new_\(realmStore.store_id)_\(UUID().uuidString)"
                     finalLogoUrlForApi = try await firebaseService.uploadImageToFirebase(
                         base64: base64,
                         fileName: fileName
@@ -394,7 +394,7 @@ class HybridStoreRepository: StoreRepository {
             if let logoValue = storeRequest.logo, isBase64String(logoValue) {
                 print("🛍️ HybridStoreRepo (Online): logo es base64. Subiendo a Firebase...")
                 do {
-                    let fileName = "store_logos/new_\(UUID().uuidString).jpg"
+                    let fileName = "store_logos/new_\(UUID().uuidString)"
                     finalLogoUrlForApi = try await firebaseService.uploadImageToFirebase(base64: logoValue, fileName: fileName)
                     print("📸 Imagen subida. URL: \(finalLogoUrlForApi ?? "")")
                 } catch {
