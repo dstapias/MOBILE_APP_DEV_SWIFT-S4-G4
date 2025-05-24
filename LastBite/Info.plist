@@ -51,6 +51,8 @@
 	<string>1</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>LastBite necesita acceso a tu red local para conectarse al servidor de desarrollo y funcionar correctamente.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>We use your location to find the closest stores</string>
 	<key>NSLocationWhenInUseUsageDescription</key>

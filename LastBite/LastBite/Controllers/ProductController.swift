@@ -23,7 +23,7 @@ class ProductController: ObservableObject {
     @Published var successMessage: String? = nil
 
     // MARK: - Dependencies (Ahora Repositorios)
-    let store: Store
+    @Published var store: Store
     private let signInService: SignInUserService
     private let productRepository: ProductRepository
     private let tagRepository: TagRepository
@@ -45,6 +45,10 @@ class ProductController: ObservableObject {
         self.cartRepository = cartRepository
         print("📦 ProductController initialized with Repositories for store: \(store.name)")
         setupFiltering()
+    }
+    
+    func updateStore(_ store: Store) {
+        self.store = store
     }
 
     // MARK: - Filtering Logic
@@ -124,6 +128,44 @@ class ProductController: ObservableObject {
             self.isLoading = false
         }
     }
+    
+    
+    func handleUpdateStoreViewDismissal(storeID: Int, storeController: StoreController) {
+           print("📦 ProductController: Handling dismissal of UpdateStoreView for store ID \(storeID).")
+           
+           // Verificar si la actualización en StoreController fue exitosa
+           // (StoreController establece su propio successMessage)
+           if let successMsgFromStoreCtrl = storeController.successMessage, successMsgFromStoreCtrl.contains("actualizada") {
+               print("📦 ProductController: Store update was successful according to StoreController's message.")
+               Task {
+                   do {
+                       print("📦 ProductController: Re-fetching updated store data for ID \(storeID) using storeController.getStoreById...")
+                       // 1. Obtener la tienda actualizada desde StoreController (que la obtiene del repositorio)
+                       let fetchedUpdatedStore = try await storeController.fetchStoreById(store_id: storeID)
+                       
+                       print("📦 ProductController: Fetched store name from getStoreById: '\(fetchedUpdatedStore.name)'")
+                       
+                       // 2. Actualizar la propiedad 'store' en este ProductController.
+                       //    Esto debería hacer que el .navigationTitle en ProductView se actualice.
+                       self.updateStore(fetchedUpdatedStore) // Llama al método 'updateStore' de este mismo controlador
+                       
+                       // 3. Limpiar el mensaje de éxito en StoreController para evitar acciones repetidas.
+                       //    Como StoreController.successMessage es @Published y estamos en un @MainActor func,
+                       //    esta asignación es segura.
+                       storeController.successMessage = nil
+                       
+                       print("📦 ProductController: Store details refreshed successfully.")
+                       
+                   } catch {
+                       print("❌ ProductController: Failed to re-fetch or update store details after UpdateStoreView dismissal: \(error.localizedDescription)")
+                       // Establecer un mensaje de error si la re-obtención falla
+                       self.errorMessage = "No se pudieron refrescar los detalles de la tienda: \(error.localizedDescription)"
+                   }
+               }
+           } else {
+               print("📦 ProductController: UpdateStoreView dismissed. No successful update detected from StoreController, or message was: \(storeController.successMessage ?? "nil")")
+           }
+       }
 
 
     // MARK: - Actions (Async con Repositorio)

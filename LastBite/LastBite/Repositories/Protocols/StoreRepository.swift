@@ -31,4 +31,16 @@ protocol StoreRepository {
     /// - Throws: Un error si la obtención falla.
     /// - Returns: Un array de objetos Store
     func fetchOwnedStores(for userId: Int) async throws -> [Store]
+        
+    func updateStore(_ store: StoreUpdateRequest, store_id: Int) async throws
+    
+    func deleteStore(store_id: Int) async throws
+    
+    func fetchStoreById(store_id: Int) async throws -> Store
+    
+    /// Crea una nueva tienda.
+    /// - Parameter store: Datos de la tienda a crear.
+    /// - Returns: El objeto Store recién creado.
+    func createStore(_ store: StoreCreateRequest) async throws -> Store
+    
 }

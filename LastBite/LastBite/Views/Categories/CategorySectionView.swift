@@ -10,8 +10,12 @@ import SwiftUI
 struct CategorySectionView: View {
     let title: String
     let items: [CategoryItemData]
+    let homeController: HomeController
+    let networkMonitor: NetworkMonitor
     
     var body: some View {
+        let _ = print("➡️ CategorySectionView body: HomeController instance = \(Unmanaged.passUnretained(homeController).toOpaque()) for title: \(title)")
+
         VStack(alignment: .leading) {
             HStack {
                 Text(title)
@@ -30,7 +34,7 @@ struct CategorySectionView: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 16) {
                     ForEach(items) { item in
-                        CategoryItemView(item: item)
+                        CategoryItemView(item: item, homeController: homeController, networkMonitor: networkMonitor)
                     }
                 }
                 .padding(.horizontal)
@@ -39,15 +43,5 @@ struct CategorySectionView: View {
     }
 }
 
-struct CategorySectionView_Previews: PreviewProvider {
-    static var previews: some View {
-        CategorySectionView(
-            title: "Bakery",
-            items: [
-                CategoryItemData(title: "Hornitos", imageName: "hornitos", isOwned: false),
-                CategoryItemData(title: "Cascabel", imageName: "cascabel", isOwned: false)
-            ]
-        )
-    }
-}
+
 
