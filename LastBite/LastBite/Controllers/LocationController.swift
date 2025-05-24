@@ -10,7 +10,7 @@ import Combine
 
 @MainActor
 class LocationController: ObservableObject {
-
+    
     // MARK: - Published State
     @Published var zones: [Zone] = []
     @Published var areas: [Area] = []
@@ -20,134 +20,131 @@ class LocationController: ObservableObject {
     @Published var isLoadingAreas: Bool = false
     @Published var errorMessage: String? = nil
     @Published var showFinalSignUpView: Bool = false
-
+    
     // MARK: - Dependencies
     private let userService: SignupUserService
     private let zoneRepository: ZoneRepository
-    private var cancellables = Set<AnyCancellable>()
-
+    
+    // MARK: - In‐Memory Cache
+    private var areasCache: [Int:[Area]] = [:]
+    
     // MARK: - Computed Properties
     var selectedZoneName: String {
-        var nameToReturn: String = "Select a zone"
-        for zone in zones { if zone.id == selectedZoneId { nameToReturn = zone.zone_name; break } }
-        return nameToReturn
+        zones.first(where: { $0.id == selectedZoneId })?.zone_name ?? "Select a zone"
     }
-
     var selectedAreaName: String {
-        guard let idToFind = selectedAreaId else { return "Select an area" }
-        return areas.first(where: { $0.id == idToFind })?.area_name ?? "Select an area"
+        guard let id = selectedAreaId else { return "Select an area" }
+        return areas.first(where: { $0.id == id })?.area_name ?? "Select an area"
     }
-
-    var canProceed: Bool {
-        selectedAreaId != nil
-    }
-
-    // MARK: - Initialization (Recibe Repositorio)
+    var canProceed: Bool { selectedAreaId != nil }
+    
+    // MARK: - Designated Initializer
     init(
-        userService: SignupUserService = SignupUserService.shared,
+        userService: SignupUserService,
         zoneRepository: ZoneRepository
     ) {
         self.userService = userService
         self.zoneRepository = zoneRepository
         print("📍 LocationController initialized with Repository.")
-        loadZones()
+        fetchZonesAndAllAreasOnce()
     }
-
-    // MARK: - Data Loading (Async con Repositorio)
-
-    func loadZones() {
+    
+    // MARK: - Convenience Initializer
+    /// Use this when you want to pull from the shared singleton
+    convenience init(zoneRepository: ZoneRepository) {
+        self.init(
+            userService: SignupUserService.shared,
+            zoneRepository: zoneRepository
+        )
+    }
+    
+    // MARK: - One‐time Fetch & Cache
+    private func fetchZonesAndAllAreasOnce() {
         guard !isLoadingZones else { return }
-        print("⏳ Loading zones via Repository...")
         isLoadingZones = true
-        errorMessage = nil
-        areas = []
-
-        // ❗️NO borres la selección si ya existe
-        if userService.selectedAreaId == nil {
-            userService.selectedAreaId = nil
-        }
-        Task { // Lanza la tarea asíncrona
-            var fetchedZones: [Zone] = [] // Variable local para zonas
+        errorMessage   = nil
+        
+        Task {  // runs on MainActor
             do {
-                // Llama al REPOSITORIO
-                fetchedZones = try await zoneRepository.fetchZones()
-                print("✅ Fetched \(fetchedZones.count) zones via Repo.")
-                self.zones = fetchedZones // Actualiza estado
-
-                // Selecciona la primera zona y carga sus áreas
-                if let firstZone = fetchedZones.first {
-                    // selectZone llama internamente a fetchAreas async
-                    self.selectZone(zone: firstZone)
-                } else {
-                     print("ℹ️ No zones fetched or list is empty.")
-                     self.isLoadingZones = false // Termina carga si no hay zonas
+                // 1️⃣ Fetch all zones
+                let fetchedZones = try await zoneRepository.fetchZones()
+                
+                // 2️⃣ Concurrently fetch areas for each zone
+                var tempCache: [Int:[Area]] = [:]
+                try await withThrowingTaskGroup(of: (Int,[Area]).self) { group in
+                    for zone in fetchedZones {
+                        group.addTask {
+                            let areas = try await self.zoneRepository.fetchAreas(zoneId: zone.id)
+                            return (zone.id, areas)
+                        }
+                    }
+                    for try await (zoneId, list) in group {
+                        tempCache[zoneId] = list
+                    }
                 }
-
-            } catch { // Error al buscar zonas
-                print("❌ Failed to fetch zones via Repo:", error.localizedDescription)
-                self.errorMessage = "Could not load locations."
-                self.isLoadingZones = false // Termina la carga en error
+                
+                // 3️⃣ Commit to state & cache
+                self.zones      = fetchedZones
+                self.areasCache = tempCache
+                if let first = fetchedZones.first {
+                    self.selectedZoneId = first.id
+                    self.areas         = tempCache[first.id] ?? []
+                }
             }
+            catch {
+                self.errorMessage = "Could not load locations: \(error.localizedDescription)"
+            }
+            self.isLoadingZones = false
         }
     }
-
-    // Ahora es async y usa el repositorio
-    func fetchAreas(for zoneId: Int) async {
-        // Evita cargas concurrentes para la misma zona si ya está en proceso
-        guard !isLoadingAreas else { return }
-        print("⏳ Loading areas via Repository for zone ID: \(zoneId)...")
-        isLoadingAreas = true
-        errorMessage = nil // Limpia errores específicos de áreas
-        areas = [] // Limpia áreas anteriores
-
-        do {
-            // Llama al REPOSITORIO
-            let fetchedAreas = try await zoneRepository.fetchAreas(zoneId: zoneId)
-            print("✅ Fetched \(fetchedAreas.count) areas via Repo for zone \(zoneId).")
-            self.areas = fetchedAreas // Actualiza estado
-
-        } catch { // Error al buscar áreas
-            print("❌ Failed to fetch areas via Repo for zone \(zoneId):", error.localizedDescription)
-            self.errorMessage = "Could not load areas for the selected zone."
-        }
-        // Termina la carga de áreas
-        isLoadingAreas = false
-        // Si loadZones inició esta carga, termina la carga general de zonas también
-        if isLoadingZones { isLoadingZones = false }
-    }
-
-    // MARK: - User Selections (Llama a fetchAreas async)
-
+    
+    // MARK: - Zone Selection
     func selectZone(zone: Zone) {
-        print("👉 Zone selected: \(zone.zone_name) (ID: \(zone.id))")
-        // Solo actualiza si es diferente para evitar recargas innecesarias
-        guard zone.id != self.selectedZoneId else { return }
-
-        self.selectedZoneId = zone.id
-        // Lanza una Task para llamar a la función async fetchAreas
-        Task {
-            await fetchAreas(for: zone.id)
-        }
-    }
-
-    // selectArea (sin cambios, solo actualiza userService)
-    func selectArea(area: Area) {
-        print("👉 Area selected: \(area.area_name) (ID: \(area.id))")
-        self.selectedAreaId = area.id
-        self.userService.selectedAreaId = area.id
-    }
-
-    // MARK: - Navigation (Sin cambios)
-    func proceedToNextStep() {
-        if let areaId = selectedAreaId {
-            print("🚀 Proceeding with area ID: \(areaId)")
-            print("🧪 Saved in userService before navigation:", userService.selectedAreaId ?? -1)
-            userService.selectedAreaId = areaId
-            self.showFinalSignUpView = true
+        guard zone.id != selectedZoneId else { return }
+        selectedZoneId = zone.id
+        
+        if let cached = areasCache[zone.id] {
+            areas = cached
+            isLoadingAreas = false
         } else {
-            print("⚠️ Cannot proceed, area not selected.")
-            self.errorMessage = "Please select an area before continuing."
+            loadAreas(for: zone.id)
         }
     }
-
+    
+    // MARK: - Area Loading Fallback
+    private func loadAreas(for zoneId: Int) {
+        guard !isLoadingAreas else { return }
+        isLoadingAreas = true
+        errorMessage   = nil
+        areas          = []
+        
+        Task {  // runs on MainActor
+            do {
+                let fetched = try await zoneRepository.fetchAreas(zoneId: zoneId)
+                self.areasCache[zoneId] = fetched
+                self.areas              = fetched
+            }
+            catch {
+                self.errorMessage = "Could not load areas for zone \(zoneId): \(error.localizedDescription)"
+            }
+            self.isLoadingAreas = false
+        }
+    }
+    
+    // MARK: - Area Selection
+    func selectArea(area: Area) {
+        selectedAreaId = area.id
+        userService.selectedAreaId = area.id
+    }
+    
+    // MARK: - Navigation
+    func proceedToNextStep() {
+        guard let areaId = selectedAreaId else {
+            errorMessage = "Please select an area before continuing."
+            return
+        }
+        userService.selectedAreaId = areaId
+        showFinalSignUpView = true
+    }
 }
+

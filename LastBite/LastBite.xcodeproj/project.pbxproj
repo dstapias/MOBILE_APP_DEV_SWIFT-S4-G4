@@ -1180,7 +1180,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"LastBite/Preview Content\"";
-				DEVELOPMENT_TEAM = W3QFYRJQQN;
+				DEVELOPMENT_TEAM = 585XBRU6ZG;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Info.plist;
@@ -1194,7 +1194,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = co.uniandes.LastBiteV3;
+				PRODUCT_BUNDLE_IDENTIFIER = co.uniandes.LastBiteV2;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -1211,7 +1211,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"LastBite/Preview Content\"";
-				DEVELOPMENT_TEAM = W3QFYRJQQN;
+				DEVELOPMENT_TEAM = 585XBRU6ZG;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Info.plist;
@@ -1225,7 +1225,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = co.uniandes.LastBiteV3;
+				PRODUCT_BUNDLE_IDENTIFIER = co.uniandes.LastBiteV2;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
