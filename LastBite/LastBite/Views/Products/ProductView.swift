@@ -6,6 +6,7 @@ struct ProductView: View {
     @EnvironmentObject var signInService: SignInUserService
     @StateObject private var controller: ProductController
     @StateObject private var storeController: StoreController
+    @StateObject private var networkMonitor: NetworkMonitor
     
     @Environment(\.dismiss) private var dismiss
 
@@ -55,6 +56,7 @@ struct ProductView: View {
         self._storeController = StateObject(wrappedValue: storeController)
             self.owned = owned
         self.homeController = homeController
+        self._networkMonitor = StateObject(wrappedValue: networkMonitor)
         
             print("🛒 ProductView initialized and injected Repositories into ProductController for store: \(store.name)")
         print("🛒 ProductView init: HomeController instance received = \(Unmanaged.passUnretained(homeController).toOpaque()) for store: \(store.name)")
@@ -108,7 +110,7 @@ struct ProductView: View {
             CreateProductView(store: controller.store, controller: controller)
         }
         .navigationDestination(isPresented: $navigateToUpdateStore) {
-            UpdateStoreView(store: controller.store, controller: storeController, homeController: homeController, onDismissAfterUpdate: {
+            UpdateStoreView(store: controller.store, controller: storeController, homeController: homeController, networkMonitor: networkMonitor, onDismissAfterUpdate: {
                 // Este closure se ejecuta DESPUÉS de que la alerta de UpdateStoreView
                 // ha llamado a homeController.loadInitialData() y ANTES de que UpdateStoreView llame a su propio dismiss().
                 print("🛍️ ProductView: Callback 'onDismissAfterUpdate' from UpdateStoreView received.")

@@ -12,6 +12,7 @@ struct UpdateStoreView: View {
     let store: Store
     @ObservedObject var controller: StoreController
     @ObservedObject var homeController: HomeController
+    @ObservedObject var networkMonitor: NetworkMonitor
     var onDismissAfterUpdate: (() -> Void)?
     
     @Environment(\.dismiss) private var dismiss
@@ -55,12 +56,12 @@ struct UpdateStoreView: View {
     
     
 
-    init(store: Store, controller: StoreController, homeController: HomeController, onDismissAfterUpdate: (() -> Void)? = nil) {
+    init(store: Store, controller: StoreController, homeController: HomeController, networkMonitor: NetworkMonitor, onDismissAfterUpdate: (() -> Void)? = nil) {
         self.store = store
         self.controller = controller
         self.homeController = homeController
         self.onDismissAfterUpdate = onDismissAfterUpdate
-        
+        self.networkMonitor = networkMonitor
         // Inicializar los @State con los valores de la tienda actual
                 _nameInput = State(initialValue: store.name)
                 _nitInput = State(initialValue: store.nit)
@@ -84,6 +85,14 @@ struct UpdateStoreView: View {
     }
 
     var body: some View {
+        if (!networkMonitor.isConnected) {
+                    Text("You are offline. Don't worry, you can continue editing or deleting all your changes will be saved and synchronized when internet is available.")
+                .foregroundColor(.red)
+                .padding(.horizontal)
+                .transition(.opacity)
+                
+            
+        }
         Form {
             Section(header: Text("Store Info")) {
                 
