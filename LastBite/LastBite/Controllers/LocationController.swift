@@ -3,7 +3,6 @@
 //  LastBite
 //
 //  Created by Andrés Romero on 14/04/25.
-//  Updated by ChatGPT on 23/05/25.
 //
 
 import Foundation
